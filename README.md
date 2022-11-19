@@ -3,7 +3,7 @@
 </h1>
 
 <p align="center">
-	<b><i>Development repo for 42cursus' werserv project</i></b><br>
+	<b><i>Development repo for 42cursus' webserv project</i></b><br>
 	For further information about 42cursus and its projects, please refer to <a href="https://github.com/iker-gonzalez/42_cursus"><b>42cursus repo</b></a>.
 </p>
 
