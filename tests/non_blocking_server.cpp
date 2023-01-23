@@ -17,7 +17,8 @@ int main()
 	*/
 
 		int sock = socket(AF_INET, SOCK_STREAM, 0);
-		if (sock < 0) {
+		if (sock < 0) 
+		{
 			std::cerr << "Error creating socket" << std::endl;
 			return 1;
 		}
@@ -43,7 +44,8 @@ int main()
 		addr.sin_family = AF_INET;
 		addr.sin_addr.s_addr = INADDR_ANY;
 		addr.sin_port = htons(1234);
-		if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+		if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) 
+		{
 			std::cerr << "Error binding socket" << std::endl;
 			return 1;
 		}
@@ -56,7 +58,8 @@ int main()
 		queued up as parameters.
 	*/
 
-		if (listen(sock, SOMAXCONN) < 0) {
+		if (listen(sock, SOMAXCONN) < 0) 
+		{
 			std::cerr << "Error listening on socket" << std::endl;
 			return 1;
 		}
