@@ -1,16 +1,16 @@
 NAME = web_server
 
-SRC = main.cpp\
-		CommonInfo.cpp\
-		ConfigFile.cpp\
-		Location.cpp\
-		Server.cpp\
-		Utils.cpp\
+SRC = src/main.cpp\
+		src/CommonInfo.cpp\
+		src/ConfigFile.cpp\
+		src/Location.cpp\
+		src/Server.cpp\
+		src/Utils.cpp
 
 OBJ	= $(SRC:.c=.o)
 
 
-CC = g++
+CC = g++ -std=c++98
 CFLAGS = -Wall -Wextra -Werror 
 
 all : $(NAME)
@@ -22,9 +22,12 @@ $(NAME) : $(OBJ)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 
-fclean: clean
+clean:
+	# rm -f $(OBJ)
+	#no descomentar porque borra los .cpp
 
-	rm -f $(SERVER) $(CLIENT)
+fclean: 
+	rm -f $(NAME)
 
 re: fclean all 
 
