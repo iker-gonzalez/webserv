@@ -1,6 +1,7 @@
-#include "CommonInfo.hpp"
-#include "Utils.hpp"
+#include "../includes/CommonInfo.hpp"
+#include "../includes/Utils.hpp"
 
+#include <cstdlib> //for std::atoi 
 
 CommonInfo::CommonInfo(void) : _client_size(0), _autoindex(false)
 {
@@ -12,6 +13,9 @@ CommonInfo::CommonInfo(void) : _client_size(0), _autoindex(false)
 	_is_m_error_page = false;
 	_is_client_size = false;
 	_is_autoindex = false;
+
+	//Empieza cerrado
+	_closeBracket = true;
 }
 
 
@@ -49,10 +53,10 @@ bool CommonInfo::fillInformation(std::vector<std::string>& a_v_strSplit)
 	else if (!(a_v_strSplit[0].compare("error_page")) && checkSize(a_v_strSplit, 2, 3) 
 		&& checkErrorPage(a_v_strSplit[1], a_v_strSplit[2]))
 	{
-		_m_error_page.insert(std::pair<int, std::string>(std::stoi(a_v_strSplit[1]), a_v_strSplit[2]));
+		_m_error_page.insert(std::pair<int, std::string>(std::atoi(a_v_strSplit[1].c_str()), a_v_strSplit[2]));
 	}
 	else if (!(a_v_strSplit[0].compare("client_size")) && checkSize(a_v_strSplit, 2, 2) && checkClientSize(a_v_strSplit[1]))
-		_client_size = std::stoi(a_v_strSplit[1]);
+		_client_size = std::atoi(a_v_strSplit[1].c_str());
 	else if (!(a_v_strSplit[0].compare("autoindex")) && checkSize(a_v_strSplit, 2, 2) && checkAutoindex(a_v_strSplit[1]))
 		_autoindex = true;
 	else if (!(a_v_strSplit[0].compare("}")) && !isCloseBracket())

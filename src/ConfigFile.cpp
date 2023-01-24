@@ -1,10 +1,10 @@
-#include "ConfigFile.h"
+#include "../includes/ConfigFile.hpp"
 
 #include <fstream> // for ifstream
 #include <iostream>
-#include "Server.h"
-#include "Location.hpp"
-#include "Utils.hpp"
+#include "../includes/Server.hpp"
+#include "../includes/Location.hpp"
+#include "../includes/Utils.hpp"
 
 ConfigFile::ConfigFile(std::string& afilename) : _filename(afilename)
 {

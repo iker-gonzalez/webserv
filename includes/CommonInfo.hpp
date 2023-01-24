@@ -18,7 +18,7 @@ class CommonInfo
 		bool						_autoindex;
 
 		// Security attributes
-		bool _closeBracket = true;
+		bool _closeBracket;
 
 		//Exist unique attributes
 		bool _is_listen;
