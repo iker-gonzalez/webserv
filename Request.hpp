@@ -11,6 +11,7 @@ class Request
 		std::map<std::string, std::string> headers;
 		std::string body;
 		size_t	content_length;
+		Request(); //! del after test
 		Request (int client_fd);
 		~Request();
 
