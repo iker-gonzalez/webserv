@@ -5,12 +5,14 @@ SRC = src/main.cpp\
 		src/ConfigFile.cpp\
 		src/Location.cpp\
 		src/Server.cpp\
-		src/Utils.cpp
+		src/Utils.cpp\
+		src/Request.cpp\
+		tests/non_blocking_server.cpp
 
 OBJ	= $(SRC:.c=.o)
 
 
-CC = g++ -std=c++98
+CC = g++ -std=c++98 -g
 CFLAGS = -Wall -Wextra -Werror 
 
 all : $(NAME)

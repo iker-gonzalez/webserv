@@ -23,7 +23,9 @@ class ConfigFile
 	
 		// Check correct configuration file format
 		bool ParseFile(std::string& aline) const;
-	
+
+		// Getter
+		std::vector<Server> getServers()const;
 	private:
 	
 		// Name of the configuration file

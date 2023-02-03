@@ -7,10 +7,10 @@
 class Request
 {
 	private:
-		int								_client_fd;
+		int									_client_fd;
 		std::string							_method; 	// GET, POST or DELETe
 		std::string							_requestFile; 	// Request HTML file
-		std::map<std::string, std::string>				_m_headers;	// All information
+		std::map<std::string, std::string>	_m_headers;	// All information
 		size_t								_content_length;
 	public:
 
@@ -23,7 +23,7 @@ class Request
 		//Getters
 		int									getClientFd(void) const;
 		std::string							getMethod(void) const;
-		std::string							getPath(void) const;
+		std::string							getRequestFile(void) const;
 		std::map<std::string, std::string>	getHeaders(void) const;
 		size_t								getContentLength(void) const;
 

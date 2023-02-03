@@ -99,3 +99,8 @@ bool ConfigFile::ParseFile(std::string &aline) const
 {
 	return false;
 }
+
+std::vector<Server> ConfigFile::getServers()const
+{
+	return _v_server;
+}
