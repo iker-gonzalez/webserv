@@ -1,18 +1,32 @@
+#ifndef REQUEST_HPP
+#define REQUEST_HPP
+
 #include <map>
 #include <iostream>
 
 class Request
 {
 	private:
-		int client_fd;
+		int								_client_fd;
+		std::string							_method; 	// GET, POST or DELETe
+		std::string							_requestFile; 	// Request HTML file
+		std::map<std::string, std::string>				_m_headers;	// All information
+		size_t								_content_length;
 	public:
-		std::string method;
-		std::string path;
-		std::map<std::string, std::string> headers;
-		//std::string body;
-		size_t	content_length;
-		Request (int client_fd);
+
+		Request ();
 		~Request();
 
-		Request parsing(std::string request);
+		//Parseo
+		int requestParsing( std::string& request);
+		
+		//Getters
+		int									getClientFd(void) const;
+		std::string							getMethod(void) const;
+		std::string							getPath(void) const;
+		std::map<std::string, std::string>	getHeaders(void) const;
+		size_t								getContentLength(void) const;
+
 };
+
+#endif
