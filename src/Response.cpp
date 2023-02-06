@@ -40,7 +40,10 @@ int		Response::readFile()
 int		Response::buildBody()
 {
 	if (request.getMethod() == "GET")
-		readFile();
+	{
+		if (readFile())
+			return (1);
+	}
 
 }
 
@@ -126,6 +129,70 @@ void	Response::buildResponse()
 	setHeaders();
 	if (request.getMethod() == "GET")
 		_response_content.append(_response_body);
+}
+
+std::string	findLocation(std::string request_file, std::vector<Location> locations, int &index)
+{
+	for(std::vector<Location>::const_iterator it = locations.begin(); it != locations.end(); ++it)
+	{
+		if (strcmp(request_file.c_str(), it->getPath().c_str()))
+			return request_file;
+		index++;
+	}
+	return "";
+}
+
+bool Response::isMethodAllowed(std::string method, Location &location)
+{
+	std::vector<std::string> allowed_methods = location.getMethods();
+	for(std::vector<std::string>::const_iterator it = allowed_methods.begin(); it != allowed_methods.end(); ++it)
+	{
+		if (*it == "GET" || *it == "POST" || *it == "DELETE")
+			return true;
+	}
+	_status_code = 405;
+	return false;
+
+}
+
+bool	Response::checkIfReturn(Location &location)
+{
+	if (!location.getReturn().empty())
+	{
+		_status_code = 301;
+		_path = location.getReturn();
+		if (_path[0] != '/')
+			_path.insert(0, 1, '/');
+		return true;
+	}
+	return false;
+}
+
+int		Response::handleRequest()
+{
+	std::string	location_match;
+	int			index;
+
+	index = 0;
+	location_match = findLocation(request.getRequestFile(), _server.getLocations(), index);
+	if (location_match.length() > 0)
+	{
+		Location	target_location = _server.getLocationByReference(index);
+		if (!(isMethodAllowed(request.getMethod(), target_location)))
+		{
+			std::cout << "METHOD NOT ALLOWED" << std::endl;
+			return (1);
+		}
+		if (request.getContentLength() > target_location.getClientSize()) //?must check if metrics retrieved are the right ones
+		{
+			_status_code = 413;
+			return (1);
+		}
+		if (checkIfReturn(target_location))
+			return (1);
+		
+		//! HANDLE CGI WHEN WE HAVE THE CLASS CREATED
+	}
 }
 
 //start treating request in handleTarget function

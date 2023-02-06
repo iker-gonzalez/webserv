@@ -16,7 +16,7 @@ public:
 	bool fillSpecificInfo(std::vector<std::string>& a_v_strSplit);
 
 	//Getters
-	std::vector<Location> getLocation() const;
+	std::vector<Location> getLocations() const;
 	Location& getLocationByReference(int nbr_localitaion) ;
 	
 	void pushBackLocation(Location& a_location);

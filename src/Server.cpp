@@ -21,7 +21,7 @@ bool Server::fillSpecificInfo(std::vector<std::string>& a_v_strSplit)
 	}
 	return false;
 }
-std::vector<Location> Server::getLocation() const
+std::vector<Location> Server::getLocations() const
 {
 	return _v_location;
 }
@@ -57,7 +57,7 @@ std::ostream& operator<<(std::ostream& ors, const Server& server)
 	}
 	ors << "client_size" << server.getClientSize() << std::endl;
 	ors << "autoindex" << server.getAutoindex() << std::endl;
-	std::vector<Location> v_locations = server.getLocation();
+	std::vector<Location> v_locations = server.getLocations();
 	for (unsigned int i = 0; i < v_locations.size(); i++)
 	{
 		ors << "  ---Location [" << i << "]: " << v_locations[i] << std::endl;
