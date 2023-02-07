@@ -8,6 +8,7 @@
 #include <string>
 #include <cstring>
 #include <ctime>
+#include "sys/stat.h"
 #include "Request.hpp"
 #include "Server.hpp"
 
@@ -21,6 +22,7 @@ class Response {
 			int										_status_code;
 			std::string								_response_body;
 			std::string								_path;
+			std::string								_target_file;
 
 	public:
 
@@ -43,6 +45,10 @@ class Response {
 			std::string	findLocation(std::string request_file, std::vector<Location> locations, int &index);
 			bool		isMethodAllowed(std::string method, Location &location);
 			bool		checkIfReturn(Location &location);
+			bool		isDirectory(std::string path);
+			bool		fileExists (const std::string& f);
+
+
 
 
 

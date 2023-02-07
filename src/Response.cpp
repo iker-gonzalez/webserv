@@ -5,6 +5,7 @@ Response::Response()
 	_response_content = "";
 	_response_body = "";
 	_status_code = 0;
+	_target_file = "";
 }
 
 Response::Response(Request &req) : request(req)
@@ -12,6 +13,7 @@ Response::Response(Request &req) : request(req)
 	_response_content = "";
 	_response_body = "";
 	_status_code = 0;
+	_target_file = "";
 }
 
 Response::~Response() {}
@@ -168,6 +170,49 @@ bool	Response::checkIfReturn(Location &location)
 	return false;
 }
 
+/*
+	Check if the file specified by path is a directory or not. The stat function is used
+	to obtain information about the file, and the information is stored in the file_stat structure.
+	The S_ISDIR macro is then used to test if the file is a directory, and the result is returned.
+*/
+
+bool	isDirectory(std::string path)
+{
+	struct stat file_stat;
+	if (stat(path.c_str(), &file_stat) != 0)
+		return (false);
+
+	return (S_ISDIR(file_stat.st_mode));
+}
+
+/*
+The return value of this function will be true if the file exists and is ready for reading, and false otherwise.
+*/
+
+bool fileExists (const std::string& f)
+{
+	std::ifstream file(f.c_str());
+	return (file.good());
+}
+
+std::string combinePaths(std::string str1, std::string str2, std::string str3)
+{
+	int			len1;
+	int			len2;
+
+	len1 = str1.length();
+	len2 = str2.length();
+	if (str1[len1 - 1] == '/' && (!str2.empty() && str2[0] == '/') )
+		str2.erase(0, 1);
+	if (str1[len1 - 1] != '/' && (!str2.empty() && str2[0] != '/'))
+		str1.insert(str1.end(), '/');
+	if (str2[len2 - 1] == '/' && (!str3.empty() && str3[0] == '/') )
+		str3.erase(0, 1);
+	if (str2[len2 - 1] != '/' && (!str3.empty() && str3[0] != '/'))
+		str2.insert(str1.end(), '/');
+	return (str1 + str2 + str3);
+}
+
 int		Response::handleRequest()
 {
 	std::string	location_match;
@@ -192,7 +237,18 @@ int		Response::handleRequest()
 			return (1);
 		
 		//! HANDLE CGI WHEN WE HAVE THE CLASS CREATED
+
+		if (!(target_location.getAlias().empty()))
+			_target_file = combinePaths(target_location.getAlias(), request.getRequestFile().substr(target_location.getPath().length()), "");
+		else
+			_target_file = combinePaths(target_location.getRoot(), request.getRequestFile(), "");
+		
+		//! HANDLE CGI WHEN WE HAVE THE CLASS CREATED
+		
+		if (isDirectory(target_location.getPath()))
+		{
+		}
+
+
 	}
 }
-
-//start treating request in handleTarget function

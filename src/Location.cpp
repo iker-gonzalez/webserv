@@ -27,6 +27,11 @@ std::string Location::getReturn() const
 	return _return;
 }
 
+std::string Location::getAlias() const
+{
+	return _alias;
+}
+
 void Location::setPath(const std::string& a_path)
 {
 	_path = a_path;
