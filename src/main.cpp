@@ -29,8 +29,9 @@ int main(int ac, char **av)
 	ServerManager manager(conf.getServers());
 	if (!manager.setupServers())
 		return false;
-	std::cout <<  "Start listening for incoming connections" << std::endl; 
-	return 1;
+	std::cout <<  "Start listening for incoming connections" << std::endl;
+
+   // non_blocking_server(conf);
 	if (!manager.serverCore())
 		return false;
 

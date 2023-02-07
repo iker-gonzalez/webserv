@@ -1,7 +1,9 @@
 #include "../includes/ServerManager.hpp"
 #include <iostream>
-#include <sys/socket.h>                     // for accept
+#include <sys/socket.h>                     // for accept, recv
 #include "../includes/Client.hpp"
+#include <fcntl.h>					// for fcntl
+
 
 
 ServerManager::ServerManager( std::vector<Server> a_v_server) : _v_server(a_v_server),
@@ -15,16 +17,21 @@ ServerManager::~ServerManager()
 
 bool ServerManager::serverCore()
 {
+    fd_set  read_fds;
+    fd_set  write_fds;
 	std::cout <<  "Waiting for connections..." << std::endl; 
     while (true)
 	{
+
         struct timeval timeout;
-		timeout.tv_sec = 5;
-		timeout.tv_usec = 0;
+        timeout.tv_sec = 1;
+        timeout.tv_usec = 0;
+        read_fds = _read_fds;
+        write_fds = _write_fds;
         setupTimeout();
         std::cout << "Set up the file descriptor set for the select function" << std::endl;
         std::cout << " Wait for activity on the socket or timeout" << std::endl;
-        if (select(_max_socket + 1, &_read_fds, &_write_fds, NULL, &timeout) < 0)
+        if (select(_max_socket, &_read_fds, &_write_fds, NULL, &timeout) < 0)
         {
 			std::cerr << "Error in select" << std::endl;
 			return false;
@@ -33,24 +40,25 @@ bool ServerManager::serverCore()
         for (int i = 0; i < _max_socket; i++)
         {
             // New connection
-            if (FD_ISSET(i, &_read_fds) && _m_fd_server.find(i) != _m_fd_server.end()) 
+            if (FD_ISSET(i, &read_fds) && _m_fd_server.find(i) != _m_fd_server.end())
             {
                 if (!acceptNewConnection(_m_fd_server.at(i)))
+                 continue;
 		        	return false;
             }
-          // else if (FD_ISSET(i, &_read_fds) && _m_fd_client.find(i) != _m_fd_client.end()) 
-          // {
-          //     if (!readRequest(_m_fd_server.at(i)))
-		  //     	return false;
-          // }
-          // else if (FD_ISSET(i, &_write_fds))
-          // {
-
-		  //     if (!handleConnection())
-		//        return false;
-
-          // }
+            else if (FD_ISSET(i, &_read_fds) && _m_fd_client.find(i) != _m_fd_client.end()) 
+            {
+               if (!readRequest(_m_fd_client.at(i)))
+		       	return false;
             }
+            else if (FD_ISSET(i, &_write_fds))
+            {
+
+		      if (!sendResponse(i))
+		            return false;
+
+            }
+        }
 	}
     return true;
 }
@@ -68,12 +76,12 @@ bool ServerManager::setupServers()
             return false;
         if (!_v_server[i].listenConnections())
             return false;
-        FD_SET(_v_server[i].getListenFd(), &_read_fds);
-        if (_v_server[i].getListenFd() > _max_socket)
-            _max_socket += 1;
-        _m_fd_server[i] = _v_server[i];
+        addFdSet(_v_server[i].getListenFd(), _read_fds);
+
+        // Store Server and Fd
+        _m_fd_server[_v_server[i].getListenFd()] = _v_server[i];
     }
-    return false;
+    return true;
 }
 
 void ServerManager::setupTimeout()
@@ -85,9 +93,10 @@ void ServerManager::setupTimeout()
 
 }
 
-bool ServerManager::handleConnection()
+bool ServerManager::sendResponse(int fdToSend)
 {
-    return false;
+    //int bytes_sent = send(fdToSend, buffer, bytes_received, 0);
+    return true;
 }
 
 bool ServerManager::acceptNewConnection(Server &a_m_server)
@@ -103,15 +112,58 @@ bool ServerManager::acceptNewConnection(Server &a_m_server)
     }
     else
     {
+
+        //! TODO Añadir información del servidor al que esta enviado la petición
         Client new_client(client_sock);
 
-        //Remove fd from _read_fds and add to _write_fds
-      // _m_fd_server.erase(a_m_server.getListenFd());
+        // Set the new socket to non-blocking mode
+        /*
+            The program sets the new socket to non-blocking mode using the fcntl function and it adds
+            the new socket to the read_fds set.
+        */
+
+        int flags = fcntl(client_sock, F_GETFL, 0);
+        fcntl(client_sock, F_SETFL, flags | O_NONBLOCK);
+
+        //Remove fd to _write_fds
+        addFdSet(client_sock, _read_fds);
         _m_fd_client[client_sock] = new_client;
-        FD_CLR(a_m_server.getListenFd(), &_read_fds);
-        FD_SET(a_m_server.getListenFd(), &_write_fds);
+
+      //  readRequest(new_client);
+
     }
-
-
     return true;
+
+}
+bool ServerManager::readRequest(Client &a_client)
+{
+    char buffer[1024];
+    
+    int bytes_received = recv(a_client.getClientFd(), buffer, sizeof(buffer), 0);
+	if (bytes_received < 0) 
+	{
+
+		std::cerr << "Error receiving data" << std::endl;
+        return false;
+
+	}
+    std::string s_buffer = buffer;
+	std::cout << "buffer:" << s_buffer << std::endl;
+
+    removeFdSet(a_client.getClientFd() ,_read_fds);
+    addFdSet(a_client.getClientFd(), _write_fds);
+    return true;
+}
+void ServerManager::addFdSet(int new_fd, fd_set &a_fds_set)
+{
+    FD_SET(new_fd, &a_fds_set);
+    if (new_fd > _max_socket)
+         _max_socket = new_fd + 1;
+}
+
+void ServerManager::removeFdSet(int remove_fd, fd_set &a_fds_set)
+{
+    FD_CLR(remove_fd, &a_fds_set);
+    if (remove_fd == _max_socket)
+         _max_socket -= 1;
 }

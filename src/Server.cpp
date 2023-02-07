@@ -6,7 +6,7 @@
 #include <netinet/in.h>				// for sockaddr_in
 #include <cstdlib>					// for std::atoi 
 #include "../includes/Server.hpp"
-
+#include <cstring>
 Server::Server() : CommonInfo(), locationBracketOpen(false)
 {
 	 
@@ -90,30 +90,36 @@ bool Server::setupServer(void)
 		The program sets the socket to non-blocking mode using the fcntl function,
 		it retrieves the current flags using F_GETFL and then sets the O_NONBLOCK flag using F_SETFL
 	*/
+    //! Opcion 1
 	int flags = fcntl(_listen_fd, F_GETFL, 0);
 	fcntl(_listen_fd, F_SETFL, flags | O_NONBLOCK);
 
+    //! Opcion 2
+    //int option_value = 1;
+    //setsockopt(_listen_fd, SOL_SOCKET, SO_REUSEADDR, &option_value, sizeof(int));
 
+s
     // Bind the socket to an address and port
 	/*
 		The program binds the socket to an address and port using the bind function,
 		it creates a sockaddr_in struct and sets the address family, IP address and port number.
 	*/
 
-	struct sockaddr_in addr;
+    struct sockaddr_in addr;
+	memset(&addr, 0, sizeof(addr));
 	addr.sin_family = AF_INET;
 	addr.sin_addr.s_addr = inet_addr(_address.data());
 	addr.sin_port = htons(_port);
-	char buf[INET_ADDRSTRLEN];
+	//char buf[INET_ADDRSTRLEN];
 	//std::string host_string = "127.0.0.1";
     //inet_ntop(AF_INET, &host, buf, INET_ADDRSTRLEN);
 	if (bind(_listen_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) 
 	{
 		std::cerr << "Error binding socket" << std::endl;
-		return 1;
+		return false;
 	}
 	
-    return false;
+    return true;
 }
 bool Server::createSocket(void)
 {
@@ -168,9 +174,8 @@ bool Server::checkListen(const std::string& alisten)
 	{
 		if (alisten[i] < '0' || alisten[i] > '9')
 			return false;
-		return true;
 	}
-	_port = std::atoi(alisten.substr(found, alisten.size()).c_str());
+	_port = std::atoi(alisten.substr(found + 1, alisten.size()).c_str());
 	_is_listen = true;
 	return true;
 }

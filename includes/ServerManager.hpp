@@ -20,9 +20,14 @@ public:
     bool setupServers(); 
 
     // 
-    void setupTimeout();
-    bool handleConnection();
     bool acceptNewConnection(Server &a_m_server);
+    bool readRequest(Client &a_client);
+    bool sendResponse(int fdToSend);
+    void setupTimeout();
+
+    // FSET new fd in _read_fds/_write_fds and uppdate _max_socket
+    void addFdSet(int new_fd, fd_set &a_fds_set);
+    void removeFdSet(int remove_fd, fd_set &a_fds_set);
 
 private:
     // Vector with all servers of config files 
