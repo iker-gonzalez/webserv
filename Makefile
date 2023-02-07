@@ -7,9 +7,11 @@ SRC = src/main.cpp\
 		src/Server.cpp\
 		src/Utils.cpp\
 		src/Request.cpp\
+		src/ServerManager.cpp\
+		src/Client.cpp\
 		tests/non_blocking_server.cpp
 
-OBJ	= $(SRC:.c=.o)
+OBJ	= $(SRC:.cpp=.o)
 
 
 CC = g++ -std=c++98 -g
@@ -17,15 +19,15 @@ CFLAGS = -Wall -Wextra -Werror
 
 all : $(NAME)
 
-$(NAME) : $(OBJ)
-	$(CC) $(CFLAG) $(OBJ) -o $(NAME)
+$(NAME) : $(SRC)
+	$(CC) $(CFLAG) $(SRC) -o $(NAME)
 
 %.o	: %.c 
 	$(CC) $(CFLAGS) -c $< -o $@
 
 
 clean:
-	# rm -f $(OBJ)
+	 rm -f $(OBJ)
 	#no descomentar porque borra los .cpp
 
 fclean: 

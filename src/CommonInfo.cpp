@@ -2,7 +2,7 @@
 #include "../includes/Utils.hpp"
 
 #include <cstdlib> //for std::atoi 
-
+#include <iostream> //quitar
 CommonInfo::CommonInfo(void) : _client_size(0), _autoindex(false)
 {
 	_is_listen = false;
@@ -34,9 +34,7 @@ bool CommonInfo::checkSize(std::vector<std::string>& a_v_info, unsigned int minV
 
 bool CommonInfo::fillInformation(std::vector<std::string>& a_v_strSplit)
 {
-	if (!(a_v_strSplit[0].compare("listen")) && checkSize(a_v_strSplit, 2, 2) && checkListen(a_v_strSplit[1]))
-		_listen = a_v_strSplit[1];
-	else if (!(a_v_strSplit[0].compare("server_name")) && checkSize(a_v_strSplit, 2, 2) &&
+	if (!(a_v_strSplit[0].compare("server_name")) && checkSize(a_v_strSplit, 2, 2) &&
 		checkServerName(a_v_strSplit[1]))
 		_server_name = a_v_strSplit[1];
 	else if (!(a_v_strSplit[0].compare("root")) && checkSize(a_v_strSplit, 2, 2) && checkRoot(a_v_strSplit[1]))
@@ -171,26 +169,7 @@ void CommonInfo::setcloseBracket(bool a_close)
 	_closeBracket = a_close;
 }
 
-bool CommonInfo::checkListen(const std::string& alisten)
-{
-	if (_is_listen == true)
-		return false;
-	std::size_t found = alisten.find(":");
-	if (found == std::string::npos)
-		return false;
-	std::size_t port_length = alisten.size() - found;
-	if (port_length != 5)
-		return false;
-	//if (isDigit(&alisten[found])
-	for (unsigned int i = found + 1; i < alisten.size(); ++i)
-	{
-		if (alisten[i] < '0' || alisten[i] > '9')
-			return false;
-		return true;
-	}
-	_is_listen = true;
-	return true;
-}
+
 bool CommonInfo::checkServerName(const std::string& aserver_name)
 {
 	if (_is_server_name == true)
@@ -217,13 +196,16 @@ bool CommonInfo::checkIndex(const std::string& aindex)
 }
 bool CommonInfo::checkMethods(const std::vector<std::string>& a_v_methods)
 {
+
 	if (_is_v_methods == true)
 		return false;
+		std::cout << _is_v_methods << std::endl;
 	for (unsigned int i = 0; i < a_v_methods.size(); i++)
 	{
-		if (a_v_methods[i].compare("GET") &&
-			a_v_methods[i].compare("DELETE") &&
-			a_v_methods[i].compare("POST"))
+		std::cout << "m:" << a_v_methods[i] << std::endl;
+		if (a_v_methods[i] != "GET" &&
+			a_v_methods[i] != "DELETE" &&
+			a_v_methods[i] != "POST")
 			return false;
 	}
 	_is_v_methods = true;

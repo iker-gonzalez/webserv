@@ -5,8 +5,13 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include "../includes/Utils.hpp"
+#include "../includes/ConfigFile.hpp"
+#include "../includes/Server.hpp"
 
-int main() 
+#include <cerrno>
+
+int non_blocking_server(ConfigFile& conf)
 {
 
 	//! Create a socket
@@ -43,7 +48,12 @@ int main()
 		struct sockaddr_in addr;
 		addr.sin_family = AF_INET;
 		addr.sin_addr.s_addr = INADDR_ANY;
-		addr.sin_port = htons(1234);
+		std::string host_string = "127.0.0.1";
+		in_addr_t host = inet_addr(host_string.data());
+		addr.sin_addr.s_addr = 	host;
+		addr.sin_port = htons(8080);
+		char buf[INET_ADDRSTRLEN];
+    	//inet_ntop(AF_INET, &host, buf, INET_ADDRSTRLEN);
 		if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) 
 		{
 			std::cerr << "Error binding socket" << std::endl;
@@ -51,6 +61,7 @@ int main()
 		}
 
 
+	std::cout <<  "Start listening for incoming connections" << std::endl; 
 	//! Start listening for incoming connections
 	/*
 		The program starts listening for incoming connections using the listen function,
@@ -66,6 +77,7 @@ int main()
 
 	while (true) 
 	{
+		std::cout << "Set up the file descriptor set for the select function" << std::endl;
 		//! Set up the file descriptor set for the select function
 		/*
 			The program enters an infinite loop, in which it calls the select function to wait
@@ -86,7 +98,7 @@ int main()
 		*/
 
 			struct timeval timeout;
-			timeout.tv_sec = 1;
+			timeout.tv_sec = 5;
 			timeout.tv_usec = 0;
 
 
@@ -106,13 +118,15 @@ int main()
 
 			if (FD_ISSET(sock, &read_fds)) {
 			//! Accept an incoming connection
+			std::cout << "Accept an incoming connection" <<std::endl;
 			/*
 				The program checks if the socket is set in the read_fds set, if it is, it calls the 
 				accept function to accept a new incoming connection.
 			*/
 
 				int client_sock = accept(sock, NULL, NULL);
-				if (client_sock < 0) {
+				if (client_sock < 0) 
+				{
 				if (errno == EAGAIN || errno == EWOULDBLOCK) {
 				// Unable to accept new connections, continue with the loop
 				continue;
@@ -136,7 +150,7 @@ int main()
 				}
 
 
-			//!loop over the read_fds
+			std::cout <<  "!loop over the read_fds" << std::endl;
 			/*
 				The program loops over the read_fds set and checks which descriptor is set. If the descriptor is set,
 				the program calls the recv function to receive data from the client.
@@ -152,6 +166,8 @@ int main()
 					{
 						if (errno == EAGAIN || errno == EWOULDBLOCK) 
 						{
+							std::cerr << " Unable to receive data, continue with the loop" << std::endl;
+
 							// Unable to receive data, continue with the loop
 							continue;
 						} 
@@ -165,27 +181,28 @@ int main()
 					/*
 						The program echoes the data back to the client using the send function.
 					*/
-
-					int bytes_sent = send(i, buffer, bytes_received, 0);
-					if (bytes_sent < 0) 
-					{
-						if (errno == EAGAIN || errno == EWOULDBLOCK) 
-						{
-							// Unable to send data, continue with the loop
-							continue;
-						} 
-						else 
-						{
-							std::cerr << "Error sending data" << std::endl;
-							return 1;
-						}
-					}
-					//! Close the client socket if all data sent
-					/*
-						The program checks if all the data has been sent, if so it closes the client socket.
-					*/
-
-					if(bytes_sent == bytes_received)
+				std::string s_buffer = buffer;
+					std::cout << "buffer:" << s_buffer << std::endl;
+	//				int bytes_sent = send(i, buffer, bytes_received, 0);
+	//				if (bytes_sent < 0) 
+	//				{
+	//					if (errno == EAGAIN || errno == EWOULDBLOCK) 
+	//					{
+	//						// Unable to send data, continue with the loop
+	//						continue;
+	//					} 
+	//					else 
+	//					{
+	//						std::cerr << "Error sending data" << std::endl;
+	//						return 1;
+	//					}
+	//				}
+	//				//! Close the client socket if all data sent
+	//				/*
+	//					The program checks if all the data has been sent, if so it closes the client socket.
+	//				*/
+//
+	//				if(bytes_sent == bytes_received)
 					close(i);
 				}
 			}

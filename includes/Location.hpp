@@ -10,6 +10,8 @@ class Location : public CommonInfo
 
 		Location();
 		~Location();
+		Location(const Location &other);
+    	Location &operator=(const Location & rhs);
 	
 		// Getters
 		std::string getPath() const;

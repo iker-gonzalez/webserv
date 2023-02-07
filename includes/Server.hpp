@@ -3,28 +3,44 @@
 
 #include "CommonInfo.hpp"
 #include "Location.hpp"
-#include <map>
 #include <vector>
 #include <ostream>
+
 class Server : public CommonInfo
 {
 public:
 	Server();
 	~Server();
-
-	//Parseo
-	bool fillSpecificInfo(std::vector<std::string>& a_v_strSplit);
-
-	//Getters
-	std::vector<Location> getLocation() const;
-	Location& getLocationByReference(int nbr_localitaion) ;
+	Server(const Server &other);
+    Server &operator=(const Server & rhs);
 	
+	//***********Parseo**********
+	bool fillSpecificInfo(std::vector<std::string>& a_v_strSplit);
 	void pushBackLocation(Location& a_location);
+	bool checkListen(const std::string& alisten);
+
+	//***********Setups sever**********
+	// Creating a socket using socket, set as not blocking (fcntl) and bind.
+	bool setupServer(void);
+	bool createSocket(void);
+	bool nonBlokingSocket(void);
+	bool bindSocket(void);
+    bool listenConnections(); 
+	
+	//Getters
+	int 					getPort() const;
+	std::string 			getAddress() const;
+	std::vector<Location> 	getLocation() const;
+	int					 	getListenFd() const;
+	Location& 				getLocationByReference(int nbr_localitaion) ;
 
 	//Tengo que poner esto en privado
 	bool locationBracketOpen;
 private:
-	std::vector<Location> _v_location;
+	int 					_port;
+	std::string 			_address;
+	std::vector<Location> 	_v_location;
+	int						_listen_fd;
 };
 
 std::ostream& operator<<(std::ostream& ors, const Server& server);

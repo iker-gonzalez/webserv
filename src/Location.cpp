@@ -1,3 +1,4 @@
+
 #include "../includes/Location.hpp"
 
 
@@ -11,6 +12,30 @@ Location::~Location()
 {
 }
 
+Location::Location(const Location &other)
+{
+	if (this != &other)
+		*this = other;
+}
+
+Location &Location::operator=(const Location &rhs)
+{
+        if (this != &rhs)
+	{
+		this->_server_name = rhs._server_name;
+		this->_root = rhs._root;
+		this->_listen = rhs._listen;
+		this->_path = rhs._path;
+		this->_return = rhs._return;
+		this->_client_size = rhs._client_size;
+		this->_index = rhs._index;
+		this->_autoindex = rhs._autoindex;
+		this->_v_methods = rhs._v_methods;
+		this->_m_error_page = rhs._m_error_page;
+		this->_cgi_pass = rhs._cgi_pass;
+	}
+	return (*this);
+}
 
 std::string Location::getPath() const
 {

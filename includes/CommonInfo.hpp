@@ -57,7 +57,6 @@ class CommonInfo
 		void setcloseBracket(bool a_auto_index);
 
 		//Check
-		bool checkListen(const std::string& alisten);
 		bool checkServerName(const std::string& aserver_name);
 		bool checkRoot(const std::string& aroot);
 		bool checkIndex(const std::string& aindex);
