@@ -23,6 +23,7 @@ class Response {
 			std::string								_response_body;
 			std::string								_path;
 			std::string								_target_file;
+			bool									_auto_index;
 
 	public:
 

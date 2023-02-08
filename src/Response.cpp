@@ -6,6 +6,8 @@ Response::Response()
 	_response_body = "";
 	_status_code = 0;
 	_target_file = "";
+	_path = "";
+	_auto_index = false;
 }
 
 Response::Response(Request &req) : request(req)
@@ -14,6 +16,8 @@ Response::Response(Request &req) : request(req)
 	_response_body = "";
 	_status_code = 0;
 	_target_file = "";
+	_path = "";
+	_auto_index = false;
 }
 
 Response::~Response() {}
@@ -59,11 +63,11 @@ void	Response::setContentType()
 
 void	Response::setContentLength()
 {
-    std::stringstream ss;
-    ss << _response_body.length();
-    _response_content.append("Content-Length: ");
-    _response_content.append(ss.str());
-    _response_content.append("\r\n");
+	std::stringstream ss;
+	ss << _response_body.length();
+	_response_content.append("Content-Length: ");
+	_response_content.append(ss.str());
+	_response_content.append("\r\n");
 	_m_headers["Content-Length: "] = ss.str();
 
 }
@@ -186,7 +190,7 @@ bool	isDirectory(std::string path)
 }
 
 /*
-The return value of this function will be true if the file exists and is ready for reading, and false otherwise.
+The return value of this function will be true if the file/directory exists and is ready for reading, and false otherwise.
 */
 
 bool fileExists (const std::string& f)
@@ -247,8 +251,45 @@ int		Response::handleRequest()
 		
 		if (isDirectory(target_location.getPath()))
 		{
+			if (_target_file[_target_file.length() - 1] != '/')
+			{
+				_status_code = 301;
+				_path = request.getRequestFile() + "/";
+				return (1);
+			}
+			if (!fileExists(_target_file))
+			{
+				// allows to generate a directory listing for a given location
+				if (target_location.getAutoindex())
+				{
+					_target_file.erase(_target_file.find_last_of('/') + 1);
+					_auto_index = true;
+					return (0);
+				}
+				else
+				{
+					_status_code = 404;
+					return (1);
+				}
+			}
 		}
-
-
 	}
+	else
+	{
+		_target_file = combinePaths(_server.getRoot(), request.getRequestFile(), "");
+		if (isDirectory(_target_file))
+		{
+			_status_code = 301;
+			_path = request.getRequestFile() + "/";
+		}
+		// the index directive specifies the default file name that should be served when a directory is requested
+		_target_file += _server.getIndex();
+		if (!fileExists(_target_file))
+		{
+			_status_code = 404;
+			return (1);
+		}
+		//? still determining this logic
+	}
+	return (0);
 }
