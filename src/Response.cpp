@@ -46,15 +46,6 @@ int		Response::readFile()
 	return (0);
 }
 
-int		Response::buildBody()
-{
-	if (request.getMethod() == "GET")
-	{
-		if (readFile())
-			return (1);
-	}
-
-}
 
 void	Response::setContentType()
 {
@@ -160,10 +151,7 @@ bool Response::isMethodAllowed(std::string method, Location &location)
 		if (_server.getMethods().empty())
 		{
 			if (method != "GET" && method != "POST")
-			{
-			_status_code = 405;
-			return false;
-			}
+				return false;
 		}
 	}
 	for(std::vector<std::string>::const_iterator it = allowed_methods.begin(); it != allowed_methods.end(); ++it)
@@ -171,7 +159,6 @@ bool Response::isMethodAllowed(std::string method, Location &location)
 		if (*it == method)
 			return true;
 	}
-	_status_code = 405;
 	return false;
 }
 
@@ -179,7 +166,6 @@ bool	Response::checkIfReturn(Location &location)
 {
 	if (!location.getReturn().empty())
 	{
-		_status_code = 301;
 		_path = location.getReturn();
 		if (_path[0] != '/')
 			_path.insert(0, 1, '/');
@@ -202,7 +188,6 @@ int Response::isClientSizeAllowed(Location &location)
 	}
 	if (request.getContentLength() < location.getClientSize())
 		return true;
-	_status_code = 405;
 	return false;
 }
 
@@ -261,16 +246,19 @@ int		Response::handleRequest()
 		Location	target_location = _server.getLocationByReference(index);
 		if (!(isMethodAllowed(request.getMethod(), target_location)))
 		{
-			std::cout << "METHOD NOT ALLOWED" << std::endl;
+			_status_code = 405;
 			return (1);
 		}
-		if (request.getContentLength() > target_location.getClientSize()) //?must check if metrics retrieved are the right ones
+		if (!(isClientSizeAllowed(target_location))) //?must check if metrics retrieved are the right ones
 		{
 			_status_code = 413;
 			return (1);
 		}
 		if (checkIfReturn(target_location))
+		{
+			_status_code = 301;
 			return (1);
+		}
 		
 		//! HANDLE CGI WHEN WE HAVE THE CLASS CREATED
 
@@ -285,8 +273,8 @@ int		Response::handleRequest()
 		{
 			if (_target_file[_target_file.length() - 1] != '/')
 			{
-				_status_code = 301;
 				_path = request.getRequestFile() + "/";
+				_status_code = 301;
 				return (1);
 			}
 			if (!fileExists(_target_file))
@@ -324,4 +312,30 @@ int		Response::handleRequest()
 		//? still determining this logic
 	}
 	return (0);
+}
+
+int		Response::buildBody()
+{
+	if (handleRequest())
+		return (1);
+	if (request.getMethod() == "GET")
+	{
+		if (readFile())
+			return (1);
+	}
+	else if (request.getMethod() == "POST")
+	{
+		if (fileExists(_target_file))
+		{
+			_status_code = 204;
+			return (0);
+		}
+		std::ofstream file(_target_file.c_str(), std::ios::binary);
+		if (file.fail())
+		{
+			_status__code = 404;
+			return (1);
+		}
+	}
+
 }
