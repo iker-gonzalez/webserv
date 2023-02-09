@@ -1,4 +1,5 @@
 #include "../includes/Response.hpp"
+#include "Response.hpp"
 
 Response::Response()
 {
@@ -8,6 +9,7 @@ Response::Response()
 	_target_file = "";
 	_path = "";
 	_auto_index = false;
+	_server = "";
 }
 
 Response::Response(Request &req) : request(req)
@@ -18,6 +20,7 @@ Response::Response(Request &req) : request(req)
 	_target_file = "";
 	_path = "";
 	_auto_index = false;
+	_server = "";
 }
 
 Response::~Response() {}
@@ -145,20 +148,31 @@ std::string	findLocation(std::string request_file, std::vector<Location> locatio
 			return request_file;
 		index++;
 	}
+
 	return "";
 }
 
 bool Response::isMethodAllowed(std::string method, Location &location)
 {
 	std::vector<std::string> allowed_methods = location.getMethods();
+	if ((allowed_methods.empty()))
+	{
+		if (_server.getMethods().empty())
+		{
+			if (method != "GET" && method != "POST")
+			{
+			_status_code = 405;
+			return false;
+			}
+		}
+	}
 	for(std::vector<std::string>::const_iterator it = allowed_methods.begin(); it != allowed_methods.end(); ++it)
 	{
-		if (*it == "GET" || *it == "POST" || *it == "DELETE")
+		if (*it == method)
 			return true;
 	}
 	_status_code = 405;
 	return false;
-
 }
 
 bool	Response::checkIfReturn(Location &location)
@@ -172,6 +186,29 @@ bool	Response::checkIfReturn(Location &location)
 		return true;
 	}
 	return false;
+}
+
+int Response::isClientSizeAllowed(Location &location)
+{
+	int clientSizeAllowed = location.getClientSize();
+	if (!clientSizeAllowed)
+	{
+		if (_server.getClientSize())
+		{
+			if (request.getContentLength() > _server.getClientSize())
+				return false;
+		}
+		if (request.getContentLength() < 1MB)
+			return true;
+	}
+	for(std::vector<std::string>::const_iterator it = allowed_methods.begin(); it != allowed_methods.end(); ++it)
+	{
+		if (*it == method)
+			return true;
+	}
+	_status_code = 405;
+	return false;
+	return 0;
 }
 
 /*

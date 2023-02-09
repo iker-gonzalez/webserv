@@ -48,11 +48,7 @@ class Response {
 			bool		checkIfReturn(Location &location);
 			bool		isDirectory(std::string path);
 			bool		fileExists (const std::string& f);
-
-
-
-
-
+			int			isClientSizeAllowed(Location &location);
 };
 
 
