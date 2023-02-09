@@ -190,25 +190,20 @@ bool	Response::checkIfReturn(Location &location)
 
 int Response::isClientSizeAllowed(Location &location)
 {
-	int clientSizeAllowed = location.getClientSize();
-	if (!clientSizeAllowed)
+	if (!(location.getClientSize()))
 	{
 		if (_server.getClientSize())
 		{
-			if (request.getContentLength() > _server.getClientSize())
-				return false;
+			if (request.getContentLength() < _server.getClientSize())
+				return true;
 		}
 		if (request.getContentLength() < 1MB)
 			return true;
 	}
-	for(std::vector<std::string>::const_iterator it = allowed_methods.begin(); it != allowed_methods.end(); ++it)
-	{
-		if (*it == method)
-			return true;
-	}
+	if (request.getContentLength() < location.getClientSize())
+		return true;
 	_status_code = 405;
 	return false;
-	return 0;
 }
 
 /*
