@@ -1,13 +1,14 @@
 #include "../includes/Request.hpp"
 #include <string>
+#include "..\includes\Response.hpp"
 
 Request::Request()
 {
-	_content_length = 0;
+
 }
 Request::~Request()
 {
-	
+
 }
 
 int Request::requestParsing(std::string& request)
@@ -31,19 +32,17 @@ int Request::requestParsing(std::string& request)
 	while (i < request.size())
 	{
 		k = request.find_first_of(':', i);
-		if (k == std::string::npos)
-			break;
 		j = request.find_first_of("\r\n", k);
+		_m_headers[request.substr(i, k - i + 1)] = request.substr(k + 1, j - k);
 		if (j == std::string::npos)
 			break;
-		_m_headers[request.substr(i, k - i + 1)] = request.substr(k + 1, j - k);
 		i = j + 2;
 	}
 	//print map content
 	std::map<std::string, std::string>::iterator it;
-   	for (it = _m_headers.begin(); it != _m_headers.end(); ++it) {
-       	std::cout << it->first << it->second << std::endl;
-   }
+	for (it = _m_headers.begin(); it != _m_headers.end(); ++it) {
+		std::cout << it->first << it->second << std::endl;
+	}
 	return 0;
 }
 
@@ -70,4 +69,9 @@ std::map<std::string, std::string> Request::getHeaders(void) const
 size_t Request::getContentLength(void) const
 {
 	return _content_length;
+}
+
+Response::Response(Server& ar_server)
+{
+	_server = ar_server;
 }

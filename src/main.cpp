@@ -22,6 +22,15 @@ int main(int ac, char **av)
 	if (!conf.CheckConfig())
 	{
 		std::cout << "Bad ConfigFile" << std::endl;
+		return false;
+	}
+
+	try {
+		conf.CheckNecessaryInfo();
+	}
+	catch(std::string error)
+	{
+		std::cerr << error << std::endl;
 	}
 	
 	//! TODO Create Select Core

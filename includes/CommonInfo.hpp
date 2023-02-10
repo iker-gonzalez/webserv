@@ -8,7 +8,6 @@ class CommonInfo
 {
 	protected:
 		std::string					_listen;
-		std::string					_server_name;
 		std::string					_root;
 		std::string					_index;
 		std::string					_error_page;
@@ -22,7 +21,6 @@ class CommonInfo
 
 		//Exist unique attributes
 		bool _is_listen;
-		bool _is_server_name;
 		bool _is_root;
 		bool _is_index;
 		bool _is_v_methods;
@@ -33,11 +31,12 @@ class CommonInfo
 	public:
 		CommonInfo();
 		virtual ~CommonInfo();
+		CommonInfo(const CommonInfo& rhs);
+		CommonInfo& operator=(const CommonInfo& rhs);
 
 	public:
 		// Getters
 		std::string					getListen()const;
-		std::string					getServerName()const;
 		std::string					getRoot()const;
 		std::string					getIndex()const;
 		std::vector<std::string>	getMethods() const;
@@ -47,7 +46,6 @@ class CommonInfo
 		
 		// Setters
 		void setListen(const std::string& alisten);
-		void setServerName(const std::string& aserver_name);
 		void setRoot(const std::string& aroot);
 		void setIndex(const std::string& aindex);
 		void setMethods(const std::vector<std::string>& a_v_methods) ;
@@ -58,7 +56,6 @@ class CommonInfo
 
 		//Check
 		bool checkListen(const std::string& alisten);
-		bool checkServerName(const std::string& aserver_name);
 		bool checkRoot(const std::string& aroot);
 		bool checkIndex(const std::string& aindex);
 		bool checkMethods(const std::vector<std::string>& a_v_methods);
@@ -69,7 +66,14 @@ class CommonInfo
 		
 
 		//IS
-		bool isCloseBracket();
+		bool isCloseBracket() const;
+		bool isListen() const;
+		bool isRoot() const;
+		bool isIndex() const;
+		bool isMethods() const;
+		bool isErrorPage() const;
+		bool isClientSize() const;
+
 
 		//Parseo
 		bool		Parse(std::string& aLine);

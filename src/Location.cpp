@@ -27,6 +27,11 @@ std::string Location::getReturn() const
 	return _return;
 }
 
+std::string Location::getAlias() const
+{
+	return _alias;
+}
+
 void Location::setPath(const std::string& a_path)
 {
 	_path = a_path;
@@ -66,7 +71,6 @@ bool Location::fillSpecificInfo(std::vector<std::string>& a_v_strSplit)
 std::ostream& operator<<(std::ostream& ors, const Location& location)
 {
 	ors << "listen" << location.getListen() << std::endl;
-	ors << "server_name" << location.getServerName() << std::endl;
 	ors << "root" << location.getRoot() << std::endl;
 	ors << "index" << location.getIndex() << std::endl;
 	std::vector<std::string> v_methods = location.getMethods();

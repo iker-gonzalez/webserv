@@ -15,6 +15,7 @@ class Location : public CommonInfo
 		std::string getPath() const;
 		std::string getCgiPass() const;
 		std::string getReturn() const;
+		std::string getAlias() const;
 	
 		// Setters
 		void setPath(const std::string& a_path);
@@ -29,6 +30,7 @@ class Location : public CommonInfo
 		std::string					_path;
 		std::string					_return;
 		std::string					_cgi_pass;
+		std::string					_alias;
 	
 };
 std::ostream& operator<<(std::ostream& ors, const Location& location);

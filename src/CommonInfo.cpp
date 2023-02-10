@@ -3,16 +3,15 @@
 
 #include <cstdlib> //for std::atoi 
 
-CommonInfo::CommonInfo(void) : _client_size(0), _autoindex(false)
+CommonInfo::CommonInfo(void) : _client_size(0), _autoindex(false), _is_listen(false)
 {
-	_is_listen = false;
-	_is_server_name = false;
 	_is_root = false;
 	_is_index = false;
 	_is_v_methods = false;
 	_is_m_error_page = false;
 	_is_client_size = false;
 	_is_autoindex = false;
+
 
 	//Empieza cerrado
 	_closeBracket = true;
@@ -21,6 +20,36 @@ CommonInfo::CommonInfo(void) : _client_size(0), _autoindex(false)
 
 CommonInfo::~CommonInfo()
 {
+}
+
+CommonInfo::CommonInfo(const CommonInfo& rhs)
+{
+		if (this != &rhs)
+		* this = rhs;
+}
+
+CommonInfo& CommonInfo::operator=(const CommonInfo& rhs)
+{
+	if(this != &rhs)
+	{
+		this->_root = rhs._root;
+		this->_listen = rhs._listen;
+		this->_client_size = rhs._client_size;
+		this->_index = rhs._index;
+		this->_autoindex = rhs._autoindex;
+		this->_v_methods = rhs._v_methods;
+		this->_m_error_page = rhs._m_error_page;
+
+		this->_is_root = rhs._is_root;
+		this->_is_index = rhs._is_index;
+		this->_is_v_methods = rhs._is_v_methods;
+		this->_is_m_error_page = rhs._is_m_error_page;
+		this->_is_client_size = rhs._is_client_size;
+		this->_is_autoindex = rhs._is_autoindex;
+		this->_closeBracket = rhs._closeBracket;
+	}
+
+	return (*this);
 }
 
 bool CommonInfo::checkSize(std::vector<std::string>& a_v_info, unsigned int minValue, unsigned int  maxValue)
@@ -34,12 +63,7 @@ bool CommonInfo::checkSize(std::vector<std::string>& a_v_info, unsigned int minV
 
 bool CommonInfo::fillInformation(std::vector<std::string>& a_v_strSplit)
 {
-	if (!(a_v_strSplit[0].compare("listen")) && checkSize(a_v_strSplit, 2, 2) && checkListen(a_v_strSplit[1]))
-		_listen = a_v_strSplit[1];
-	else if (!(a_v_strSplit[0].compare("server_name")) && checkSize(a_v_strSplit, 2, 2) &&
-		checkServerName(a_v_strSplit[1]))
-		_server_name = a_v_strSplit[1];
-	else if (!(a_v_strSplit[0].compare("root")) && checkSize(a_v_strSplit, 2, 2) && checkRoot(a_v_strSplit[1]))
+	if (!(a_v_strSplit[0].compare("root")) && checkSize(a_v_strSplit, 2, 2) && checkRoot(a_v_strSplit[1]))
 		_root = a_v_strSplit[1];
 	else if (!(a_v_strSplit[0].compare("index")) && checkSize(a_v_strSplit, 2, 2) && checkIndex(a_v_strSplit[1]))
 		_index = a_v_strSplit[1];
@@ -89,11 +113,6 @@ std::string CommonInfo::getListen() const
 	return _listen;
 }
 
-std::string CommonInfo::getServerName() const
-{
-	return _server_name;
-}
-
 std::string CommonInfo::getRoot() const
 {
 	return _root;
@@ -128,11 +147,6 @@ bool CommonInfo::getAutoindex() const
 void CommonInfo::setListen(const std::string& alisten) 
 {
 	_listen = alisten;
-}
-
-void CommonInfo::setServerName(const std::string& aserver_name)
-{
-	_server_name = _server_name;
 }
 
 void CommonInfo::setRoot(const std::string& aroot)
@@ -171,33 +185,6 @@ void CommonInfo::setcloseBracket(bool a_close)
 	_closeBracket = a_close;
 }
 
-bool CommonInfo::checkListen(const std::string& alisten)
-{
-	if (_is_listen == true)
-		return false;
-	std::size_t found = alisten.find(":");
-	if (found == std::string::npos)
-		return false;
-	std::size_t port_length = alisten.size() - found;
-	if (port_length != 5)
-		return false;
-	//if (isDigit(&alisten[found])
-	for (unsigned int i = found + 1; i < alisten.size(); ++i)
-	{
-		if (alisten[i] < '0' || alisten[i] > '9')
-			return false;
-		return true;
-	}
-	_is_listen = true;
-	return true;
-}
-bool CommonInfo::checkServerName(const std::string& aserver_name)
-{
-	if (_is_server_name == true)
-		return false;
-	_is_server_name = true;
-	return true;
-}
 bool CommonInfo::checkRoot(const std::string& aroot)
 {
 	if (_is_root == true)
@@ -265,7 +252,49 @@ bool CommonInfo::checkcloseBracket(bool a_auto_index)
 
 }
 
-bool CommonInfo::isCloseBracket()
+bool CommonInfo::isListen() const
+{
+	if (_is_listen)
+		return true;
+	return false;
+}
+
+bool CommonInfo::isRoot() const
+{
+	if (_is_root)
+		return true;
+	return false;
+}
+
+bool CommonInfo::isIndex() const
+{
+	if (_is_index)
+		return true;
+	return false;
+}
+
+bool CommonInfo::isMethods() const
+{
+	if (_is_v_methods)
+		return true;
+	return false;
+}
+
+bool CommonInfo::isErrorPage() const
+{
+	if (_is_m_error_page)
+		return true;
+	return false;
+}
+
+bool CommonInfo::isClientSize() const
+{
+	if (_is_client_size)
+		return true;
+	return false;
+}
+
+bool CommonInfo::isCloseBracket() const
 {
 	return _closeBracket;
 }

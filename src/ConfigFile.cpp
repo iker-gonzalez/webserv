@@ -74,8 +74,8 @@ bool ConfigFile::ReadFile(void)
 		{
 			if (_v_server.at(_v_server.size() - 1).locationBracketOpen)
 			{
-				int nbr_location = _v_server.at(_v_server.size() - 1).getLocation().size();
-				Location& tmp_location = _v_server.at(_v_server.size() - 1).getLocationByReference(nbr_location - 1);
+				int nbr_location = _v_server.at(_v_server.size() - 1).getLocations().size();
+				Location& tmp_location = _v_server.at(_v_server.size() - 1).getLocationsByReference(nbr_location - 1);
 				if (!tmp_location.Parse(line))
 					return false;
 				if (tmp_location.isCloseBracket())
@@ -98,6 +98,38 @@ bool ConfigFile::ReadFile(void)
 bool ConfigFile::ParseFile(std::string &aline) const
 {
 	return false;
+}
+
+
+// Neccesarry data of the confif file:
+// 1. Address.
+// 2. Port.
+// 3. Index.
+// Other information has a default value.
+void ConfigFile::CheckNecessaryInfo() const
+{
+	std::vector<Server>::const_iterator it_server;
+	std::vector<Server>::const_iterator it_server_end = _v_server.end();
+	for (it_server =  _v_server.begin(); it_server != it_server_end; it_server++)
+	{
+		if (!(*it_server).isPort())
+			throw "Lack of necessary server info: (Port)";
+		if ( !(*it_server).isAddress())
+			throw "Lack of necessary server info: (Port or Address)";
+		if (!(*it_server).isServerName())
+			throw "Lack of necessary server info: (Port or Address)"; std::vector<Location> v_location  = (*it_server).getLocations();
+		std::vector<Location>::const_iterator it_location;
+		std::vector<Location>::const_iterator it_location_end = v_location.end();
+		for (it_location = v_location.begin(); it_location != it_location_end; it_location ++ )
+		{
+			if (!(*it_server).isRoot() && !(*it_location).isRoot())
+				throw std::string("Lack of necessary server info: (Root)");
+			if (!(*it_server).isIndex() && !(*it_location).isIndex())
+				throw std::string("Lack of necessary server info: (Index)");
+		}
+	}
+
+	return ;
 }
 
 std::vector<Server> ConfigFile::getServers()const

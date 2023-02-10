@@ -7,7 +7,7 @@ SRC = src/main.cpp\
 		src/Server.cpp\
 		src/Utils.cpp\
 		src/Request.cpp\
-		tests/non_blocking_server.cpp
+		#tests/non_blocking_server.cpp
 
 OBJ	= $(SRC:.c=.o)
 

@@ -24,6 +24,9 @@ class ConfigFile
 		// Check correct configuration file format
 		bool ParseFile(std::string& aline) const;
 
+		// Check if there is the necessary information to setup servers
+		void CheckNecessaryInfo() const;
+
 		// Getter
 		std::vector<Server> getServers()const;
 	private:
