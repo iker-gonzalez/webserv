@@ -16,6 +16,7 @@ public:
 
 	//***********Parseo**********
 	bool fillSpecificInfo(std::vector<std::string>& a_v_strSplit);
+
 	void pushBackLocation(Location& a_location);
 
 	//Check
@@ -36,7 +37,7 @@ public:
 	std::vector<Location> 	getLocations() const;
 	std::string				getServerName()const;
 	int					 	getListenFd() const;
-	Location& getLocationsByReference(int nbr_localitaion);
+	Location& 				getLocationsByReference(int nbr_localitaion);
 
 	// Set
 	void setServerName(const std::string& aserver_name);
