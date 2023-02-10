@@ -46,7 +46,6 @@ int		Response::readFile()
 	return (0);
 }
 
-
 void	Response::setContentType()
 {
 	_response_content.append("Content-Type: ");
@@ -124,7 +123,8 @@ void	Response::setHeaders()
 
 void	Response::buildResponse()
 {
-	buildBody();
+	if (buildBody())
+		buildErrorBody();
 	setStatusLine();
 	setHeaders();
 	if (request.getMethod() == "GET")
@@ -189,6 +189,11 @@ int Response::isClientSizeAllowed(Location &location)
 	if (request.getContentLength() < location.getClientSize())
 		return true;
 	return false;
+}
+
+void Response::buildErrorBody()
+{
+	
 }
 
 /*
@@ -336,6 +341,48 @@ int		Response::buildBody()
 			_status__code = 404;
 			return (1);
 		}
-	}
+		/*
+			A multi-part form request is a type of HTTP request used to submit large
+			amounts of data, such as binary files, to a server.
 
+			In a multi-part form request, the request body is divided into several parts,
+			each of which can contain different types of data, such as text fields, binary files.
+
+			Each part is separated by a boundary string, which is specified in the "Content-Type" header of the HTTP request.
+
+			When a server receives a multi-part form request, it can parse the request body into its individual parts, process
+			each part separately, and store the data in a suitable format, such as a file or a database.
+		*/
+		if (//! handle if request multi-part form request)
+		{
+
+		}
+		/*
+		 	code assumes that the request is a regular request, and it simply
+			writes the body of the request to the file
+		*/
+		else
+			file.write(request.getBody().c_str(), request.getBody().length());
+	}
+	else if (request.getMethod() == "DELETE")
+	{
+		if (!fileExists(_target_file))
+		{
+			_status_code = 404;
+			return (1);
+		}
+		/*
+		If the file exists and can be successfully deleted, the function returns 0.
+
+		If the file does not exist or if there was an error deleting the file, the 
+		function returns a non-zero value to indicate an error.
+		*/
+		if (remove(_target_file.c_str()))
+		{
+			_status_code = 500;
+			return (1);
+		}
+	}
+	_status_code = 200;
+	return (0);
 }

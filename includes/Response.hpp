@@ -8,6 +8,7 @@
 #include <string>
 #include <cstring>
 #include <ctime>
+#include <cstdio>
 #include "sys/stat.h"
 #include "Request.hpp"
 #include "Server.hpp"
@@ -49,6 +50,7 @@ class Response {
 			bool		isDirectory(std::string path);
 			bool		fileExists (const std::string& f);
 			int			isClientSizeAllowed(Location &location);
+			void		buildErrorBody();
 };
 
 
