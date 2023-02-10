@@ -93,12 +93,12 @@ bool Server::setupServer(void)
     //! Opcion 1
 	int flags = fcntl(_listen_fd, F_GETFL, 0);
 	fcntl(_listen_fd, F_SETFL, flags | O_NONBLOCK);
-
+//	fcntl(_listen_fd, F_SETFL, O_NONBLOCK) ;
     //! Opcion 2
-    //int option_value = 1;
-    //setsockopt(_listen_fd, SOL_SOCKET, SO_REUSEADDR, &option_value, sizeof(int));
+//	int option_value = 1;
+  //  setsockopt(_listen_fd, SOL_SOCKET, SO_REUSEADDR, &option_value, sizeof(int));
 
-s
+
     // Bind the socket to an address and port
 	/*
 		The program binds the socket to an address and port using the bind function,

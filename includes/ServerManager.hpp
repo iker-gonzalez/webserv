@@ -39,6 +39,11 @@ private:
     fd_set        _read_fds;
     fd_set        _write_fds;
 
+    fd_set        _wait_fd_server;
+    fd_set        _read_from_client;
+    fd_set        _write_to_client;
+
+
     // Map contains each server with its file descriptor
     std::map<int, Server>   _m_fd_server;
     // Map contains each client with its file descriptor

@@ -20,10 +20,10 @@ bool ServerManager::serverCore()
     fd_set  read_fds;
     fd_set  write_fds;
 	std::cout <<  "Waiting for connections..." << std::endl; 
+    struct timeval timeout;
     while (true)
 	{
 
-        struct timeval timeout;
         timeout.tv_sec = 1;
         timeout.tv_usec = 0;
         read_fds = _read_fds;
@@ -31,27 +31,27 @@ bool ServerManager::serverCore()
         setupTimeout();
         std::cout << "Set up the file descriptor set for the select function" << std::endl;
         std::cout << " Wait for activity on the socket or timeout" << std::endl;
-        if (select(_max_socket, &_read_fds, &_write_fds, NULL, &timeout) < 0)
+        if (select(_max_socket, &read_fds, &write_fds, NULL, &timeout) < 0)
         {
 			std::cerr << "Error in select" << std::endl;
 			return false;
 		}
         std::cout <<  "!loop over the read_fds" << std::endl;
-        for (int i = 0; i < _max_socket; i++)
+        for (int i = 0; i < _max_socket ; ++i)
         {
+            std::cout << "i:" << i << std::endl;
             // New connection
             if (FD_ISSET(i, &read_fds) && _m_fd_server.find(i) != _m_fd_server.end())
             {
                 if (!acceptNewConnection(_m_fd_server.at(i)))
-                 continue;
-		        	return false;
+		            return false;
             }
-            else if (FD_ISSET(i, &_read_fds) && _m_fd_client.find(i) != _m_fd_client.end()) 
+            else if (FD_ISSET(i, &read_fds) && _m_fd_client.find(i) != _m_fd_client.end()) 
             {
                if (!readRequest(_m_fd_client.at(i)))
 		       	return false;
             }
-            else if (FD_ISSET(i, &_write_fds))
+            else if (FD_ISSET(i, &write_fds))
             {
 
 		      if (!sendResponse(i))
@@ -122,11 +122,14 @@ bool ServerManager::acceptNewConnection(Server &a_m_server)
             the new socket to the read_fds set.
         */
 
+       // fcntl(client_sock, F_SETFL, O_NONBLOCK) ;
         int flags = fcntl(client_sock, F_GETFL, 0);
         fcntl(client_sock, F_SETFL, flags | O_NONBLOCK);
 
         //Remove fd to _write_fds
         addFdSet(client_sock, _read_fds);
+     //   if (_m_fd_client.count(client_sock) != 0)
+       //     _m_fd_client.erase(client_sock);
         _m_fd_client[client_sock] = new_client;
 
       //  readRequest(new_client);
