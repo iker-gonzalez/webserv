@@ -25,6 +25,9 @@ public:
     bool sendResponse(int fdToSend);
     void setupTimeout();
 
+    // Close fd and remove from read_ or write set
+    void closeFd(const int fd_to_close);
+
     // FSET new fd in _read_fds/_write_fds and uppdate _max_socket
     void addFdSet(int new_fd, fd_set &a_fds_set);
     void removeFdSet(int remove_fd, fd_set &a_fds_set);

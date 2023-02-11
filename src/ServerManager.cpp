@@ -93,6 +93,20 @@ void ServerManager::setupTimeout()
 
 }
 
+void ServerManager::closeFd(const int fd_to_close)
+{
+    if (FD_ISSET(fd_to_close, _read_fds))
+        removeFdSet(fd_to_close, _read_fds);
+    else 
+        removeFdSet(fd_to_close, _write_fds);
+    close(fd_to_close);   
+    if (_m_fd_server.count(fd_to_close))
+        _m_fd_server.erase(fd_to_close);
+    else
+        _m_fd_client.erase(fd_to_close);
+    
+}
+
 bool ServerManager::sendResponse(int fdToSend)
 {
     //int bytes_sent = send(fdToSend, buffer, bytes_received, 0);
