@@ -1,9 +1,9 @@
 #include "../includes/Server.hpp"
 #include <iostream> 				// for std::cerr
-//#include <sys/socket.h> 			// for socket
+#include <sys/socket.h> 			// for socket
 #include <fcntl.h>					// for fcntl
-//#include <arpa/inet.h>				// for htons
-//#include <netinet/in.h>				// for sockaddr_in
+#include <arpa/inet.h>				// for htons
+#include <netinet/in.h>				// for sockaddr_in
 #include <cstdlib>					// for std::atoi 
 #include "../includes/Server.hpp"
 #include <cstring>
@@ -78,9 +78,14 @@ bool Server::fillSpecificInfo(std::vector<std::string> & a_v_strSplit)
 
 bool Server::listenConnections()
 {
-//	if (listen(_listen_fd, SOMAXCONN) < 0)
+	if (listen(_listen_fd, SOMAXCONN) < 0) 
 	{
 		std::cerr << "Error listening on socket" << std::endl;
+		return false;
+	}
+	if (fcntl(_listen_fd, F_SETFL, O_NONBLOCK) < 0)
+	{
+		std::cerr << "Error fcntl on socket" << std::endl;
 		return false;
 	}
 	return true;
@@ -96,8 +101,8 @@ bool Server::setupServer(void)
 		it specifies the address family (AF_INET), the type of socket (SOCK_STREAM)
 		and the protocol (0) as parameters.
 	*/
-//	_listen_fd = socket(AF_INET, SOCK_STREAM, 0);
-	if (_listen_fd < 0)
+	_listen_fd = socket(AF_INET, SOCK_STREAM, 0);
+	if (_listen_fd < 0) 
 	{
 		std::cerr << "Error creating socket" << std::endl;
 		return false;
@@ -107,69 +112,71 @@ bool Server::setupServer(void)
 		The program sets the socket to non-blocking mode using the fcntl function,
 		it retrieves the current flags using F_GETFL and then sets the O_NONBLOCK flag using F_SETFL
 	*/
-	//! Opcion 1
-	//int flags = fcntl(_listen_fd, F_GETFL, 0);
-	//fcntl(_listen_fd, F_SETFL, flags | O_NONBLOCK);
-
-	//! Opcion 2
-	//int option_value = 1;
-	//setsockopt(_listen_fd, SOL_SOCKET, SO_REUSEADDR, &option_value, sizeof(int));
-
+    //! Opcion 1
+	 int option_value = 1;
+    setsockopt(_listen_fd, SOL_SOCKET, SO_REUSEADDR, &option_value, sizeof(int));
 	
-		// Bind the socket to an address and port
-		/*
-			The program binds the socket to an address and port using the bind function,
-			it creates a sockaddr_in struct and sets the address family, IP address and port number.
-		*/
+    //! Opcion 2
+//	int flags = fcntl(_listen_fd, F_GETFL, 0);
+//	fcntl(_listen_fd, F_SETFL, flags | O_NONBLOCK);
+//	fcntl(_listen_fd, F_SETFL, O_NONBLOCK) ;
+//	
 
-	//	struct sockaddr_in addr;
-	//memset(&addr, 0, sizeof(addr));
-	//addr.sin_family = AF_INET;
-	//addr.sin_addr.s_addr = inet_addr(_address.data());
-	//addr.sin_port = htons(_port);
-	////char buf[INET_ADDRSTRLEN];
-	////std::string host_string = "127.0.0.1";
-	////inet_ntop(AF_INET, &host, buf, INET_ADDRSTRLEN);
-	//if (bind(_listen_fd, (struct sockaddr*) & addr, sizeof(addr)) < 0)
-	//{
-	//	std::cerr << "Error binding socket" << std::endl;
-	//	return false;
-	//}
+    // Bind the socket to an address and port
+	/*
+		The program binds the socket to an address and port using the bind function,
+		it creates a sockaddr_in struct and sets the address family, IP address and port number.
+	*/
 
-	return true;
+    struct sockaddr_in addr;
+	memset(&addr, 0, sizeof(addr));
+	addr.sin_family = AF_INET;
+	addr.sin_addr.s_addr = inet_addr(_address.data());
+	addr.sin_port = htons(_port);
+	//char buf[INET_ADDRSTRLEN];
+	//std::string host_string = "127.0.0.1";
+    //inet_ntop(AF_INET, &host, buf, INET_ADDRSTRLEN);
+	if (bind(_listen_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) 
+	{
+		std::cerr << "Error binding socket" << std::endl;
+		return false;
+	}
+	
+    return true;
 }
 bool Server::createSocket(void)
 {
-	return false;
+    return false;
 }
 bool Server::nonBlokingSocket(void)
 {
-	return false;
+    return false;
 }
 bool Server::bindSocket(void)
 {
-	return false;
+    return false;
 }
 int Server::getPort() const
 {
-	return _port;
+    return _port;
 }
 int Server::getListenFd() const
 {
-	return _listen_fd;
-}
-std::string Server::getServerName() const
-{
-	return _server_name;
+    return _listen_fd;
 }
 std::string Server::getAddress() const
 {
-	return _address;
+    return _address;
 }
 std::vector<Location> Server::getLocations() const
 {
 	return _v_location;
 }
+std::string Server::getServerName() const
+{
+    return _server_name;
+}
+
 Location& Server::getLocationsByReference(int nbr_localitaion)
 {
 	return (_v_location.at(nbr_localitaion));

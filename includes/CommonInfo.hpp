@@ -55,7 +55,6 @@ class CommonInfo
 		void setcloseBracket(bool a_auto_index);
 
 		//Check
-		bool checkListen(const std::string& alisten);
 		bool checkRoot(const std::string& aroot);
 		bool checkIndex(const std::string& aindex);
 		bool checkMethods(const std::vector<std::string>& a_v_methods);

@@ -1,3 +1,4 @@
+
 #include "../includes/Location.hpp"
 
 
@@ -11,6 +12,27 @@ Location::~Location()
 {
 }
 
+Location::Location(const Location &other)
+{
+	if (this != &other)
+		*this = other;
+}
+
+Location &Location::operator=(const Location &rhs)
+{
+        if (this != &rhs)
+	{
+				//Copy commun info
+		CommonInfo::operator=(rhs);
+
+	
+		this->_path = rhs._path;
+		this->_return = rhs._return;
+		this->_cgi_pass = rhs._cgi_pass;
+		this->_alias = rhs._alias;
+	}
+	return (*this);
+}
 
 std::string Location::getPath() const
 {

@@ -8,8 +8,11 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include "../includes/ConfigFile.hpp"
+#include "../includes/Server.hpp"
+#include "../includes/Utils.hpp"
 
-int main()
+int block_server(ConfigFile &conf)
 {
 
 	//! Create the socket
@@ -35,12 +38,15 @@ int main()
 		server_addr variable and set the address family to AF_INET, the port number to 80,
 		and the IP address to "93.184.216.34" (which is the IP address of example.com website)
 	*/
-
+    int listen = 8002;
+	std::string server_name =  "localhost";
+    std::string host = "127.0.0.1";
 		struct sockaddr_in server_addr;
 		memset(&server_addr, 0, sizeof(server_addr));
 		server_addr.sin_family = AF_INET;
-		server_addr.sin_port = htons(80);
-		inet_pton(AF_INET, "93.184.216.34", &server_addr.sin_addr);
+		std::vector<Server> server = conf.getServers();
+		server_addr.sin_port = htons(8002);
+		inet_pton(AF_INET, "127.0.0.1", &server_addr.sin_addr);
 
 
 	//! Connect to the server
@@ -57,7 +63,7 @@ int main()
 			std::cerr << "Failed to connect to server" << std::endl;
 			return 1;
 	}
-
+	 return 0;
 
 	//! Send the GET request
 	/*

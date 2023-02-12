@@ -2,8 +2,8 @@
 #include "../includes/Utils.hpp"
 
 #include <cstdlib> //for std::atoi 
-
-CommonInfo::CommonInfo(void) : _client_size(0), _autoindex(false), _is_listen(false)
+#include <iostream> //quitar
+CommonInfo::CommonInfo(void) : _client_size(0), _autoindex(false)
 {
 	_is_root = false;
 	_is_index = false;
@@ -11,6 +11,7 @@ CommonInfo::CommonInfo(void) : _client_size(0), _autoindex(false), _is_listen(fa
 	_is_m_error_page = false;
 	_is_client_size = false;
 	_is_autoindex = false;
+	_is_listen = false;
 
 
 	//Empieza cerrado
@@ -204,13 +205,16 @@ bool CommonInfo::checkIndex(const std::string& aindex)
 }
 bool CommonInfo::checkMethods(const std::vector<std::string>& a_v_methods)
 {
+
 	if (_is_v_methods == true)
 		return false;
+	std::cout << _is_v_methods << std::endl;
 	for (unsigned int i = 0; i < a_v_methods.size(); i++)
 	{
-		if (a_v_methods[i].compare("GET") &&
-			a_v_methods[i].compare("DELETE") &&
-			a_v_methods[i].compare("POST"))
+		std::cout << "m:" << a_v_methods[i] << std::endl;
+		if (a_v_methods[i] != "GET" &&
+			a_v_methods[i] != "DELETE" &&
+			a_v_methods[i] != "POST")
 			return false;
 	}
 	_is_v_methods = true;

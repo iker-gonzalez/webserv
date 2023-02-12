@@ -7,6 +7,7 @@
 #include "../includes/ConfigFile.hpp"
 #include "../includes/Utils.hpp"
 #include "../includes/Request.hpp"
+#include "../includes/ServerManager.hpp"
 
 int main(int ac, char **av)
 {
@@ -34,8 +35,15 @@ int main(int ac, char **av)
 	}
 	
 	//! TODO Create Select Core
-	//if (non_blocking_server(conf))
-	//	std::cout << "Error Selectcd" << std::endl;
+	ServerManager manager(conf.getServers());
+	if (!manager.setupServers()) 
+		return false;
+	std::cout <<  "Start listening for incoming connections" << std::endl;
+
+   // non_blocking_server(conf);
+	if (!manager.serverCore())
+		return false;
+
 
 
 	// Test the request parse

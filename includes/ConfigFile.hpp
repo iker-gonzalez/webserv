@@ -4,7 +4,8 @@
 #include <string>
 #include <vector>
 
-class Server;
+#include "Server.hpp"
+#include "Client.hpp"
 
 class ConfigFile
 {

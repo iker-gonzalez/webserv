@@ -11,12 +11,11 @@ class Server : public CommonInfo
 public:
 	Server();
 	~Server();
-	Server(const Server& other);
-	Server& operator=(const Server& rhs);
-
+	Server(const Server &other);
+    Server &operator=(const Server & rhs);
+	
 	//***********Parseo**********
 	bool fillSpecificInfo(std::vector<std::string>& a_v_strSplit);
-
 	void pushBackLocation(Location& a_location);
 
 	//Check
