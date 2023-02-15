@@ -1,5 +1,5 @@
 #include "../includes/Response.hpp"
-#include "Response.hpp"
+#include "../includes/Utils.hpp"
 
 Response::Response()
 {
@@ -9,7 +9,6 @@ Response::Response()
 	_target_file = "";
 	_path = "";
 	_auto_index = false;
-	_server = "";
 }
 
 Response::Response(Request &req) : request(req)
@@ -20,7 +19,6 @@ Response::Response(Request &req) : request(req)
 	_target_file = "";
 	_path = "";
 	_auto_index = false;
-	_server = "";
 }
 
 Response::~Response() {}
@@ -193,7 +191,7 @@ int Response::isClientSizeAllowed(Location &location)
 
 void Response::buildErrorBody()
 {
-	
+	errorMessage(getStatusMessage(_status_code));
 }
 
 /*
@@ -338,7 +336,7 @@ int		Response::buildBody()
 		std::ofstream file(_target_file.c_str(), std::ios::binary);
 		if (file.fail())
 		{
-			_status__code = 404;
+			_status_code = 404;
 			return (1);
 		}
 		/*
@@ -353,10 +351,10 @@ int		Response::buildBody()
 			When a server receives a multi-part form request, it can parse the request body into its individual parts, process
 			each part separately, and store the data in a suitable format, such as a file or a database.
 		*/
-		if (//! handle if request multi-part form request)
-		{
+		//if (//! handle if request multi-part form request)
+		//{
 
-		}
+		//}
 		/*
 		 	code assumes that the request is a regular request, and it simply
 			writes the body of the request to the file

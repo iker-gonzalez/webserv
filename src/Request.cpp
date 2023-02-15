@@ -4,6 +4,10 @@
 Request::Request()
 {
 	_content_length = 0;
+	_client_fd = 0;
+	_method = "";
+	_requestFile = "";
+	_content_length = 0;
 }
 Request::~Request()
 {
