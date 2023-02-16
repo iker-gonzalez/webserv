@@ -122,7 +122,7 @@ void	Response::setHeaders()
 void	Response::buildResponse()
 {
 	if (buildBody())
-		buildErrorBody();
+		ErrorPage();
 	setStatusLine();
 	setHeaders();
 	if (request.getMethod() == "GET")
@@ -189,9 +189,9 @@ int Response::isClientSizeAllowed(Location &location)
 	return false;
 }
 
-void Response::buildErrorBody()
+void Response::ErrorPage()
 {
-	errorMessage(getStatusMessage(_status_code));
+	_response_content = buildErrorPage(_status_code);
 }
 
 /*

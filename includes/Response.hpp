@@ -51,7 +51,7 @@ public:
 	bool		isDirectory(std::string path);
 	bool		fileExists(const std::string& f);
 	int			isClientSizeAllowed(Location& location);
-	void		buildErrorBody();
+	void		ErrorPage();
 };
 
 

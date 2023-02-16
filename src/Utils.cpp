@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <vector>
 #include <iostream>
+#include <string>
+
 bool isDigit(const std::string& a_attributes)
 {
 	for (unsigned int i = 0; i < a_attributes.size(); ++i)
@@ -195,8 +197,26 @@ bool errorMessage(const std::string message)
 	return false;
 }
 
+std::string errorHtml(int status_code, std::string message)
+{
+	return ("<html>\r\n" 
+			+ '<head>'
+			+ '<title>' + std::to_string(status_code) + "</title>"
+			+ "</head>\r\n"
+			+ "<body>\r\n" 
+			+ "<center><h1>" + std::to_string(status_code) + ":" + message + "</h1></center>\r\n"
+			+ "</body>"
+			+ "</html>");
+}
+
 std::string buildErrorPage(int status_code)
 {
-	
+	std::string message;
+	std::string error_page;
+
+	message = getStatusMessage(status_code);
+	errorMessage(message);
+	error_page = errorHtml(status_code, message);
+	return (error_page);
 }
 
