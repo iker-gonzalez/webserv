@@ -53,6 +53,6 @@ int main(int ac, char **av)
 	req.requestParsing(request);
 
 	//! TODO Test response message
-	Response resp(req);
+	//Response resp(req);
 	return 0;
 }

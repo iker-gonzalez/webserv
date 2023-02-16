@@ -21,17 +21,17 @@ bool splitString(std::string& aline, std::string& character, std::vector<std::st
 	while (it != aline.end() && (*it) == ' ')
 		it++;
 	for (it; it != aline.end(); ++it)
-	
+	{
 		if (*it != ' ')
 			create_line += *it;
 		else
-		
+		{
 			if (create_line.empty())
 				continue;
 			asplit_line.push_back(create_line);
 			create_line.clear();
-		
-	
+		}
+	}
 	asplit_line.push_back(create_line);
 	return true;
 }
