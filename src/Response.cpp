@@ -181,7 +181,7 @@ int Response::isClientSizeAllowed(Location &location)
 			if (request.getContentLength() < _server.getClientSize())
 				return true;
 		}
-		if (request.getContentLength() < 1MB)
+		if (request.getContentLength() < DEFAULT_CLIENT_MAX_BODY_SIZE)
 			return true;
 	}
 	if (request.getContentLength() < location.getClientSize())
@@ -243,15 +243,20 @@ int		Response::handleRequest()
 	int			index;
 
 	index = 0;
+	//1) Check if the requested file is an existing server location
 	location_match = findLocation(request.getRequestFile(), _server.getLocations(), index);
+	//2) If it is an existing location:
 	if (location_match.length() > 0)
 	{
-		Location	target_location = _server.getLocationByReference(index);
+		//3) We store that location in target_location variable
+		Location	target_location = _server.getLocationsByReference(index);
+		//4) We check that the method used is even GET, POST or DELETE
 		if (!(isMethodAllowed(request.getMethod(), target_location)))
 		{
 			_status_code = 405;
 			return (1);
 		}
+		//5) We check if the max client size is bigger than the lenght of the content requested
 		if (!(isClientSizeAllowed(target_location))) //?must check if metrics retrieved are the right ones
 		{
 			_status_code = 413;
@@ -340,8 +345,8 @@ int		Response::buildBody()
 			return (1);
 		}
 		/*
-			A multi-part form request is a type of HTTP request used to submit large
-			amounts of data, such as binary files, to a server.
+			A multipart/form-data is a method of encoding data in an HTTP POST request,
+			often used when uploading files or submitting forms with binary data.
 
 			In a multi-part form request, the request body is divided into several parts,
 			each of which can contain different types of data, such as text fields, binary files.
@@ -351,14 +356,20 @@ int		Response::buildBody()
 			When a server receives a multi-part form request, it can parse the request body into its individual parts, process
 			each part separately, and store the data in a suitable format, such as a file or a database.
 		*/
-		//if (//! handle if request multi-part form request)
-		//{
-
-		//}
-		/*
-		 	code assumes that the request is a regular request, and it simply
-			writes the body of the request to the file
-		*/
+		if (request.getHeaders().find("Content-Type") != request.getHeaders().end())
+		{
+			std::string content_type = request.getHeaders()["Content-Type"];
+			if (content_type.find("multipart/form-data") != std::string::npos) 
+			{
+				// This is a multipart/form-data request
+				size_t begin = content_type.find("boundary=") + 9;
+				std::string boundary = content_type.substr(begin);
+				// Use the boundary string to parse the request body
+				parseMultiPartRequest(request.getBody(), boundary);
+			}
+		}
+		 	//code assumes that the request is a regular request, and it simply
+			//writes the body of the request to the file
 		else
 			file.write(request.getBody().c_str(), request.getBody().length());
 	}
@@ -383,4 +394,56 @@ int		Response::buildBody()
 	}
 	_status_code = 200;
 	return (0);
+}
+
+void Response::parseMultiPartRequest(const std::string& request_body, const std::string& boundary)
+{
+	std::vector<std::string> parts;
+	size_t pos = 0;
+
+	// split the request body into parts based on the boundary
+	while ((pos = request_body.find(boundary, pos)) != std::string::npos)
+	{
+		size_t start_pos = pos + boundary.length();
+		size_t end_pos = request_body.find(boundary, start_pos);
+		parts.push_back(request_body.substr(start_pos, end_pos - start_pos));
+		pos = end_pos;
+	}
+
+	// loop through the parts and extract the data
+	for (std::vector<std::string>::iterator it = parts.begin(); it != parts.end(); ++it)
+	{
+		std::string part = *it;
+		size_t header_pos = part.find("\r\n\r\n");
+		std::string header = part.substr(0, header_pos);
+		std::string data = part.substr(header_pos + 2);
+
+		// extract the name and filename from the header
+		std::string name, filename;
+		size_t name_pos = header.find("name=\"");
+		size_t filename_pos = header.find("filename=\"");
+		if (name_pos != std::string::npos)
+		{
+			size_t end_pos = header.find("\"", name_pos + 6);
+			name = header.substr(name_pos + 6, end_pos - name_pos - 6);
+		}
+		if (filename_pos != std::string::npos)
+		{
+			size_t end_pos = header.find("\"", filename_pos + 10);
+			filename = header.substr(filename_pos + 10, end_pos - filename_pos - 10);
+		}
+
+		// output the name and data
+		std::cout << "Name: " << name << std::endl;
+		if (!filename.empty())
+		{
+			std::cout << "Filename: " << filename << std::endl;
+			std::ofstream outfile(filename.c_str(), std::ios::binary);
+			outfile.write(data.c_str(), data.length());
+		}
+		else
+		{
+			std::cout << "Data: " << data << std::endl;
+		}
+	}
 }

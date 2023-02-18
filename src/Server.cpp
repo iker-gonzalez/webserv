@@ -136,6 +136,7 @@ bool Server::setupServer(void)
 	//char buf[INET_ADDRSTRLEN];
 	//std::string host_string = "127.0.0.1";
     //inet_ntop(AF_INET, &host, buf, INET_ADDRSTRLEN);
+	std::cout << "listen" << _listen_fd << std::endl;
 	if (bind(_listen_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) 
 	{
 		std::cerr << "Error binding socket" << std::endl;

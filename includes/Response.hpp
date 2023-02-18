@@ -13,6 +13,8 @@
 #include "Request.hpp"
 #include "Server.hpp"
 
+#define DEFAULT_CLIENT_MAX_BODY_SIZE 1000000
+
 class Response {
 
 private:
@@ -51,6 +53,8 @@ public:
 	bool		isDirectory(std::string path);
 	bool		fileExists(const std::string& f);
 	int			isClientSizeAllowed(Location& location);
+	void		parseMultiPartRequest(const std::string& request_body, const std::string& boundary)
+
 	void		ErrorPage();
 };
 
