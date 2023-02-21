@@ -137,11 +137,13 @@ bool Server::setupServer(void)
 	//std::string host_string = "127.0.0.1";
     //inet_ntop(AF_INET, &host, buf, INET_ADDRSTRLEN);
 	std::cout << "listen" << _listen_fd << std::endl;
-	if (bind(_listen_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) 
+	int status_bind = bind(_listen_fd, (struct sockaddr *)&addr, sizeof(addr));;
+	if (status_bind < 0) 
 	{
-		std::cerr << "Error binding socket" << std::endl;
+		std::cerr << "Error binding socket:" << status_bind <<  std::endl;
 		return false;
 	}
+	std::cerr << "Bind status: "<<  status_bind <<  std::endl;
 	
     return true;
 }
