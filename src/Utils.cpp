@@ -60,8 +60,6 @@ bool onlySpaces(const std::string& aLine)
 	return true;
 }
 
-
-
 std::string getStatusMessage(int statusCode)
 {
 	if (statusCode == 100) 
@@ -199,14 +197,14 @@ bool errorMessage(const std::string message)
 
 std::string errorHtml(int status_code, std::string message)
 {
-	return ("<html>\r\n" 
-			+ '<head>'
-			+ '<title>' + std::to_string(status_code) + "</title>"
-			+ "</head>\r\n"
-			+ "<body>\r\n" 
-			+ "<center><h1>" + std::to_string(status_code) + ":" + message + "</h1></center>\r\n"
-			+ "</body>"
-			+ "</html>");
+	return ("<html>\r\n" );
+//			+ '<head>'
+//			+ '<title>' + std::to_string(status_code) + "</title>"
+//			+ "</head>\r\n"
+//			+ "<body>\r\n" 
+//			+ "<center><h1>" + std::to_string(status_code) + ":" + message + "</h1></center>\r\n"
+//			+ "</body>"
+//			+ "</html>");
 }
 
 std::string buildErrorPage(int status_code)

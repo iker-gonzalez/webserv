@@ -37,6 +37,7 @@ class Request
 		std::string							parseChunkedBody();
 		std::string							getServerName() const;
 		int									getPort() const;
+		void 								parseRequest(std::string request);
 };
 
 #endif

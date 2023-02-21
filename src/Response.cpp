@@ -141,9 +141,8 @@ std::string	findLocation(std::string request_file, std::vector<Location> locatio
 	return "";
 }
 
-bool Response::isMethodAllowed(std::string method, Location &location)
+bool Response::isMethodAllowed(std::string method, std::vector<std::string> allowed_methods)
 {
-	std::vector<std::string> allowed_methods = location.getMethods();
 	if ((allowed_methods.empty()))
 	{
 		if (_server.getMethods().empty())
@@ -243,20 +242,38 @@ int		Response::handleRequest()
 	int			index;
 
 	index = 0;
-	//1) Check if the requested file is an existing server location
 	location_match = findLocation(request.getRequestFile(), _server.getLocations(), index);
-	//2) If it is an existing location:
-	if (location_match.length() > 0)
+	if (location_match.empty())
 	{
-		//3) We store that location in target_location variable
-		Location	target_location = _server.getLocationsByReference(index);
-		//4) We check that the method used is even GET, POST or DELETE
-		if (!(isMethodAllowed(request.getMethod(), target_location)))
+		if (isMethodAllowed(request.getMethod(), _server.getMethods()))
 		{
 			_status_code = 405;
 			return (1);
 		}
-		//5) We check if the max client size is bigger than the lenght of the content requested
+		_target_file = combinePaths(_server.getRoot(), request.getRequestFile(), "");
+		if (isDirectory(_target_file))
+		{
+			_status_code = 301;
+			_path = request.getRequestFile() + "/";
+		}
+		// the index directive specifies the default file name that should be served when a directory is requested
+		_target_file += _server.getIndex();
+		if (!fileExists(_target_file))
+		{
+			_status_code = 404;
+			return (1);
+		}
+		//? still determining this logic
+	}
+	else
+	{
+		Location	target_location = _server.getLocationsByReference(index);
+		if (!(isMethodAllowed(request.getMethod(), target_location.getMethods())))
+		{
+			_status_code = 405;
+			return (1);
+		}
+		// We check if the max client size is bigger than the lenght of the content requested
 		if (!(isClientSizeAllowed(target_location))) //?must check if metrics retrieved are the right ones
 		{
 			_status_code = 413;
@@ -301,23 +318,6 @@ int		Response::handleRequest()
 				}
 			}
 		}
-	}
-	else
-	{
-		_target_file = combinePaths(_server.getRoot(), request.getRequestFile(), "");
-		if (isDirectory(_target_file))
-		{
-			_status_code = 301;
-			_path = request.getRequestFile() + "/";
-		}
-		// the index directive specifies the default file name that should be served when a directory is requested
-		_target_file += _server.getIndex();
-		if (!fileExists(_target_file))
-		{
-			_status_code = 404;
-			return (1);
-		}
-		//? still determining this logic
 	}
 	return (0);
 }
@@ -446,4 +446,18 @@ void Response::parseMultiPartRequest(const std::string& request_body, const std:
 			std::cout << "Data: " << data << std::endl;
 		}
 	}
+}
+
+
+void Response::handleRequest()
+{
+	std::string	location_match;
+	int			index;
+
+	index = 0;
+	location_match = findLocation(request.getRequestFile(), _server.getLocations(), index);
+	if (location_match.empty())
+		//handle regular request
+	else
+		//handle location request
 }

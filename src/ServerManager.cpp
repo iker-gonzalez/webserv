@@ -188,7 +188,7 @@ bool ServerManager::readRequest(Client &a_client)
 
     Request new_response;
 
-    new_response.requestParsing(s_buffer);
+    new_response.parseHeaders(s_buffer);
     return true;
 }
 void ServerManager::addFdSet(int new_fd, fd_set &a_fds_set)
