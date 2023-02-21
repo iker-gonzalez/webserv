@@ -48,7 +48,6 @@ int Request::parseHeaders(std::string& request)
    	for (it = _m_headers.begin(); it != _m_headers.end(); ++it) {
 	   	std::cout << it->first << it->second << std::endl;
    }
-   parseBody();
 	return 0;
 }
 
@@ -63,36 +62,36 @@ int	Request::parseBody()
 		content_length = atoi(_m_headers["Content-Length"].c_str());
 	}
 	else if (_m_headers.find("Transfer-Encoding") != _m_headers.end() &&
-	           _m_headers["Transfer-Encoding"] == "chunked")
+			   _m_headers["Transfer-Encoding"] == "chunked")
 	{
-	    is_chunked = true;
+		is_chunked = true;
 	}
 
 	// read the request body into a buffer
 	std::string body_str;
 	if (is_chunked)
 	{
-	    body_str = parseChunkedBody();
+		body_str = parseChunkedBody();
 	}
 	else 
 	{
-	    char buffer[1024];
-	    int bytes_left = content_length;
-	    while (bytes_left > 0)
-	    {
-	        int bytes_read = recv(getClientFd(), buffer, std::min(bytes_left, 1024), 0);
-	        // handle error
-	        if (bytes_read < 0)
-	        {
-	            std::cerr << "Error receiving data" << std::endl;
-	            return (1);
-	        }
-	        else
-	        {
-	            body_str.append(buffer, bytes_read);
-	            bytes_left -= bytes_read;
-	        }
-	    }
+		char buffer[1024];
+		int bytes_left = content_length;
+		while (bytes_left > 0)
+		{
+			int bytes_read = recv(getClientFd(), buffer, std::min(bytes_left, 1024), 0);
+			// handle error
+			if (bytes_read < 0)
+			{
+				std::cerr << "Error receiving data" << std::endl;
+				return (1);
+			}
+			else
+			{
+				body_str.append(buffer, bytes_read);
+				bytes_left -= bytes_read;
+			}
+		}
 	}
 	
 	// store the request body in the member variable
@@ -133,63 +132,70 @@ std::string Request::getBody(void) const
 
 std::string Request::parseChunkedBody()
 {
-    std::string body_str;
-    char buffer[1024];
-    int bytes_left = 0;
+	std::string body_str;
+	char buffer[1024];
+	int bytes_left = 0;
 
-    while (true) {
-        // read the chunk size
-        std::string chunk_size_str;
-        int chunk_size;
-        while (true) {
-            int bytes_read = recv(getClientFd(), buffer, 1, 0);
-            // handle error
-            if (bytes_read < 0)
-            {
-                std::cerr << "Error receiving data" << std::endl;
-                return "";
-            }
-            if (buffer[0] == '\r') {
-                break;
-            }
-            chunk_size_str += buffer[0];
-        }
-        chunk_size = strtol(chunk_size_str.c_str(), NULL, 16);
+	while (true) {
+		// read the chunk size
+		std::string chunk_size_str;
+		int chunk_size;
+		while (true) {
+			int bytes_read = recv(getClientFd(), buffer, 1, 0);
+			// handle error
+			if (bytes_read < 0)
+			{
+				std::cerr << "Error receiving data" << std::endl;
+				return "";
+			}
+			if (buffer[0] == '\r') {
+				break;
+			}
+			chunk_size_str += buffer[0];
+		}
+		chunk_size = strtol(chunk_size_str.c_str(), NULL, 16);
 
-        if (chunk_size == 0) {
-            // end of chunked data
-            break;
-        }
+		if (chunk_size == 0) {
+			// end of chunked data
+			break;
+		}
 
-        // read the chunk data
-        bytes_left = chunk_size;
-        while (bytes_left > 0) {
-            int bytes_read = recv(getClientFd(), buffer, std::min(bytes_left, 1024), 0);
-            // handle error
-            if (bytes_read < 0)
-            {
-                std::cerr << "Error receiving data" << std::endl;
-                return "";
-            }
-            body_str.append(buffer, bytes_read);
-            bytes_left -= bytes_read;
-        }
+		// read the chunk data
+		bytes_left = chunk_size;
+		while (bytes_left > 0) {
+			int bytes_read = recv(getClientFd(), buffer, std::min(bytes_left, 1024), 0);
+			// handle error
+			if (bytes_read < 0)
+			{
+				std::cerr << "Error receiving data" << std::endl;
+				return "";
+			}
+			body_str.append(buffer, bytes_read);
+			bytes_left -= bytes_read;
+		}
 
-        // skip the chunk extension and trailing CRLF
-        while (true) {
-            int bytes_read = recv(getClientFd(), buffer, 1, 0);
-            // handle error
-            if (bytes_read < 0)
-            {
-                std::cerr << "Error receiving data" << std::endl;
-                return "";
-            }
-            if (buffer[0] == '\n') {
-                break;
-            }
-        }
-    }
+		// skip the chunk extension and trailing CRLF
+		while (true) {
+			int bytes_read = recv(getClientFd(), buffer, 1, 0);
+			// handle error
+			if (bytes_read < 0)
+			{
+				std::cerr << "Error receiving data" << std::endl;
+				return "";
+			}
+			if (buffer[0] == '\n') {
+				break;
+			}
+		}
+	}
 
-    return body_str;
+	return body_str;
+}
+
+void Request::parseRequest(std::string request)
+{
+	if(parseHeaders(request));
+		return ;
+	parseBody();
 }
 

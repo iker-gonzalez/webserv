@@ -31,9 +31,7 @@ class Request
 		std::map<std::string, std::string>	getHeaders(void) const;
 		size_t								getContentLength(void) const;
 		std::string							parseChunkedBody();
-
-
-
+		void 								parseRequest(std::string request);
 };
 
 #endif

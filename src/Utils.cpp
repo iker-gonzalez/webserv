@@ -60,8 +60,6 @@ bool onlySpaces(const std::string& aLine)
 	return true;
 }
 
-
-
 std::string getStatusMessage(int statusCode)
 {
 	if (statusCode == 100) 
