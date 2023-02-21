@@ -1,4 +1,5 @@
 #include "../includes/ServerManager.hpp"
+#include "../includes/Request.hpp"
 #include <iostream>
 #include <sys/socket.h>                     // for accept, recv
 #include "../includes/Client.hpp"
@@ -184,6 +185,10 @@ bool ServerManager::readRequest(Client &a_client)
 
     removeFdSet(a_client.getClientFd() ,_read_fds);
     addFdSet(a_client.getClientFd(), _write_fds);
+
+    Request new_response;
+
+    new_response.requestParsing(s_buffer);
     return true;
 }
 void ServerManager::addFdSet(int new_fd, fd_set &a_fds_set)

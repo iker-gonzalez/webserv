@@ -1,4 +1,5 @@
 #include "../includes/Request.hpp"
+#include "../includes/Utils.hpp"
 #include <string>
 
 Request::Request()
@@ -43,6 +44,14 @@ int Request::parseHeaders(std::string& request)
 		_m_headers[request.substr(i, k - i + 1)] = request.substr(k + 1, j - k);
 		i = j + 2;
 	}
+
+	//Get ServerName and Port to which the request was sent
+	std::string host = _m_headers ["HTTP: "];
+	std::vector<std::string> v_host;
+	splitString(host, ":", v_host);
+	_serverName = v_host[0];
+	_port = std::atoi(v_host[1].c_str()); 
+
 	//print map content
 	std::map<std::string, std::string>::iterator it;
    	for (it = _m_headers.begin(); it != _m_headers.end(); ++it) {

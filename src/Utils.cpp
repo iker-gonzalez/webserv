@@ -15,7 +15,7 @@ bool isDigit(const std::string& a_attributes)
 }
 
 
-bool splitString(std::string& aline, std::string& character, std::vector<std::string>& asplit_line)
+bool splitString(std::string& aline, std::string character, std::vector<std::string>& asplit_line)
 {
 	std::string create_line;
 	std::string::iterator it = aline.begin();

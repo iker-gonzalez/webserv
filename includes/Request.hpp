@@ -12,8 +12,12 @@ class Request
 		std::string							_request_body;
 		std::string							_method; 	// GET, POST or DELETe
 		std::string							_requestFile; 	// Request HTML file
-		std::map<std::string, std::string>	_m_headers;	// All information
+		std::map<std::string, std::string>	_m_headers;		// All information
 		size_t								_content_length;
+		std::string							_serverName;
+		int									_port;
+		
+
 	public:
 
 		Request ();
@@ -31,9 +35,8 @@ class Request
 		std::map<std::string, std::string>	getHeaders(void) const;
 		size_t								getContentLength(void) const;
 		std::string							parseChunkedBody();
-
-
-
+		std::string							getServerName() const;
+		int									getPort() const;
 };
 
 #endif
