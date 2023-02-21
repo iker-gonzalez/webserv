@@ -32,6 +32,9 @@ public:
     void addFdSet(int new_fd, fd_set &a_fds_set);
     void removeFdSet(int remove_fd, fd_set &a_fds_set);
 
+    // Close before exiting  
+    void closeServerSocket(void);
+
 private:
     // Vector with all servers of config files 
 	std::vector<Server>     _v_server;

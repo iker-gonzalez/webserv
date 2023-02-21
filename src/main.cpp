@@ -43,7 +43,10 @@ int main(int ac, char **av)
 
    // non_blocking_server(conf);
 	if (!manager.serverCore())
+	{
+		manager.closeServerSocket();
 		return false;
+	}
 
 	// Test the request parse
 	Request req;

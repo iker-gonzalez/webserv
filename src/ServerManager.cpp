@@ -61,6 +61,7 @@ bool ServerManager::serverCore()
             }
         }
 	}
+    closeServerSocket();
     return true;
 }
 
@@ -73,7 +74,10 @@ bool ServerManager::setupServers()
     for (unsigned int i = 0; i < _v_server.size(); i++)
     {
         if (!_v_server[i].setupServer())
+        {
+            closeServerSocket();
             return false;
+        }
         if (!_v_server[i].listenConnections())
             return false;
         addFdSet(_v_server[i].getListenFd(), _read_fds);
@@ -108,6 +112,15 @@ void ServerManager::closeFd(const int fd_to_close)
     
 }
 
+void ServerManager::closeServerSocket(void)
+{
+    std::vector<Server>::iterator it = _v_server.begin();
+    std::vector<Server>::iterator it_end = _v_server.end();
+    for (it =  _v_server.begin(); it != it_end; it++)
+    {
+        close((*it).getListenFd());   
+    }
+}
 bool ServerManager::sendResponse(int fdToSend)
 {
     //int bytes_sent = send(fdToSend, buffer, bytes_received, 0);
@@ -188,7 +201,7 @@ bool ServerManager::readRequest(Client &a_client)
 
     Request new_response;
 
-    new_response.parseHeaders(s_buffer);
+ //   new_response.parseHeaders(s_buffer);
     return true;
 }
 void ServerManager::addFdSet(int new_fd, fd_set &a_fds_set)
