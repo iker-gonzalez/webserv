@@ -47,7 +47,7 @@ int Request::parseHeaders(std::string& request)
 	}
 
 	//Get ServerName and Port to which the request was sent
-	std::string host = _m_headers ["HTTP: "];
+	std::string host = _m_headers ["Host: "];
 	std::vector<std::string> v_host;
 	splitString(host, ":", v_host);
 	_serverName = v_host[0];
