@@ -21,8 +21,8 @@ public:
 
     // 
     bool acceptNewConnection(Server &a_m_server);
-    bool readRequest(Client &a_client);
-    bool sendResponse(int fdToSend);
+    bool readRequest(Client &a_client, Request &request);
+    bool sendResponse(int fdToSend, Request &request);
     void setupTimeout();
 
     // Close fd and remove from read_ or write set
@@ -48,6 +48,7 @@ private:
     fd_set        _wait_fd_server;
     fd_set        _read_from_client;
     fd_set        _write_to_client;
+    std::string    _s_buffer;
 
 
     // Map contains each server with its file descriptor

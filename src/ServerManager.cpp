@@ -49,13 +49,14 @@ bool ServerManager::serverCore()
             }
             else if (FD_ISSET(i, &read_fds) && _m_fd_client.find(i) != _m_fd_client.end()) 
             {
-               if (!readRequest(_m_fd_client.at(i)))
+                Request request;
+               if (!readRequest(_m_fd_client.at(i), request))
 		       	return false;
             }
             else if (FD_ISSET(i, &write_fds))
             {
-
-		      if (!sendResponse(i))
+                std::cout << "MANDAMOS???????" << std::endl;
+		      if (!sendResponse(i, request))
 		            return false;
 
             }
@@ -121,9 +122,10 @@ void ServerManager::closeServerSocket(void)
         close((*it).getListenFd());   
     }
 }
-bool ServerManager::sendResponse(int fdToSend)
+bool ServerManager::sendResponse(int fdToSend, Request &request)
 {
-    //int bytes_sent = send(fdToSend, buffer, bytes_received, 0);
+    int bytes_sent = send(fdToSend, _s_buffer.c_str(),atoi(request.getHeaders()["Content-length"].c_str()), 0);
+    std::cout << "bytes sent:" << bytes_sent << std::endl;
     return true;
 }
 
@@ -181,7 +183,7 @@ bool ServerManager::acceptNewConnection(Server &a_m_server)
     return true;
 
 }
-bool ServerManager::readRequest(Client &a_client)
+bool ServerManager::readRequest(Client &a_client, Request& request)
 {
     char buffer[1024];
     
@@ -193,15 +195,12 @@ bool ServerManager::readRequest(Client &a_client)
         return false;
 
 	}
-    std::string s_buffer = buffer;
-	std::cout << "buffer:" << s_buffer << std::endl;
+    _s_buffer = buffer;
+	//std::cout << "buffer:" << s_buffer << std::endl;
 
     removeFdSet(a_client.getClientFd() ,_read_fds);
     addFdSet(a_client.getClientFd(), _write_fds);
-
-    Request new_response;
-
- //   new_response.parseHeaders(s_buffer);
+    request.parseRequest(_s_buffer);
     return true;
 }
 void ServerManager::addFdSet(int new_fd, fd_set &a_fds_set)
