@@ -7,6 +7,8 @@
 #include <cstdlib>					// for std::atoi 
 #include "../includes/Server.hpp"
 #include <cstring>
+#include <cstdio>
+
 Server::Server() : CommonInfo(), locationBracketOpen(false)
 {
 	_is_address = false;
@@ -131,8 +133,17 @@ bool Server::setupServer(void)
     struct sockaddr_in addr;
 	memset(&addr, 0, sizeof(addr));
 	addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr = inet_addr(_address.data());
 	addr.sin_port = htons(_port);
+	inet_pton(AF_INET, "127.0.0.1", &(addr.sin_addr)); //? 0)
+
+	//? 1)addr.sin_addr.s_addr = inet_addr(_address.data());
+
+	//? 2) if (inet_aton(_address.c_str(), &addr.sin_addr) == 0) 
+	//?{
+	//?	std::cerr << "Invalid address: " << _address << std::endl;
+	//?	return false;
+	//?}
+	
 	//char buf[INET_ADDRSTRLEN];
 	//std::string host_string = "127.0.0.1";
     //inet_ntop(AF_INET, &host, buf, INET_ADDRSTRLEN);
@@ -141,6 +152,7 @@ bool Server::setupServer(void)
 	if (status_bind < 0) 
 	{
 		std::cerr << "Error binding socket:" << status_bind <<  std::endl;
+		perror("bind");
 		return false;
 	}
 	std::cerr << "Bind status: "<<  status_bind <<  std::endl;

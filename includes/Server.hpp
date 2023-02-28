@@ -64,4 +64,3 @@ private:
 std::ostream& operator<<(std::ostream& ors, const Server& server);
 
 #endif // !SERVER_HPP
-
