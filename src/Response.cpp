@@ -129,7 +129,7 @@ void	Response::buildResponse()
 		_response_content.append(_response_body);
 }
 
-std::string	findLocation(std::string request_file, std::vector<Location> locations, int &index)
+std::string	Response::findLocation(std::string request_file, std::vector<Location> locations, int &index)
 {
 	for(std::vector<Location>::const_iterator it = locations.begin(); it != locations.end(); ++it)
 	{
@@ -448,16 +448,12 @@ void Response::parseMultiPartRequest(const std::string& request_body, const std:
 	}
 }
 
-
-void Response::handleRequest()
+std::string	Response::getResponseContent()
 {
-	std::string	location_match;
-	int			index;
+	return(this->_response_content);
+}
 
-	index = 0;
-	location_match = findLocation(request.getRequestFile(), _server.getLocations(), index);
-	if (location_match.empty())
-		//handle regular request
-	else
-		//handle location request
+void    Response::setRequest(Request &req)
+{
+	request = req;
 }

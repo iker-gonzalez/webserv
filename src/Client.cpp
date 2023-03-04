@@ -16,3 +16,9 @@ int Client::getClientFd() const
 {
     return _client_fd;
 }
+
+void    Client::buildResponse()
+{
+    response.setRequest(this->request);
+    response.buildResponse();
+}

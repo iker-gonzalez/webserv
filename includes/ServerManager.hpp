@@ -3,6 +3,7 @@
 
 #include "../includes/Server.hpp"
 #include "../includes/Client.hpp"
+#include "../includes/Response.hpp"
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -21,8 +22,8 @@ public:
 
     // 
     bool acceptNewConnection(Server &a_m_server);
-    bool readRequest(Client &a_client, Request &request);
-    bool sendResponse(int fdToSend, Request &request);
+    bool readRequest(Client &a_client);
+    bool sendResponse(int fdToSend, Client &a_client);
     void setupTimeout();
 
     // Close fd and remove from read_ or write set

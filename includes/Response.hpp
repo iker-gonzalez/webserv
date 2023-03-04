@@ -39,6 +39,7 @@ public:
 	void		buildResponse();
 	int			buildBody();
 	int			readFile();
+	void		setRequest(Request &req);
 	void		setStatusLine();
 	void		setHeaders();
 	void		setContentType();
@@ -50,12 +51,13 @@ public:
 	std::string	findLocation(std::string request_file, std::vector<Location> locations, int& index);
 	bool		isMethodAllowed(std::string method, std::vector<std::string> allowed_methods);
 	bool		checkIfReturn(Location& location);
-	bool		isDirectory(std::string path);
-	bool		fileExists(const std::string& f);
+	//bool		isDirectory(std::string path);
+	//bool		fileExists(const std::string& f);
 	int			isClientSizeAllowed(Location& location);
 	void		parseMultiPartRequest(const std::string& request_body, const std::string& boundary);
-	int			ft_check_errors(std::string target_file, Location target_location);
+	//int			ft_check_errors(std::string target_file, Location target_location);
 	void		ErrorPage();
+	std::string	getResponseContent();
 };
 
 

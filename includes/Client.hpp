@@ -1,6 +1,9 @@
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
 
+#include "Request.hpp"
+#include "Response.hpp"
+
 
 class Client 
 {
@@ -10,7 +13,11 @@ class Client
 		~Client();
 
 		int		getClientFd() const;
+		void	buildResponse();
 
+
+		Request		request;
+		Response	response;
 
 	private:
 

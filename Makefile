@@ -9,7 +9,8 @@ SRC = src/main.cpp\
 		src/Request.cpp\
 		src/ServerManager.cpp\
 		src/Client.cpp\
-		tests/non_blocking_server.cpp
+		src/Response.cpp\
+		#tests/non_blocking_server.cpp
 
 OBJ	= $(SRC:.cpp=.o)
 
