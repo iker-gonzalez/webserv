@@ -54,8 +54,7 @@ bool ServerManager::serverCore()
 			}
 			else if (FD_ISSET(i, &write_fds))
 			{
-				std::cout << "MANDAMOS???????" << std::endl;
-			  if (!sendResponse(i, _m_fd_client.at(i)))
+				if (!sendResponse(i, _m_fd_client.at(i)))
 					return false;
 
 			}
@@ -124,7 +123,8 @@ void ServerManager::closeServerSocket(void)
 bool ServerManager::sendResponse(int fdToSend, Client &a_client)
 {
 	std::string response_content = a_client.response.getResponseContent();
-	std::cout << "RESPONSE CONTENT" << std::endl;
+	std::cout << "response content:" << std::endl;
+	std::cout << response_content << std::endl;
 	//int bytes_sent = send(fdToSend, _s_buffer.c_str(),atoi(request.getHeaders()["Content-length"].c_str()), 0);
 	//std::cout << "bytes sent:" << bytes_sent << std::endl;
 	return true;
@@ -203,6 +203,7 @@ bool ServerManager::readRequest(Client &a_client)
 	addFdSet(a_client.getClientFd(), _write_fds);
 	return true;
 }
+
 void ServerManager::addFdSet(int new_fd, fd_set &a_fds_set)
 {
 	FD_SET(new_fd, &a_fds_set);

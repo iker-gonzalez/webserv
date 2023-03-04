@@ -49,6 +49,8 @@ void	Response::setContentType()
 	_response_content.append("Content-Type: ");
 	_response_content.append("text/html"); //? should any other content type different from html be considered?
 	_m_headers["Content-Type: "] = "text/html";
+	_response_content.append("\r\n");
+
 
 }
 
@@ -70,7 +72,6 @@ void	Response::setConnection()
 		_response_content.append("Connection: keep-alive\r\n");
 		_m_headers["Connection: "] = "keep-alive";
 	}
-
 }
 
 void	Response::setServer()
@@ -122,11 +123,20 @@ void	Response::setHeaders()
 void	Response::buildResponse()
 {
 	if (buildBody())
+	{
+		std::cout << "error building body" << std::endl;
 		ErrorPage();
+	}
+	std::cout << "setting headers" << std::endl;
 	setStatusLine();
 	setHeaders();
 	if (request.getMethod() == "GET")
+	{
+		std::cout << "appending reponse body" << std::endl;
+		std::cout << "response_content" << std::endl;
+		std::cout << _response_content << std::endl;
 		_response_content.append(_response_body);
+	}
 }
 
 std::string	Response::findLocation(std::string request_file, std::vector<Location> locations, int &index)
@@ -324,8 +334,12 @@ int		Response::handleRequest()
 
 int		Response::buildBody()
 {
+	std::cout << "BUILDING BODY\n\n";
 	if (handleRequest())
+	{
+
 		return (1);
+	}
 	if (request.getMethod() == "GET")
 	{
 		if (readFile())
