@@ -50,8 +50,6 @@ void	Response::setContentType()
 	_response_content.append("text/html"); //? should any other content type different from html be considered?
 	_m_headers["Content-Type: "] = "text/html";
 	_response_content.append("\r\n");
-
-
 }
 
 void	Response::setContentLength()
@@ -72,6 +70,7 @@ void	Response::setConnection()
 		_response_content.append("Connection: keep-alive\r\n");
 		_m_headers["Connection: "] = "keep-alive";
 	}
+
 }
 
 void	Response::setServer()

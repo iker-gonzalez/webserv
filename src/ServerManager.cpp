@@ -49,8 +49,8 @@ bool ServerManager::serverCore()
 			}
 			else if (FD_ISSET(i, &read_fds) && _m_fd_client.find(i) != _m_fd_client.end()) 
 			{
-			   if (!readRequest(_m_fd_client.at(i)))
-			   	return false;
+				if (!readRequest(_m_fd_client.at(i)))
+					return false;
 			}
 			else if (FD_ISSET(i, &write_fds))
 			{

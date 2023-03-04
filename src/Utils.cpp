@@ -195,26 +195,32 @@ bool errorMessage(const std::string message)
 	return false;
 }
 
-std::string errorHtml(int status_code, std::string message)
+std::string errorHtml(std::string status_code, std::string message)
 {
-	return ("<html>\r\n" );
-//			+ '<head>'
-//			+ '<title>' + std::to_string(status_code) + "</title>"
-//			+ "</head>\r\n"
-//			+ "<body>\r\n" 
-//			+ "<center><h1>" + std::to_string(status_code) + ":" + message + "</h1></center>\r\n"
-//			+ "</body>"
-//			+ "</html>");
+	std::cout << "message:" << message << std::endl;
+	std::cout << "status code:" << status_code << std::endl;
+    std::stringstream ss;
+    ss << "<html>\r\n"
+        << "<head>"
+        << "<title>" << status_code << "</title>"
+        << "</head>\r\n"
+        << "<body>\r\n"
+        << "<center><h1>" << status_code << ": " << message << "</h1></center>\r\n"
+        << "</body>"
+        << "</html>";
+    return ss.str();
 }
 
 std::string buildErrorPage(int status_code)
 {
 	std::string message;
 	std::string error_page;
+	std::string str_status_code;
 
 	message = getStatusMessage(status_code);
 	errorMessage(message);
-	error_page = errorHtml(status_code, message);
+	str_status_code = std::to_string(status_code);
+	error_page = errorHtml(str_status_code, message);
 	return (error_page);
 }
 
