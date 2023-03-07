@@ -1,8 +1,9 @@
 #include "../includes/Client.hpp"
 
 
-Client::Client(int a_fd) : _client_fd(a_fd)
+Client::Client(Server &serv, int a_fd) : _client_fd(a_fd)
 {
+    setServer(serv);
 }
 
 Client::Client()
@@ -21,4 +22,9 @@ void    Client::buildResponse()
 {
     response.setRequest(this->request);
     response.buildResponse();
+}
+
+void    Client::setServer(Server &serv)
+{
+    response.setServer(serv);
 }

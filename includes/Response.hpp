@@ -45,7 +45,7 @@ public:
 	void		setContentType();
 	void		setContentLength();
 	void		setConnection();
-	void		setServer();
+	void		server();
 	void		setDate();
 	int			handleRequest();
 	std::string	findLocation(std::string request_file, std::vector<Location> locations, int& index);
@@ -58,6 +58,8 @@ public:
 	//int			ft_check_errors(std::string target_file, Location target_location);
 	void		ErrorPage();
 	std::string	getResponseContent();
+	void		setServer(Server &server);
+
 };
 
 

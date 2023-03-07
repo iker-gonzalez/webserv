@@ -216,3 +216,7 @@ void Request::parseRequest(std::string request)
 	parseBody();
 }
 
+std::string     Request::getServerName() const
+{
+    return (this->_serverName);
+}

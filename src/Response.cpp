@@ -73,7 +73,7 @@ void	Response::setConnection()
 
 }
 
-void	Response::setServer()
+void	Response::server()
 {
 	_response_content.append("Server: ");
 	_response_content.append("nginx/1.14.0"); //? might need to change later
@@ -113,7 +113,7 @@ void	Response::setHeaders()
 	setContentType();
 	setContentLength();
 	setConnection();
-	setServer();
+	server();
 	setDate();
 	//?location
 	_response_content.append("\r\n");
@@ -252,6 +252,8 @@ int		Response::handleRequest()
 
 	index = 0;
 	location_match = findLocation(request.getRequestFile(), _server.getLocations(), index);
+		std::cout << "server root:" << _server.getRoot() << std::endl;
+		std::cout << "server index:" << _server.getIndex() << std::endl;
 	if (location_match.empty())
 	{
 		if (isMethodAllowed(request.getMethod(), _server.getMethods()))
@@ -267,8 +269,10 @@ int		Response::handleRequest()
 		}
 		// the index directive specifies the default file name that should be served when a directory is requested
 		_target_file += _server.getIndex();
+		std::cout << "target file:" << _target_file << std::endl;
 		if (!fileExists(_target_file))
 		{
+			std::cout << "FILE NOT GOOOD" << std::endl;
 			_status_code = 404;
 			return (1);
 		}
@@ -469,4 +473,9 @@ std::string	Response::getResponseContent()
 void    Response::setRequest(Request &req)
 {
 	request = req;
+}
+
+void     Response::setServer(Server &server)
+{
+    _server = server;
 }

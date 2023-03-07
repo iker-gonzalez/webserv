@@ -123,8 +123,8 @@ void ServerManager::closeServerSocket(void)
 bool ServerManager::sendResponse(int fdToSend, Client &a_client)
 {
 	std::string response_content = a_client.response.getResponseContent();
-	std::cout << "response content:" << std::endl;
-	std::cout << response_content << std::endl;
+	//std::cout << "response content:" << std::endl;
+	//std::cout << response_content << std::endl;
 	//int bytes_sent = send(fdToSend, _s_buffer.c_str(),atoi(request.getHeaders()["Content-length"].c_str()), 0);
 	//std::cout << "bytes sent:" << bytes_sent << std::endl;
 	return true;
@@ -153,7 +153,7 @@ bool ServerManager::acceptNewConnection(Server &a_m_server)
 
 		std::cout << "\033[1;31mNew Client. FD:" << client_sock << "\033[0m\n" << std::endl;
 		//! TODO Añadir información del servidor al que esta enviado la petición
-		Client new_client(client_sock);
+		Client new_client(a_m_server, client_sock);
 
 		// Set the new socket to non-blocking mode
 		/*
@@ -198,6 +198,7 @@ bool ServerManager::readRequest(Client &a_client)
 	}
 	_s_buffer = buffer;
 	a_client.request.parseRequest(_s_buffer);
+	assignServerToClient(a_client);
 	a_client.buildResponse();
 	removeFdSet(a_client.getClientFd() ,_read_fds);
 	addFdSet(a_client.getClientFd(), _write_fds);
@@ -218,4 +219,20 @@ void ServerManager::removeFdSet(int remove_fd, fd_set &a_fds_set)
 
 	if (remove_fd == _max_socket)
 		 _max_socket -= 1;
+}
+
+/* Assign serverconfiguration to a client*/
+void    ServerManager::assignServerToClient(Client &client)
+{
+	for (std::vector<Server>::iterator it = _v_server.begin();
+		it != _v_server.end(); ++it)
+	{
+		if (client.server.getListen() == it->getListen() &&
+			client.server.getPort() == it->getPort() &&
+			client.request.getServerName() == it->getServerName())
+		{
+			client.setServer(*it);
+			return ;
+		}
+	}
 }

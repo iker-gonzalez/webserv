@@ -36,6 +36,9 @@ public:
     // Close before exiting  
     void closeServerSocket(void);
 
+    // Assign server config to a client
+    void    assignServerToClient(Client &client);
+
 private:
     // Vector with all servers of config files 
 	std::vector<Server>     _v_server;
