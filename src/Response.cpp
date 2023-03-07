@@ -256,7 +256,7 @@ int		Response::handleRequest()
 		std::cout << "server index:" << _server.getIndex() << std::endl;
 	if (location_match.empty())
 	{
-		if (isMethodAllowed(request.getMethod(), _server.getMethods()))
+		if (!(isMethodAllowed(request.getMethod(), _server.getMethods())))
 		{
 			_status_code = 405;
 			return (1);
