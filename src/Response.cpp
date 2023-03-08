@@ -256,30 +256,39 @@ int		Response::handleRequest()
 		std::cout << "server index:" << _server.getIndex() << std::endl;
 	if (location_match.empty())
 	{
-		if (!(isMethodAllowed(request.getMethod(), _server.getMethods())))
-		{
-			_status_code = 405;
-			return (1);
-		}
 		_target_file = combinePaths(_server.getRoot(), request.getRequestFile(), "");
 		if (isDirectory(_target_file))
 		{
-			_status_code = 301;
-			_path = request.getRequestFile() + "/";
+			if (_target_file[_target_file.length() - 1] != '/')
+			{
+				_status_code = 301;
+				_path = request.getRequestFile() + "/";
+				return (1);
+			}
+			if (!(isMethodAllowed(request.getMethod(), _server.getMethods())))
+			{
+				_status_code = 405;
+				return (1);
+			}
+			_target_file += _server.getIndex();
+			if (!fileExists(_target_file))
+			{
+				_status_code = 404;
+				return (1);
+			}
+			if (isDirectory(_target_file))
+			{
+				_status_code = 301;
+				_path = combinePaths(request.getRequestFile(), _server.getIndex(), "");
+				if(_path[_path.length() - 1] != '/')
+					_path.insert(_path.end(), '/');
+				return (1);
+			}
 		}
-		// the index directive specifies the default file name that should be served when a directory is requested
-		_target_file += _server.getIndex();
-		std::cout << "target file:" << _target_file << std::endl;
-		if (!fileExists(_target_file))
-		{
-			std::cout << "FILE NOT GOOOD" << std::endl;
-			_status_code = 404;
-			return (1);
-		}
-		//? still determining this logic
 	}
 	else
 	{
+		std::cout << "I AM IN LOCATION BABY!" << std::endl;
 		Location	target_location = _server.getLocationsByReference(index);
 		if (!(isMethodAllowed(request.getMethod(), target_location.getMethods())))
 		{
@@ -340,7 +349,6 @@ int		Response::buildBody()
 	std::cout << "BUILDING BODY\n\n";
 	if (handleRequest())
 	{
-
 		return (1);
 	}
 	if (request.getMethod() == "GET")
@@ -382,7 +390,7 @@ int		Response::buildBody()
 				size_t begin = content_type.find("boundary=") + 9;
 				std::string boundary = content_type.substr(begin);
 				// Use the boundary string to parse the request body
-				parseMultiPartRequest(request.getBody(), boundary);
+				//parseMultiPartRequest(request.getBody(), boundary);
 			}
 		}
 		 	//code assumes that the request is a regular request, and it simply
@@ -413,6 +421,7 @@ int		Response::buildBody()
 	return (0);
 }
 
+/*
 void Response::parseMultiPartRequest(const std::string& request_body, const std::string& boundary)
 {
 	std::vector<std::string> parts;
@@ -464,6 +473,7 @@ void Response::parseMultiPartRequest(const std::string& request_body, const std:
 		}
 	}
 }
+*/
 
 std::string	Response::getResponseContent()
 {
