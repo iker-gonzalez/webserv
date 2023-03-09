@@ -123,8 +123,8 @@ void ServerManager::closeServerSocket(void)
 bool ServerManager::sendResponse(int fdToSend, Client &a_client)
 {
 	std::string response_content = a_client.response.getResponseContent();
-	//std::cout << "response content:" << std::endl;
-	//std::cout << response_content << std::endl;
+	std::cout << "response content:" << std::endl;
+	std::cout << response_content << std::endl;
 	//int bytes_sent = send(fdToSend, _s_buffer.c_str(),atoi(request.getHeaders()["Content-length"].c_str()), 0);
 	//std::cout << "bytes sent:" << bytes_sent << std::endl;
 	return true;

@@ -31,8 +31,8 @@ void	Response::setStatusLine()
 
 int		Response::readFile()
 {
-	std::ifstream file(request.getRequestFile().c_str());
-
+	std::ifstream file(_target_file.c_str());
+	std::cout << "target file:" << _target_file << std::endl;
 	if (file.fail())
 	{
 		_status_code = 404;
@@ -41,11 +41,14 @@ int		Response::readFile()
 	std::ostringstream ss;
 	ss << file.rdbuf();
 	_response_body = ss.str();
+	std::cout << "_response_body" << std::endl;
+	std::cout << _response_body << std::endl;
 	return (0);
 }
 
 void	Response::setContentType()
 {
+	//! This should be set dynamically based on the extension of the resource requested
 	_response_content.append("Content-Type: ");
 	_response_content.append("text/html"); //? should any other content type different from html be considered?
 	_m_headers["Content-Type: "] = "text/html";
@@ -122,11 +125,7 @@ void	Response::setHeaders()
 void	Response::buildResponse()
 {
 	if (buildBody())
-	{
-		std::cout << "error building body" << std::endl;
 		ErrorPage();
-	}
-	std::cout << "setting headers" << std::endl;
 	setStatusLine();
 	setHeaders();
 	if (request.getMethod() == "GET")
@@ -142,7 +141,7 @@ std::string	Response::findLocation(std::string request_file, std::vector<Locatio
 {
 	for(std::vector<Location>::const_iterator it = locations.begin(); it != locations.end(); ++it)
 	{
-		if (strcmp(request_file.c_str(), it->getPath().c_str()))
+		if ((strcmp(request_file.c_str(), it->getPath().c_str())) == 0)
 			return request_file;
 		index++;
 	}
@@ -265,6 +264,11 @@ int		Response::handleRequest()
 				_path = request.getRequestFile() + "/";
 				return (1);
 			}
+			if (request.getContentLength() > _server.getClientSize())
+			{
+				_status_code = 413;
+				return (1);
+			}
 			if (!(isMethodAllowed(request.getMethod(), _server.getMethods())))
 			{
 				_status_code = 405;
@@ -314,7 +318,7 @@ int		Response::handleRequest()
 		else
 			_target_file = combinePaths(target_location.getRoot(), request.getRequestFile(), "");
 		
-		//! HANDLE CGI WHEN WE HAVE THE CLASS CREATED
+		//! HANDLE CGI TEMP WHEN WE HAVE THE CLASS CREATED
 		
 		if (isDirectory(target_location.getPath()))
 		{
@@ -324,6 +328,10 @@ int		Response::handleRequest()
 				_status_code = 301;
 				return (1);
 			}
+			if (!target_location.getIndex().empty())
+				_target_file += target_location.getIndex();
+			else
+				_target_file += _server.getIndex();
 			if (!fileExists(_target_file))
 			{
 				// allows to generate a directory listing for a given location
@@ -338,6 +346,17 @@ int		Response::handleRequest()
 					_status_code = 404;
 					return (1);
 				}
+				if (isDirectory(_target_file))
+				{
+					_status_code = 301;
+					if (!target_location.getIndex().empty())
+						_path = combinePaths(request.getRequestFile(), target_location.getIndex(), "");
+					else
+						_path = combinePaths(request.getRequestFile(), _server.getIndex(), "");
+					if (_path[_path.length() - 1] != '/')
+						_path.insert(_path.end(), '/');
+					return (1);
+				}
 			}
 		}
 	}
@@ -346,11 +365,8 @@ int		Response::handleRequest()
 
 int		Response::buildBody()
 {
-	std::cout << "BUILDING BODY\n\n";
 	if (handleRequest())
-	{
 		return (1);
-	}
 	if (request.getMethod() == "GET")
 	{
 		if (readFile())
@@ -487,5 +503,5 @@ void    Response::setRequest(Request &req)
 
 void     Response::setServer(Server &server)
 {
-    _server = server;
+	_server = server;
 }
