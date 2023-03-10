@@ -32,7 +32,7 @@ void	Response::setStatusLine()
 int		Response::readFile()
 {
 	std::ifstream file(_target_file.c_str());
-	std::cout << "target file:" << _target_file << std::endl;
+	//std::cout << "target file:" << _target_file << std::endl;
 	if (file.fail())
 	{
 		_status_code = 404;
@@ -41,8 +41,6 @@ int		Response::readFile()
 	std::ostringstream ss;
 	ss << file.rdbuf();
 	_response_body = ss.str();
-	std::cout << "_response_body" << std::endl;
-	std::cout << _response_body << std::endl;
 	return (0);
 }
 
@@ -124,15 +122,14 @@ void	Response::setHeaders()
 
 void	Response::buildResponse()
 {
-	if (buildBody())
-		ErrorPage();
+	int error;
+	error = buildBody();
 	setStatusLine();
 	setHeaders();
+	if (error)
+		ErrorPage();
 	if (request.getMethod() == "GET")
 	{
-		std::cout << "appending reponse body" << std::endl;
-		std::cout << "response_content" << std::endl;
-		std::cout << _response_content << std::endl;
 		_response_content.append(_response_body);
 	}
 }
@@ -251,8 +248,8 @@ int		Response::handleRequest()
 
 	index = 0;
 	location_match = findLocation(request.getRequestFile(), _server.getLocations(), index);
-		std::cout << "server root:" << _server.getRoot() << std::endl;
-		std::cout << "server index:" << _server.getIndex() << std::endl;
+		//std::cout << "server root:" << _server.getRoot() << std::endl;
+		//std::cout << "server index:" << _server.getIndex() << std::endl;
 	if (location_match.empty())
 	{
 		_target_file = combinePaths(_server.getRoot(), request.getRequestFile(), "");
@@ -292,7 +289,7 @@ int		Response::handleRequest()
 	}
 	else
 	{
-		std::cout << "I AM IN LOCATION BABY!" << std::endl;
+		//std::cout << "I AM IN LOCATION BABY!" << std::endl;
 		Location	target_location = _server.getLocationsByReference(index);
 		if (!(isMethodAllowed(request.getMethod(), target_location.getMethods())))
 		{
@@ -310,14 +307,14 @@ int		Response::handleRequest()
 			_status_code = 301;
 			return (1);
 		}
-		
+
 		//! HANDLE CGI WHEN WE HAVE THE CLASS CREATED
 
 		if (!(target_location.getAlias().empty()))
 			_target_file = combinePaths(target_location.getAlias(), request.getRequestFile().substr(target_location.getPath().length()), "");
 		else
 			_target_file = combinePaths(target_location.getRoot(), request.getRequestFile(), "");
-		
+
 		//! HANDLE CGI TEMP WHEN WE HAVE THE CLASS CREATED
 		
 		if (isDirectory(target_location.getPath()))
@@ -476,16 +473,16 @@ void Response::parseMultiPartRequest(const std::string& request_body, const std:
 		}
 
 		// output the name and data
-		std::cout << "Name: " << name << std::endl;
+		//std::cout << "Name: " << name << std::endl;
 		if (!filename.empty())
 		{
-			std::cout << "Filename: " << filename << std::endl;
+			//std::cout << "Filename: " << filename << std::endl;
 			std::ofstream outfile(filename.c_str(), std::ios::binary);
 			outfile.write(data.c_str(), data.length());
 		}
 		else
 		{
-			std::cout << "Data: " << data << std::endl;
+			//std::cout << "Data: " << data << std::endl;
 		}
 	}
 }

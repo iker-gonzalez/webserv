@@ -23,7 +23,7 @@ int main(int ac, char **av)
 	ConfigFile conf(filename);
 	if (!conf.CheckConfig())
 	{
-		std::cout << "Bad ConfigFile" << std::endl;
+		//std::cout << "Bad ConfigFile" << std::endl;
 		return false;
 	}
 
@@ -39,7 +39,7 @@ int main(int ac, char **av)
 	ServerManager manager(conf.getServers());
 	if (!manager.setupServers()) 
 		return false;
-	std::cout <<  "Start listening for incoming connections" << std::endl;
+	//std::cout <<  "Start listening for incoming connections" << std::endl;
 
    // non_blocking_server(conf);
 	if (!manager.serverCore())

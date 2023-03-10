@@ -62,7 +62,7 @@ int non_blocking_server(ConfigFile& conf)
 
 
 
-	std::cout <<  "Start listening for incoming connections" << std::endl; 
+	//std::cout <<  "Start listening for incoming connections" << std::endl; 
 	//! Start listening for incoming connections
 	/*
 		The program starts listening for incoming connections using the listen function,
@@ -78,7 +78,7 @@ int non_blocking_server(ConfigFile& conf)
 
 	while (true) 
 	{
-		std::cout << "Set up the file descriptor set for the select function" << std::endl;
+		//std::cout << "Set up the file descriptor set for the select function" << std::endl;
 		//! Set up the file descriptor set for the select function
 		/*
 			The program enters an infinite loop, in which it calls the select function to wait
@@ -119,7 +119,7 @@ int non_blocking_server(ConfigFile& conf)
 
 			if (FD_ISSET(sock, &read_fds)) {
 			//! Accept an incoming connection
-			std::cout << "Accept an incoming connection" <<std::endl;
+			//std::cout << "Accept an incoming connection" <<std::endl;
 			/*
 				The program checks if the socket is set in the read_fds set, if it is, it calls the 
 				accept function to accept a new incoming connection.
@@ -151,7 +151,7 @@ int non_blocking_server(ConfigFile& conf)
 				}
 
 
-			std::cout <<  "!loop over the read_fds" << std::endl;
+			//std::cout <<  "!loop over the read_fds" << std::endl;
 			/*
 				The program loops over the read_fds set and checks which descriptor is set. If the descriptor is set,
 				the program calls the recv function to receive data from the client.
@@ -183,7 +183,7 @@ int non_blocking_server(ConfigFile& conf)
 						The program echoes the data back to the client using the send function.
 					*/
 				std::string s_buffer = buffer;
-					std::cout << "buffer:" << s_buffer << std::endl;
+					//std::cout << "buffer:" << s_buffer << std::endl;
 	//				int bytes_sent = send(i, buffer, bytes_received, 0);
 	//				if (bytes_sent < 0) 
 	//				{

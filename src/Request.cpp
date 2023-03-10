@@ -23,10 +23,10 @@ int Request::parseHeaders(std::string& request)
 	int k;
 	int j;
 
-	std::cout << "****REQUEST NOT PARSED (STRING)****" << std::endl;
-	std::cout << "-----------------------------------" << std::endl;
-	std::cout << request << std::endl;
-	std::cout << "-----------------------------------" << std::endl;
+	//std::cout << "****REQUEST NOT PARSED (STRING)****" << std::endl;
+	//std::cout << "-----------------------------------" << std::endl;
+	//std::cout << request << std::endl;
+	//std::cout << "-----------------------------------" << std::endl;
 	i = request.find_first_of(" ", 0);
 	_method = request.substr(0, i);
 	if (_method != "GET" && _method != "POST" && _method != "DELETE")
@@ -53,15 +53,15 @@ int Request::parseHeaders(std::string& request)
 	std::vector<std::string> v_host;
 	splitString(host, ":", v_host);
 	_serverName = v_host[0];
-	std::cout << "port 1:" << v_host[0] << std::endl;
+	//std::cout << "port 1:" << v_host[0] << std::endl;
 	_port = std::atoi(v_host[0].c_str());
 
 	//print map content
-	std::cout << "*******REQUEST PARSED (MAP)********" << std::endl;
-	std::cout << "-----------------------------------" << std::endl;
+	//std::cout << "*******REQUEST PARSED (MAP)********" << std::endl;
+	//std::cout << "-----------------------------------" << std::endl;
 	std::map<std::string, std::string>::iterator it;
    	for (it = _m_headers.begin(); it != _m_headers.end(); ++it) {
-	   	std::cout << it->first << it->second << std::endl;
+	   	//std::cout << it->first << it->second << std::endl;
    }
 	return 0;
 }
@@ -92,7 +92,7 @@ int	Request::parseBody()
 	{
 		char buffer[1024];
 		int bytes_left = content_length;
-		std::cout << "content-length:" << content_length << std::endl;
+		//std::cout << "content-length:" << content_length << std::endl;
 		while (bytes_left > 0)
 		{
 			int bytes_read = recv(getClientFd(), buffer, std::min(bytes_left, 1024), 0);
@@ -112,9 +112,9 @@ int	Request::parseBody()
 	
 	// store the request body in the member variable
 	_request_body = body_str;
-	std::cout << "REQUEST BODY" << std::endl;
-	std::cout << "------------" << std::endl;
-	std::cout << _request_body << std::endl;
+	//std::cout << "REQUEST BODY" << std::endl;
+	//std::cout << "------------" << std::endl;
+	//std::cout << _request_body << std::endl;
 	return 0;
 }
 

@@ -191,24 +191,24 @@ std::string getStatusMessage(int statusCode)
 
 bool errorMessage(const std::string message)
 {
-	std::cout << message << std::endl;
+	//std::cout << message << std::endl;
 	return false;
 }
 
 std::string errorHtml(std::string status_code, std::string message)
 {
-	std::cout << "message:" << message << std::endl;
-	std::cout << "status code:" << status_code << std::endl;
-    std::stringstream ss;
-    ss << "<html>\r\n"
-        << "<head>"
-        << "<title>" << status_code << "</title>"
-        << "</head>\r\n"
-        << "<body>\r\n"
-        << "<center><h1>" << status_code << ": " << message << "</h1></center>\r\n"
-        << "</body>"
-        << "</html>";
-    return ss.str();
+	//std::cout << "message:" << message << std::endl;
+	//std::cout << "status code:" << status_code << std::endl;
+	std::stringstream ss;
+	ss << "<html>\r\n"
+		<< "<head>"
+		<< "<title>" << status_code << "</title>"
+		<< "</head>\r\n"
+		<< "<body>\r\n"
+		<< "<center><h1>" << status_code << ": " << message << "</h1></center>\r\n"
+		<< "</body>"
+		<< "</html>";
+	return ss.str();
 }
 
 std::string buildErrorPage(int status_code)

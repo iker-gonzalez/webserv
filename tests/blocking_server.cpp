@@ -96,7 +96,7 @@ int block_server(ConfigFile &conf)
 		The code then prints the response by passing the response buffer to cout
 	*/
 
-		std::cout << response << std::endl;
+		//std::cout << response << std::endl;
 
 
 	//! Close the socket

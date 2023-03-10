@@ -20,8 +20,8 @@ bool ServerManager::serverCore()
 {
 	fd_set  read_fds;
 	fd_set  write_fds;
-	std::cout <<  "Waiting for connections..." << std::endl; 
-	std::cout <<  "Max." << _max_socket << std::endl; 
+	//std::cout <<  "Waiting for connections..." << std::endl; 
+	//std::cout <<  "Max." << _max_socket << std::endl; 
 	struct timeval timeout;
 	while (true)
 	{
@@ -83,7 +83,7 @@ bool ServerManager::setupServers()
 
 		// Store Server and Fd
 		_m_fd_server[_v_server[i].getListenFd()] = _v_server[i];
-		std::cout << "\033[1;31mNew Server. Port:" << _v_server[i].getPort() << ". Address: "<<  _v_server[i].getAddress() << "\033[0m\n" << std::endl;
+		//std::cout << "\033[1;31mNew Server. Port:" << _v_server[i].getPort() << ". Address: "<<  _v_server[i].getAddress() << "\033[0m\n" << std::endl;
 	}
 	return true;
 }
@@ -122,11 +122,16 @@ void ServerManager::closeServerSocket(void)
 }
 bool ServerManager::sendResponse(int fdToSend, Client &a_client)
 {
+	int bytes_sent;
+
 	std::string response_content = a_client.response.getResponseContent();
 	std::cout << "response content:" << std::endl;
 	std::cout << response_content << std::endl;
+	bytes_sent = write(fdToSend, a_client.response.getResponseContent().c_str(), a_client.response.getResponseContent().length());
+	closeFd(fdToSend);
+	//! meter condicion KEEP-ALIVE
 	//int bytes_sent = send(fdToSend, _s_buffer.c_str(),atoi(request.getHeaders()["Content-length"].c_str()), 0);
-	//std::cout << "bytes sent:" << bytes_sent << std::endl;
+	////std::cout << "bytes sent:" << bytes_sent << std::endl;
 	return true;
 }
 
@@ -151,7 +156,7 @@ bool ServerManager::acceptNewConnection(Server &a_m_server)
 	else
 	{
 
-		std::cout << "\033[1;31mNew Client. FD:" << client_sock << "\033[0m\n" << std::endl;
+		//std::cout << "\033[1;31mNew Client. FD:" << client_sock << "\033[0m\n" << std::endl;
 		//! TODO Añadir información del servidor al que esta enviado la petición
 		Client new_client(a_m_server, client_sock);
 
@@ -172,7 +177,7 @@ bool ServerManager::acceptNewConnection(Server &a_m_server)
 		addFdSet(client_sock, _read_fds);
 		if (_m_fd_client.count(client_sock) != 0)
 		{
-			std::cout << "ERASEEEE" << std::endl;
+			//std::cout << "ERASEEEE" << std::endl;
 			_m_fd_client.erase(client_sock);
 
 		}
@@ -189,12 +194,10 @@ bool ServerManager::readRequest(Client &a_client)
 	char buffer[1024];
 	
 	int bytes_received = recv(a_client.getClientFd(), buffer, sizeof(buffer), 0);
-	if (bytes_received < 0) 
+	if (bytes_received < 0)
 	{
-
 		std::cerr << "Error receiving data" << std::endl;
 		return false;
-
 	}
 	_s_buffer = buffer;
 	a_client.request.parseRequest(_s_buffer);
@@ -215,7 +218,7 @@ void ServerManager::addFdSet(int new_fd, fd_set &a_fds_set)
 void ServerManager::removeFdSet(int remove_fd, fd_set &a_fds_set)
 {
 	FD_CLR(remove_fd, &a_fds_set);
-	std::cout << "\033[1;31m" << "REMOVEE" << "\033[0m\n" << std::endl;
+	//std::cout << "\033[1;31m" << "REMOVEE" << "\033[0m\n" << std::endl;
 
 	if (remove_fd == _max_socket)
 		 _max_socket -= 1;

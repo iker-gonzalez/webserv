@@ -40,7 +40,7 @@ bool ConfigFile::ReadFile(void)
 	std::ifstream infile(_filename.c_str());
 	if (!infile.is_open())
 	{
-		std::cout << "Infile unable to open" << std::endl;
+		//std::cout << "Infile unable to open" << std::endl;
 		return (false);
 	}
 	std::string line;
@@ -86,11 +86,11 @@ bool ConfigFile::ReadFile(void)
 		}
 
 		
-		std::cout << line << std::endl;
+		//std::cout << line << std::endl;
 	}
 	for (unsigned int i = 0; i < _v_server.size(); i++)
 	{
-		std::cout << _v_server[i] << std::endl;
+		//std::cout << _v_server[i] << std::endl;
 	}
 	return true;
 }
