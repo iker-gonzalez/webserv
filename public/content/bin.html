@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>The bin 🗑</title>
+	<h1>Welcome to the bin 🗑</h1>
+	<h2>The following files are ready to be deleted:</h2>
+	<li><strong>public/bin/pepe.html</strong></li>
+	<li><strong>public/bin/rubbish.css</strong></li>
+	<p>Please enter the name of the file you want to delete:</p>
+	<form action="/delete_file" method="DELETE">
+		<label for="filename">File Name:</label>
+		<input type="text" id="filename" name="filename" required>
+		<br><br>
+		<input type="submit" value="Delete File">
+	</form>
+</head>
+<body>
+	
+</body>
+</html>

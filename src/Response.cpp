@@ -32,12 +32,18 @@ void	Response::setStatusLine()
 int		Response::readFile()
 {
 	std::ifstream file(_target_file.c_str());
-	//std::cout << "target file:" << _target_file << std::endl;
+	std::cout << "target file:" << _target_file << std::endl;
 	if (file.fail())
 	{
 		_status_code = 404;
+		_target_file = "public/html/error.html";
+		std::ifstream file(_target_file.c_str());
+		std::ostringstream ss;
+		ss << file.rdbuf();
+		_response_body = ss.str();
 		return (1);
 	}
+	std::cout << "target file:" << _target_file << std::endl;
 	std::ostringstream ss;
 	ss << file.rdbuf();
 	_response_body = ss.str();
@@ -98,6 +104,8 @@ void	Response::setDate()
 	dereference the pointer returned by std::gmtime and store the result in the tm variable.
 	*/
 	std::tm tm = *std::gmtime(&now);
+	//set time to UTC + 1
+	tm.tm_hour += 1;
 
 	std::ostringstream date;
 	//used to format the tm structure into a string
@@ -195,7 +203,8 @@ int Response::isClientSizeAllowed(Location &location)
 
 void Response::ErrorPage()
 {
-	_response_content = buildErrorPage(_status_code);
+	_response_content.append(buildErrorPage(_status_code));
+	_target_file = "public/content/html/error.html";
 }
 
 /*
@@ -364,6 +373,7 @@ int		Response::buildBody()
 {
 	if (handleRequest())
 		return (1);
+	std::cout << "REQUEST METHOD:" << request.getMethod() << std::endl;
 	if (request.getMethod() == "GET")
 	{
 		if (readFile())
@@ -379,31 +389,18 @@ int		Response::buildBody()
 		std::ofstream file(_target_file.c_str(), std::ios::binary);
 		if (file.fail())
 		{
-			_status_code = 404;
+			_status_code = 403;
 			return (1);
 		}
-		/*
-			A multipart/form-data is a method of encoding data in an HTTP POST request,
-			often used when uploading files or submitting forms with binary data.
-
-			In a multi-part form request, the request body is divided into several parts,
-			each of which can contain different types of data, such as text fields, binary files.
-
-			Each part is separated by a boundary string, which is specified in the "Content-Type" header of the HTTP request.
-
-			When a server receives a multi-part form request, it can parse the request body into its individual parts, process
-			each part separately, and store the data in a suitable format, such as a file or a database.
-		*/
 		if (request.getHeaders().find("Content-Type") != request.getHeaders().end())
 		{
 			std::string content_type = request.getHeaders()["Content-Type"];
 			if (content_type.find("multipart/form-data") != std::string::npos) 
 			{
-				// This is a multipart/form-data request
 				size_t begin = content_type.find("boundary=") + 9;
 				std::string boundary = content_type.substr(begin);
 				// Use the boundary string to parse the request body
-				//parseMultiPartRequest(request.getBody(), boundary);
+				parseMultiPartRequest(request.getBody(), boundary);
 			}
 		}
 		 	//code assumes that the request is a regular request, and it simply
@@ -434,7 +431,7 @@ int		Response::buildBody()
 	return (0);
 }
 
-/*
+
 void Response::parseMultiPartRequest(const std::string& request_body, const std::string& boundary)
 {
 	std::vector<std::string> parts;
@@ -482,11 +479,11 @@ void Response::parseMultiPartRequest(const std::string& request_body, const std:
 		}
 		else
 		{
-			//std::cout << "Data: " << data << std::endl;
+			std::cout << "Data: " << data << std::endl;
 		}
 	}
 }
-*/
+
 
 std::string	Response::getResponseContent()
 {

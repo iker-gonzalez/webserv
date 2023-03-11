@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <string>
+#include <fstream>
 
 bool isDigit(const std::string& a_attributes)
 {
@@ -206,6 +207,7 @@ std::string errorHtml(std::string status_code, std::string message)
 		<< "</head>\r\n"
 		<< "<body>\r\n"
 		<< "<center><h1>" << status_code << ": " << message << "</h1></center>\r\n"
+		<< "<center><h1>" << "<a href=public/index.html>Return to homepage</a>" << "</h1></center>\r\n"
 		<< "</body>"
 		<< "</html>";
 	return ss.str();
@@ -221,6 +223,16 @@ std::string buildErrorPage(int status_code)
 	errorMessage(message);
 	str_status_code = std::to_string(status_code);
 	error_page = errorHtml(str_status_code, message);
+	std::string filePath = "public/html/error.html";
+	// open the file stream
+	std::ofstream fileStream(filePath);
+	// write the HTML content to the file
+	fileStream << error_page;
+	// close the file stream
+	fileStream.close();
 	return (error_page);
 }
+
+
+
 

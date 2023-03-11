@@ -1,165 +1,46 @@
-html {
-    font-size: 16px;
-    text-align: center;
+body {
+	margin: 0;
+	padding: 0;
+	font-family: Arial, sans-serif;
 }
 
-h2 {
-    font-family: 'Dancing Script';
-    font-size: 3rem;
-    background-color:lightgoldenrodyellow;
-    margin: unset;
-    padding: 50px;
+header {
+	background-color: #333;
+	color: #fff;
+	padding: 20px;
 }
 
-a {
-    text-decoration: none;
-    color: white;
+h1 {
+	margin: 0;
 }
 
-/*cover*/
-
-.cover {
-    background-image: url('imgs/cover.jpg');
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
-    height: 40rem;
-    padding-top: 1rem;
+nav {
+	float: right;
 }
 
-.cover li {
-    color: ghostwhite;
-    list-style-type: none;
-    display: inline-flex;
-    margin-left: 5rem;
-    margin-right: 5rem;
-    font-size: 1.5rem;
-    float: right;
-    order: initial;
+nav ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&display=swap');
-
-.cover .name {
-    font-family: 'Dancing Script';
-    float: left;
+nav li {
+	display: inline-block;
+	margin-left: 20px;
 }
 
-/* our club*/
-
-.container.club {
-    display: grid;
-    grid-template: repeat(2, 1fr) / repeat(2, 1fr);
-    height: 60rem;
-    max-width: 100%;
-    column-gap: 20px;
-    background-color:lightgoldenrodyellow;
+nav a {
+	color: #fff;
+	text-decoration: none;
 }
 
-.club .left-top {
-    grid-area: 1 / 1 / span 1 / span 1;
+main {
+	padding: 20px;
 }
 
-.club .right-top {
-    grid-area: 1 / 2 / span 1 / span 1;
-    align-self: center;
-    font-size: 1.75rem;
-    text-align: justify;
-    margin-right:2rem;
-}
-
-.club .left-bottom {
-    grid-area: 2 / 1 / span 1 / span 1;
-    align-self: center;
-    font-size: 1.75rem;
-    text-align: justify;
-    margin-left:2rem;
-}
-
-.club .right-bottom {
-    grid-area: 2 / 2 / span 1 / span 1;
-    background-color:yellow;
-}
-
-.club img{
-    max-width: 90%;
-    margin-left: 2rem;
-    align-self: center;
-}
-
-/*memberships*/
-
-.grid.memberships {
-    display: grid;
-    grid-template: 100px 1fr / repeat(3, 1fr);
-    height: 42rem;
-    max-width: 100%;
-    column-gap: 20px;
-}
-
-.grid .title {
-    grid-area: 1 / 1 / span 1 / span 3;
-    background-color: white;
-}
-
-.memberships p {
-    line-height: 10px;
-}
-
-.memberships img {
-    max-width: 50%;
-    max-height: 25%;
-    margin-top: 5rem;
-}
-
-.memberships p {
-    align-self: center;
-    text-align: center;
-    list-style-type: none;
-    font-size: 1.2rem;
-}
-
-/*contact*/
-
-.contact-info {
-    display: grid;
-    grid-template: 1fr / 1.5fr 1fr;
-    background-color: lightgoldenrodyellow;
-    height: 15rem;
-    padding-top: 1rem;
-}
-
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@600&display=swap');
-
-.contact-info h2 {
-    font-family: 'Noto Sans';
-    background-color: transparent;
-    text-align: left;
-    margin-left: 2rem;
-    margin-bottom: 0px;
-    opacity: 1;
-}
-
-.contact-info p{
-    font-size: 1.5rem;
-    text-align: left;
-    margin-left: 5rem;
-    opacity: 1;
-    margin-top: 0px;
-
-}
-
-.copyrights {
-    text-align: center;
-    background-color: lightgoldenrodyellow;
-    margin: unset;
-    padding: 20px;
-}
-
-button {
-    margin-top: 1.5rem;
-    background-color: rgb(17, 90, 173);
-    padding: 12px;
-    border-radius: 10px;
-    color: white;
+footer {
+	background-color: #333;
+	color: #fff;
+	padding: 20px;
+	text-align: center;
 }
