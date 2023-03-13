@@ -24,7 +24,7 @@ private:
 	std::string								_response_content;
 	int										_status_code;
 	std::string								_response_body;
-	std::string								_path;
+	std::string								_location;
 	std::string								_target_file;
 	bool									_auto_index;
 
@@ -48,7 +48,7 @@ public:
 	void		server();
 	void		setDate();
 	int			handleRequest();
-	std::string	findLocation(std::string request_file, std::vector<Location> locations, int& index);
+	void		findLocation(std::string path, std::vector<Location> locations, std::string &location_key);
 	bool		isMethodAllowed(std::string method, std::vector<std::string> allowed_methods);
 	bool		checkIfReturn(Location& location);
 	//bool		isDirectory(std::string path);
@@ -59,6 +59,14 @@ public:
 	void		ErrorPage();
 	std::string	getResponseContent();
 	void		setServer(Server &server);
+	int 		handleMatch(std::string target_location);
+	int 		handleNoMatch();
+	int 		handleDirectory(Location target_location);
+	int 		getStatusCode();
+	void 		location();
+	Location	findLocation(std::string request_file, std::vector<Location> locations);
+
+
 
 };
 

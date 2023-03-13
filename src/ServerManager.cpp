@@ -125,9 +125,10 @@ bool ServerManager::sendResponse(int fdToSend, Client &a_client)
 	int bytes_sent;
 
 	std::string response_content = a_client.response.getResponseContent();
-	std::cout << "response content:" << std::endl;
-	std::cout << response_content << std::endl;
+
 	bytes_sent = write(fdToSend, a_client.response.getResponseContent().c_str(), a_client.response.getResponseContent().length());
+	std::cout << "\033[1;31m" << "Status code: " << a_client.response.getStatusCode() << "\033[0m" << std::endl;
+	std::cout << response_content << std::cout;
 	closeFd(fdToSend);
 	//! meter condicion KEEP-ALIVE
 	//int bytes_sent = send(fdToSend, _s_buffer.c_str(),atoi(request.getHeaders()["Content-length"].c_str()), 0);
