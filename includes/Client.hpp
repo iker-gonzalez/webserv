@@ -13,6 +13,7 @@ class Client
 		Client();
 		~Client();
 
+		// Getters
 		int		getClientFd() const;
 		void	buildResponse();
 		void    setServer(Server &serv);
@@ -22,10 +23,17 @@ class Client
 		Request		request;
 		Response	response;
 		Server		server;
+		bool	getIsCGI() const;
+
+		//Setter
+		void	setIsCGI(bool a_is_CGI) ;
+
+		// Poner private
+		//Request _request;
 
 	private:
-
-		int		_client_fd;
+		int		_client_fd; 
+		bool	_is_CGI;
 };
 
 

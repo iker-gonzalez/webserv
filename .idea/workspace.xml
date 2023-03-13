@@ -22,13 +22,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="57be98bc-72e0-46bb-ab14-15ca5a1ad27c" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/config_files/Conf_file.conf" beforeDir="false" afterPath="$PROJECT_DIR$/config_files/Conf_file.conf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.vscode/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/.vscode/settings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/includes/CGI.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/includes/CGI.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/includes/Client.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/includes/Client.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/includes/Request.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/includes/Request.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/includes/ServerManager.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/includes/ServerManager.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Server.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Server.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/includes/Utils.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/includes/Utils.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CGI.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/CGI.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Request.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Request.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/ServerManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/ServerManager.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/non_blocking_server.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/non_blocking_server.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web_server" beforeDir="false" afterPath="$PROJECT_DIR$/web_server" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Utils.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Utils.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -97,17 +102,22 @@
     "WebServerToolWindowFactoryState": "false",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
-    "last_opened_file_path": "//wsl$/Ubuntu/home/zcanales/42/webserver/GROPU",
+    "last_opened_file_path": "//wsl$/Ubuntu/home/zcanales/42/webserver/Git_Kaydoo",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "reference.settingsdialog.project.make",
+    "settings.editor.selected.configurable": "MakefileSettings",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
   <component name="RunManager" selected="Makefile Application.all">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="all" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="GROPU" TARGET_NAME="all" CONFIG_NAME="all" version="1" RUN_PATH="web_server">
       <method v="2">
         <option name="CLION.COMPOUND.BUILD" enabled="true" />
@@ -131,11 +141,6 @@
     <configuration name="web_server" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="GROPU" TARGET_NAME="web_server" CONFIG_NAME="web_server" version="1">
       <method v="2">
         <option name="CLION.COMPOUND.BUILD" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <configuration name="Makefile (1)" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
@@ -176,6 +181,10 @@
       <updated>1675193294197</updated>
       <workItem from="1675193295829" duration="1799000" />
       <workItem from="1675797531899" duration="8009000" />
+      <workItem from="1677092929031" duration="1487000" />
+      <workItem from="1677608244521" duration="497000" />
+      <workItem from="1677783801976" duration="42000" />
+      <workItem from="1677784006221" duration="994000" />
     </task>
     <servers />
   </component>
@@ -186,23 +195,13 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/ServerManager.cpp</url>
-          <line>33</line>
-          <option name="timeStamp" value="20" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/tests/non_blocking_server.cpp</url>
           <line>112</line>
           <option name="timeStamp" value="23" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/ServerManager.cpp</url>
-          <line>112</line>
-          <option name="timeStamp" value="26" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/ServerManager.cpp</url>
-          <line>109</line>
+          <line>157</line>
           <option name="timeStamp" value="27" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
@@ -222,25 +221,19 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/ServerManager.cpp</url>
-          <line>149</line>
-          <option name="timeStamp" value="33" />
+          <line>217</line>
+          <option name="timeStamp" value="37" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/ServerManager.cpp</url>
-          <line>44</line>
-          <option name="timeStamp" value="34" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/ServerManager.cpp</url>
-          <line>50</line>
-          <option name="timeStamp" value="35" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/ServerManager.cpp</url>
-          <line>56</line>
-          <option name="timeStamp" value="36" />
+          <url>file://$PROJECT_DIR$/src/Request.cpp</url>
+          <line>55</line>
+          <option name="timeStamp" value="39" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>

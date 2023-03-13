@@ -53,8 +53,7 @@ int Request::parseHeaders(std::string& request)
 	std::vector<std::string> v_host;
 	splitString(host, ":", v_host);
 	_serverName = v_host[0];
-	//std::cout << "port 1:" << v_host[0] << std::endl;
-	_port = std::atoi(v_host[0].c_str());
+	_port = std::atoi(v_host[1].c_str());
 
 	//print map content
 	//std::cout << "*******REQUEST PARSED (MAP)********" << std::endl;
@@ -110,6 +109,8 @@ int	Request::parseBody()
 		}
 	}
 	
+	//if (_requestFile == "/cgi-bin" )
+		
 	// store the request body in the member variable
 	_request_body = body_str;
 	//std::cout << "REQUEST BODY" << std::endl;
@@ -148,7 +149,7 @@ std::string Request::getBody(void) const
 	return _request_body;
 }
 
-std::string Request::parseChunkedBody()
+std::string Request::parseChunkedBody() const
 {
 	std::string body_str;
 	char buffer[1024];
@@ -210,6 +211,10 @@ std::string Request::parseChunkedBody()
 	return body_str;
 }
 
+int Request::getPort() const
+{
+    return _port;
+}
 void Request::parseRequest(std::string request)
 {
 	parseHeaders(request);
@@ -219,4 +224,19 @@ void Request::parseRequest(std::string request)
 std::string     Request::getServerName() const
 {
     return (this->_serverName);
+}
+
+std::ostream &operator<<(std::ostream &ors, const Request &a_request)
+{
+   std::cout << "CLIENT_FD: " << a_request.getClientFd() << std::endl;
+   std::cout << "METHOD: " << a_request.getMethod() << std::endl;
+   std::cout << "RequestFile: " << a_request.getRequestFile() << std::endl;
+   std::cout << "BODY: " << a_request.getBody() << std::endl;
+   //std::cout << "HEADERS: " << a_request.getHeaders() << std::endl;
+   std::cout << "CONTENT LENGHT: " << a_request.getContentLength() << std::endl;
+   std::cout << "PARSE Chunked Body: " << a_request.parseChunkedBody() << std::endl;
+   std::cout << "SeverName: " << a_request.getServerName() << std::endl;
+   std::cout << "Port: " << a_request.getPort() << std::endl;
+
+	return ors;
 }

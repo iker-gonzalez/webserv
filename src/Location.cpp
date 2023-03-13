@@ -68,7 +68,6 @@ void Location::setReturn(const std::string& a_return)
 {
 	_return = a_return;
 }
-
 bool Location::fillSpecificInfo(std::vector<std::string>& a_v_strSplit)
 {
 	if (!(a_v_strSplit[0].compare("location")) && checkSize(a_v_strSplit, 3, 3))
@@ -77,7 +76,7 @@ bool Location::fillSpecificInfo(std::vector<std::string>& a_v_strSplit)
 		_closeBracket = false;
 		return true;
 	}
-	else if (!(a_v_strSplit[0].compare("cgi_pass")) && checkSize(a_v_strSplit, 2, 2))
+	else if (!(a_v_strSplit[0].compare("cgi_path")) && checkSize(a_v_strSplit, 2, 3))
 	{
 		_cgi_pass = a_v_strSplit[1];
 		return true;

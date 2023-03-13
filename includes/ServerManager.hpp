@@ -14,20 +14,20 @@ public:
 	ServerManager(std::vector<Server> a_v_server);
 	~ServerManager();
 
-
 	bool serverCore();
+
+    //Check maximun wait time
+    void setupTimeout();
 
     // Creates a socket with the specifies information
     bool setupServers(); 
 
-    // 
+    // Server core. Infinitive loop
     bool acceptNewConnection(Server &a_m_server);
     bool readRequest(Client &a_client);
-    bool sendResponse(int fdToSend, Client &a_client);
-    void setupTimeout();
-
-    // Close fd and remove from read_ or write set
-    void closeFd(const int fd_to_close);
+    bool sendResponse(int fdToSend, Client& ar_client);
+    bool sendCGIResponse(Client &a_client);
+    bool readCGIResponse(Client &a_client);
 
     // FSET new fd in _read_fds/_write_fds and uppdate _max_socket
     void addFdSet(int new_fd, fd_set &a_fds_set);
@@ -38,6 +38,8 @@ public:
 
     // Assign server config to a client
     void    assignServerToClient(Client &client);
+    // Close fd and remove from read_ or write set
+    void closeFd(const int fd_to_close);
 
 private:
     // Vector with all servers of config files 

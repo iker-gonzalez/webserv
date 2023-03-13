@@ -1,5 +1,9 @@
 #include "../includes/Response.hpp"
 #include "../includes/Utils.hpp"
+#include <sstream>
+#include <string>
+#include <iostream>
+
 
 Response::Response()
 {
@@ -9,6 +13,7 @@ Response::Response()
 	_target_file = "";
 	_path = "";
 	_auto_index = false;
+	_isCGIResponse = false;
 }
 
 Response::Response(Request &req) : request(req)
@@ -19,6 +24,8 @@ Response::Response(Request &req) : request(req)
 	_target_file = "";
 	_path = "";
 	_auto_index = false;
+	_isCGIResponse = false;
+
 }
 
 Response::~Response() {}
@@ -84,32 +91,22 @@ void	Response::server()
 }
 
 void	Response::setDate()
-{
-	/* 
-	get current time
-	nullptr is used as an argument to indicate that the function should use 
-	the local time instead of the time from the system clock.
-	*/
-	std::time_t now = std::time(nullptr);
-
-	/* 
-	convert the now time to a std::tm structure, which represents the broken-down 
-	time in the Coordinated Universal Time (UTC) format. The * operator is used to
-	dereference the pointer returned by std::gmtime and store the result in the tm variable.
-	*/
-	std::tm tm = *std::gmtime(&now);
-
-	std::ostringstream date;
-	//used to format the tm structure into a string
-	date << std::put_time(&tm, "%a, %d %b %Y %T %Z");
-
-	_response_content.append("Date: ");
-	_response_content.append(date.str());
-	_response_content.append("\r\n");
-	_m_headers["Date: "] = date.str();
+{    
+    char date[1000];
+    time_t now = time(0);
+    struct tm tm = *gmtime(&now);
+    strftime(date, sizeof(date), "%a, %d %b %Y %H:%M:%S %Z", &tm);
+    _response_content.append("Date: ");
+    _response_content.append(date);
+    _response_content.append("\r\n");
+	_m_headers["Date: "] = date;
 }
 
-void	Response::setHeaders()
+bool Response::isCGIResponse() const
+{
+    return _isCGIResponse;
+}
+void Response::setHeaders()
 {
 	setContentType();
 	setContentLength();
@@ -124,14 +121,18 @@ void	Response::buildResponse()
 {
 	int error;
 	error = buildBody();
-	setStatusLine();
-	setHeaders();
-	if (error)
+	
+		setStatusLine();
+	if (!_isCGIResponse)
+		setHeaders();
+	if (error && !_isCGIResponse) //??Siempre que sale CGI entra en error asique he tenido que poner esta condicion
 		ErrorPage();
+	
 	if (request.getMethod() == "GET")
 	{
 		_response_content.append(_response_body);
 	}
+	//std::cerr << _response_content << std::endl;
 }
 
 std::string	Response::findLocation(std::string request_file, std::vector<Location> locations, int &index)
@@ -241,7 +242,33 @@ std::string combinePaths(std::string str1, std::string str2, std::string str3)
 	return (str1 + str2 + str3);
 }
 
-int		Response::handleRequest()
+std::string Response::getPath() const
+{
+    return _path;
+}
+
+CGI Response::getCGIResponse() const
+{
+    return _CGI_response;
+}
+int Response::handleCGI(const Location &location)
+{
+	_isCGIResponse= true;
+	//std::cout << "CGI:Request File" << request.getRequestFile() << std::endl;
+	std::string requestFile = request.getRequestFile();
+
+	const std::string index_file = location.getIndex();
+
+	_CGI_response.createCGIEnvironment(request, location);
+	_CGI_response.setupPipes();
+	//_response_body.clear();
+	_response_body = _CGI_response.execute();
+
+
+	//exit(0);
+    return true;
+}
+int Response::handleRequest()
 {
 	std::string	location_match;
 	int			index;
@@ -257,6 +284,7 @@ int		Response::handleRequest()
 		{
 			if (_target_file[_target_file.length() - 1] != '/')
 			{
+				//std::cerr << "AAAAA" << std::endl;
 				_status_code = 301;
 				_path = request.getRequestFile() + "/";
 				return (1);
@@ -279,6 +307,7 @@ int		Response::handleRequest()
 			}
 			if (isDirectory(_target_file))
 			{
+				//std::cerr << "BBBBB" << std::endl;
 				_status_code = 301;
 				_path = combinePaths(request.getRequestFile(), _server.getIndex(), "");
 				if(_path[_path.length() - 1] != '/')
@@ -304,8 +333,14 @@ int		Response::handleRequest()
 		}
 		if (checkIfReturn(target_location))
 		{
+			//std::cerr << "CCCCC" << std::endl;
 			_status_code = 301;
 			return (1);
+		}
+		
+		if (target_location.getPath().find("cgi-bin") != std::string::npos)
+		{
+            return handleCGI(target_location);
 		}
 
 		//! HANDLE CGI WHEN WE HAVE THE CLASS CREATED
@@ -322,6 +357,7 @@ int		Response::handleRequest()
 			if (_target_file[_target_file.length() - 1] != '/')
 			{
 				_path = request.getRequestFile() + "/";
+				//std::cerr << "DDDDD" << std::endl;
 				_status_code = 301;
 				return (1);
 			}
@@ -345,6 +381,7 @@ int		Response::handleRequest()
 				}
 				if (isDirectory(_target_file))
 				{
+					//std::cerr << "EEEEE" << std::endl;
 					_status_code = 301;
 					if (!target_location.getIndex().empty())
 						_path = combinePaths(request.getRequestFile(), target_location.getIndex(), "");
@@ -431,6 +468,8 @@ int		Response::buildBody()
 		}
 	}
 	_status_code = 200;
+
+	// CGI Case
 	return (0);
 }
 

@@ -15,7 +15,7 @@ int main(int ac, char **av)
 	// Get the configuration file, if there is not one given as argument take default.conf 
 	std::string filename;
 	if (ac == 1)
-		filename = "config_files/Conf_file.conf";
+		filename = "config_files/single.conf";
 	else
 		filename = av[1];
 
@@ -23,7 +23,7 @@ int main(int ac, char **av)
 	ConfigFile conf(filename);
 	if (!conf.CheckConfig())
 	{
-		//std::cout << "Bad ConfigFile" << std::endl;
+		std::cout << "Bad ConfigFile" << std::endl;
 		return false;
 	}
 

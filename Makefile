@@ -10,18 +10,19 @@ SRC = src/main.cpp\
 		src/ServerManager.cpp\
 		src/Client.cpp\
 		src/Response.cpp\
+		src/CGI.cpp
 		#tests/non_blocking_server.cpp
 
 OBJ	= $(SRC:.cpp=.o)
 
 
-CC = g++ -std=c++98 -g -fsanitize=address
+CC = g++ -std=c++11 -g #-fsanitize=address
 CFLAGS = -Wall -Wextra -Werror 
 
 all : $(NAME)
 
-$(NAME) : $(SRC)
-	$(CC) $(CFLAG) $(SRC) -o $(NAME)
+$(NAME) : $(OBJ)
+	$(CC) $(CFLAG) $(OBJ) -o $(NAME)
 
 %.o	: %.c 
 	$(CC) $(CFLAGS) -c $< -o $@
