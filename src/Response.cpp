@@ -11,7 +11,7 @@ Response::Response()
 	_response_body = "";
 	_status_code = 0;
 	_target_file = "";
-	_path = "";
+	_location = "";
 	_auto_index = false;
 	_isCGIResponse = false;
 }
@@ -22,7 +22,7 @@ Response::Response(Request &req) : request(req)
 	_response_body = "";
 	_status_code = 0;
 	_target_file = "";
-	_path = "";
+	_location = "";
 	_auto_index = false;
 	_isCGIResponse = false;
 
@@ -39,7 +39,7 @@ void	Response::setStatusLine()
 int		Response::readFile()
 {
 	std::ifstream file(_target_file.c_str());
-	//std::cout << "target file:" << _target_file << std::endl;
+	std::cout << "\033[1;34mtarget file: " << _target_file << "\033[0m" << std::endl;
 	if (file.fail())
 	{
 		_status_code = 404;
@@ -91,7 +91,8 @@ void	Response::server()
 }
 
 void	Response::setDate()
-{    
+{   
+		{ 
     char date[1000];
     time_t now = time(0);
     struct tm tm = *gmtime(&now);
@@ -100,6 +101,38 @@ void	Response::setDate()
     _response_content.append(date);
     _response_content.append("\r\n");
 	_m_headers["Date: "] = date;
+	return;
+
+
+	}
+	{
+	/* 
+	get current time
+	nullptr is used as an argument to indicate that the function should use 
+	the local time instead of the time from the system clock.
+	*/
+	std::time_t now = std::time(nullptr);
+
+	/* 
+	convert the now time to a std::tm structure, which represents the broken-down 
+	time in the Coordinated Universal Time (UTC) format. The * operator is used to
+	dereference the pointer returned by std::gmtime and store the result in the tm variable.
+	*/
+	std::tm tm = *std::gmtime(&now);
+	//set time to UTC + 1
+	tm.tm_hour += 1;
+
+	std::ostringstream date;
+	//used to format the tm structure into a string
+	//date << std::put_time(&tm, "%a, %d %b %Y %T %Z");
+
+	//_response_content.append("Date: ");
+	//_response_content.append(date.str());
+	//_response_content.append("\r\n");
+	//_m_headers["Date: "] = date.str();
+
+
+	}
 }
 
 bool Response::isCGIResponse() const
@@ -112,8 +145,8 @@ void Response::setHeaders()
 	setContentLength();
 	setConnection();
 	server();
+	location();
 	setDate();
-	//?location
 	_response_content.append("\r\n");
 }
 
@@ -135,16 +168,24 @@ void	Response::buildResponse()
 	//std::cerr << _response_content << std::endl;
 }
 
-std::string	Response::findLocation(std::string request_file, std::vector<Location> locations, int &index)
+void	Response::findLocation(std::string path, std::vector<Location> locations, std::string &location_key)
 {
+	size_t biggest_match = 0;
+
 	for(std::vector<Location>::const_iterator it = locations.begin(); it != locations.end(); ++it)
 	{
-		if ((strcmp(request_file.c_str(), it->getPath().c_str())) == 0)
-			return request_file;
-		index++;
+		if(path.find(it->getPath()) == 0)
+		{
+			   if( it->getPath() == "/" || path.length() == it->getPath().length() || path[it->getPath().length()] == '/')
+			   {
+					if(it->getPath().length() > biggest_match)
+					{
+						biggest_match = it->getPath().length();
+						location_key = it->getPath();
+					}
+			   }
+		}
 	}
-
-	return "";
 }
 
 bool Response::isMethodAllowed(std::string method, std::vector<std::string> allowed_methods)
@@ -169,9 +210,9 @@ bool	Response::checkIfReturn(Location &location)
 {
 	if (!location.getReturn().empty())
 	{
-		_path = location.getReturn();
-		if (_path[0] != '/')
-			_path.insert(0, 1, '/');
+		_location = location.getReturn();
+		if (_location[0] != '/')
+			_location.insert(0, 1, '/');
 		return true;
 	}
 	return false;
@@ -196,7 +237,8 @@ int Response::isClientSizeAllowed(Location &location)
 
 void Response::ErrorPage()
 {
-	_response_content = buildErrorPage(_status_code);
+	_response_content.append(buildErrorPage(_status_code));
+	_target_file = "public/content/html/error.html";
 }
 
 /*
@@ -208,14 +250,15 @@ void Response::ErrorPage()
 bool	isDirectory(std::string path)
 {
 	struct stat file_stat;
-	if (stat(path.c_str(), &file_stat) != 0)
-		return (false);
-
-	return (S_ISDIR(file_stat.st_mode));
+	if (stat(path.c_str(), &file_stat) == 0 && S_ISDIR(file_stat.st_mode))
+		return true;
+	std::cout << "PEPE\n";
+	return false;
 }
 
 /*
-The return value of this function will be true if the file/directory exists and is ready for reading, and false otherwise.
+The return value of this function will be true if the file/directory exists
+and is ready for reading, and false otherwise.
 */
 
 bool fileExists (const std::string& f)
@@ -268,139 +311,14 @@ int Response::handleCGI(const Location &location)
 	//exit(0);
     return true;
 }
-int Response::handleRequest()
-{
-	std::string	location_match;
-	int			index;
-
-	index = 0;
-	location_match = findLocation(request.getRequestFile(), _server.getLocations(), index);
-		//std::cout << "server root:" << _server.getRoot() << std::endl;
-		//std::cout << "server index:" << _server.getIndex() << std::endl;
-	if (location_match.empty())
-	{
-		_target_file = combinePaths(_server.getRoot(), request.getRequestFile(), "");
-		if (isDirectory(_target_file))
-		{
-			if (_target_file[_target_file.length() - 1] != '/')
-			{
-				//std::cerr << "AAAAA" << std::endl;
-				_status_code = 301;
-				_path = request.getRequestFile() + "/";
-				return (1);
-			}
-			if (request.getContentLength() > _server.getClientSize())
-			{
-				_status_code = 413;
-				return (1);
-			}
-			if (!(isMethodAllowed(request.getMethod(), _server.getMethods())))
-			{
-				_status_code = 405;
-				return (1);
-			}
-			_target_file += _server.getIndex();
-			if (!fileExists(_target_file))
-			{
-				_status_code = 404;
-				return (1);
-			}
-			if (isDirectory(_target_file))
-			{
-				//std::cerr << "BBBBB" << std::endl;
-				_status_code = 301;
-				_path = combinePaths(request.getRequestFile(), _server.getIndex(), "");
-				if(_path[_path.length() - 1] != '/')
-					_path.insert(_path.end(), '/');
-				return (1);
-			}
-		}
-	}
-	else
-	{
-		//std::cout << "I AM IN LOCATION BABY!" << std::endl;
-		Location	target_location = _server.getLocationsByReference(index);
-		if (!(isMethodAllowed(request.getMethod(), target_location.getMethods())))
-		{
-			_status_code = 405;
-			return (1);
-		}
-		// We check if the max client size is bigger than the lenght of the content requested
-		if (!(isClientSizeAllowed(target_location))) //?must check if metrics retrieved are the right ones
-		{
-			_status_code = 413;
-			return (1);
-		}
-		if (checkIfReturn(target_location))
-		{
-			//std::cerr << "CCCCC" << std::endl;
-			_status_code = 301;
-			return (1);
-		}
-		
-		if (target_location.getPath().find("cgi-bin") != std::string::npos)
-		{
-            return handleCGI(target_location);
-		}
-
-		//! HANDLE CGI WHEN WE HAVE THE CLASS CREATED
-
-		if (!(target_location.getAlias().empty()))
-			_target_file = combinePaths(target_location.getAlias(), request.getRequestFile().substr(target_location.getPath().length()), "");
-		else
-			_target_file = combinePaths(target_location.getRoot(), request.getRequestFile(), "");
-
-		//! HANDLE CGI TEMP WHEN WE HAVE THE CLASS CREATED
-		
-		if (isDirectory(target_location.getPath()))
-		{
-			if (_target_file[_target_file.length() - 1] != '/')
-			{
-				_path = request.getRequestFile() + "/";
-				//std::cerr << "DDDDD" << std::endl;
-				_status_code = 301;
-				return (1);
-			}
-			if (!target_location.getIndex().empty())
-				_target_file += target_location.getIndex();
-			else
-				_target_file += _server.getIndex();
-			if (!fileExists(_target_file))
-			{
-				// allows to generate a directory listing for a given location
-				if (target_location.getAutoindex())
-				{
-					_target_file.erase(_target_file.find_last_of('/') + 1);
-					_auto_index = true;
-					return (0);
-				}
-				else
-				{
-					_status_code = 404;
-					return (1);
-				}
-				if (isDirectory(_target_file))
-				{
-					//std::cerr << "EEEEE" << std::endl;
-					_status_code = 301;
-					if (!target_location.getIndex().empty())
-						_path = combinePaths(request.getRequestFile(), target_location.getIndex(), "");
-					else
-						_path = combinePaths(request.getRequestFile(), _server.getIndex(), "");
-					if (_path[_path.length() - 1] != '/')
-						_path.insert(_path.end(), '/');
-					return (1);
-				}
-			}
-		}
-	}
-	return (0);
-}
 
 int		Response::buildBody()
 {
 	if (handleRequest())
 		return (1);
+	if (_status_code)
+		return (0);
+	std::cout << "_status code" << _status_code << std::endl;
 	if (request.getMethod() == "GET")
 	{
 		if (readFile())
@@ -416,31 +334,18 @@ int		Response::buildBody()
 		std::ofstream file(_target_file.c_str(), std::ios::binary);
 		if (file.fail())
 		{
-			_status_code = 404;
+			_status_code = 403;
 			return (1);
 		}
-		/*
-			A multipart/form-data is a method of encoding data in an HTTP POST request,
-			often used when uploading files or submitting forms with binary data.
-
-			In a multi-part form request, the request body is divided into several parts,
-			each of which can contain different types of data, such as text fields, binary files.
-
-			Each part is separated by a boundary string, which is specified in the "Content-Type" header of the HTTP request.
-
-			When a server receives a multi-part form request, it can parse the request body into its individual parts, process
-			each part separately, and store the data in a suitable format, such as a file or a database.
-		*/
 		if (request.getHeaders().find("Content-Type") != request.getHeaders().end())
 		{
 			std::string content_type = request.getHeaders()["Content-Type"];
 			if (content_type.find("multipart/form-data") != std::string::npos) 
 			{
-				// This is a multipart/form-data request
 				size_t begin = content_type.find("boundary=") + 9;
 				std::string boundary = content_type.substr(begin);
 				// Use the boundary string to parse the request body
-				//parseMultiPartRequest(request.getBody(), boundary);
+				parseMultiPartRequest(request.getBody(), boundary);
 			}
 		}
 		 	//code assumes that the request is a regular request, and it simply
@@ -473,7 +378,7 @@ int		Response::buildBody()
 	return (0);
 }
 
-/*
+
 void Response::parseMultiPartRequest(const std::string& request_body, const std::string& boundary)
 {
 	std::vector<std::string> parts;
@@ -521,11 +426,11 @@ void Response::parseMultiPartRequest(const std::string& request_body, const std:
 		}
 		else
 		{
-			//std::cout << "Data: " << data << std::endl;
+			std::cout << "Data: " << data << std::endl;
 		}
 	}
 }
-*/
+
 
 std::string	Response::getResponseContent()
 {
@@ -540,4 +445,167 @@ void    Response::setRequest(Request &req)
 void     Response::setServer(Server &server)
 {
 	_server = server;
+}
+
+// This function checks if the requested file is a directory and appends a slash if needed.
+// If a slash is added, it returns 1 and sets the path variable to the new request file.
+int Response::handleDirectory(Location target_location)
+{
+	if (_target_file[_target_file.length() - 1] != '/')
+	{
+		_location = request.getRequestFile() + "/";
+		_status_code = 301;
+		return (1);
+	}
+	if (!target_location.getIndex().empty())
+		_target_file += target_location.getIndex();
+	else
+		_target_file += _server.getIndex();
+	if (!fileExists(_target_file))
+	{
+		// allows to generate a directory listing for a given location
+		if (target_location.getAutoindex())
+		{
+			_target_file.erase(_target_file.find_last_of('/') + 1);
+			_auto_index = true;
+			return (0);
+		}
+		else
+				{
+			_status_code = 404;
+					return (1);
+		}
+		if (isDirectory(_target_file))
+		{
+			_status_code = 301;
+			if (!target_location.getIndex().empty())
+				_location = combinePaths(request.getRequestFile(), target_location.getIndex(), "");
+			else
+				_location = combinePaths(request.getRequestFile(), _server.getIndex(), "");
+			if (_location[_location.length() - 1] != '/')
+				_location.insert(_location.end(), '/');
+			return (1);
+		}
+	}
+	return 0;
+}
+
+// This function handles the case where the requested file is not matched by a location.
+// It sets the target file to the path combined with the server root and calls handleDirectory.
+int Response::handleNoMatch() 
+{
+	std::cout << std::endl;
+	std::cout << "\033[33m" << "SERVER" << "\033[0m" << std::endl;
+	_target_file = combinePaths(_server.getRoot(), request.getRequestFile(), "");
+	if (isDirectory(_target_file))
+	{
+		if (_target_file[_target_file.length() - 1] != '/')
+		{
+			_status_code = 301;
+			_location = request.getRequestFile() + "/";
+			return 1;
+		}
+		_target_file += _server.getIndex();
+		// if there is not index on this directory...
+		if (!fileExists(_target_file))
+		{
+			_status_code = 404;
+			return 1;
+		}
+		// if the index specified for this directory is another directory...
+		if (isDirectory(_target_file))
+		{
+			_status_code = 301;
+			_location = combinePaths(request.getRequestFile(), _server.getIndex(), "");
+			if(_location[_location.length() - 1] != '/')
+				_location.insert(_location.end(), '/');
+			return 1;
+		}
+	}
+	return (0);
+}
+
+Location	Response::findLocation(std::string target_location, std::vector<Location> locations)
+{
+	for(std::vector<Location>::const_iterator it = locations.begin(); it != locations.end(); ++it)
+	{
+		if ((strcmp(target_location.c_str(), it->getPath().c_str())) == 0)
+			return *it;
+	}
+	return Location();
+}
+
+// This function handles the case where the requested file is matched by a location.
+// It sets the target file to the path combined with the location root or alias, depending on which is specified.
+// It then calls handleDirectory.
+int Response::handleMatch(std::string location)
+{
+	std::cout << std::endl;
+	std::cout << "\033[38;5;205mLOCATION\033[0m" << std::endl;
+	Location target_location = findLocation(location, _server.getLocations());
+	if (!(isMethodAllowed(request.getMethod(), target_location.getMethods()))) {
+		_status_code = 405;
+		return 1;
+	}
+	if (!(isClientSizeAllowed(target_location))) {
+		_status_code = 413;
+		return 1;
+	}
+	if (checkIfReturn(target_location)) {
+		_status_code = 301;
+		return 1;
+	}
+
+		if (target_location.getPath().find("cgi-bin") != std::string::npos)
+		{
+            return handleCGI(target_location);
+		}
+	//! HANDLE CGI
+
+		if (!(target_location.getAlias().empty()))
+			_target_file = combinePaths(target_location.getAlias(), request.getRequestFile().substr(target_location.getPath().length()), "");
+		else
+		{
+			if(!target_location.getRoot().empty())
+				_target_file = combinePaths(target_location.getRoot(), request.getRequestFile(), "");
+			else
+				_target_file = combinePaths(_server.getRoot(), request.getRequestFile(), "");
+		}
+		
+
+	//! HANDLE CGI
+
+			std::cout << "target fileEEeee: " << _target_file << std::endl;
+	if (isDirectory(target_location.getPath()))
+		return (handleDirectory(target_location));
+	return (0);
+}
+
+// This is the main function that handles a request.
+// It first tries to find a matching location and calls handleMatch or handleNoMatch depending on the result.
+// It returns 0 on success, 1 on failure.
+int Response::handleRequest() 
+{
+	std::string location_match;
+	int index;
+	index = 0;
+	std::cout << "match: "  << std::endl;
+
+	findLocation(request.getRequestFile(), _server.getLocations(), location_match);
+	std::cout << "match: " << location_match << std::endl;
+	if (location_match.empty())
+		return handleNoMatch();
+	else
+		return handleMatch(location_match);
+}
+
+int Response::getStatusCode()
+{
+	return _status_code;
+}
+
+void 	Response::location()
+{
+	if (_location.length())
+		_response_content.append("Location: "+ _location +"\r\n");
 }

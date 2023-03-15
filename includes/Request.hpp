@@ -26,9 +26,9 @@ class Request
 		~Request();
 
 		//Parseo
-		int parseHeaders(std::string& request);
+		bool parseHeaders(std::string& request);
 		int	parseBody();
-		void 								parseRequest(std::string request);
+		bool 								parseRequest(std::string request);
 		
 		//Getters
 		int									getClientFd(void) const;

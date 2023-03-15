@@ -20,6 +20,8 @@ int Client::getClientFd() const
 
 void    Client::buildResponse()
 {
+	//std::cerr << "build Body" << std::endl;
+
     response.setRequest(this->request);
     response.buildResponse();
 

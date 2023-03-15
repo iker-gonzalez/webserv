@@ -168,7 +168,7 @@ void CGI::createCGIEnvironment(const Request &ar_request, const Location& ar_loc
    //this->_m_env["SCRIPT_FILENAME"] = cgi_executable;
    //this->_m_env["REQUEST_URI"] = ar_request.getRequestFile();//
 
-    //std::cerr << "-----REQUESTT----" << std::endl;
+   // std::cerr << "-----REQUESTT----" << std::endl;
     //std::cerr << ar_request << std::endl;
 
     if (ar_request.getMethod() == "GET")
@@ -210,7 +210,7 @@ void CGI::prepareArgForExecve()
     for ( it = _m_env.begin(); it != it_end; it++ )
     {
         std::string env_varible = (*it).first + "=" + (*it).second;
-      //  std::cout << "ENV_var: " << env_varible << std::endl;
+ //       std::cout << "ENV_var: " << env_varible << std::endl;
         _env_char[i] = strdup(env_varible.c_str());
 
         i++;
