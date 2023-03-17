@@ -25,7 +25,7 @@ bool splitString(std::string& aline, std::string character, std::vector<std::str
 		it++;
 	for (it; it != aline.end(); ++it)
 	{
-		if (*it != ' ')
+		if (*it != character[0] )
 			create_line += *it;
 		else
 		{
@@ -192,7 +192,7 @@ std::string getStatusMessage(int statusCode)
 
 bool errorMessage(const std::string message)
 {
-	//std::cout << message << std::endl;
+	std::cout << message << std::endl;
 	return false;
 }
 

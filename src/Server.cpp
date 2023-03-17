@@ -134,7 +134,7 @@ bool Server::setupServer(void)
 	memset(&addr, 0, sizeof(addr));
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(_port);
-	inet_pton(AF_INET, "127.0.0.1", &(addr.sin_addr)); //? 0)
+	inet_pton(AF_INET, _address.c_str(), &(addr.sin_addr)); //? 0)
 
 	//? 1)addr.sin_addr.s_addr = inet_addr(_address.data());
 

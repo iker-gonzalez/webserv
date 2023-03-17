@@ -12,6 +12,7 @@
 #include "sys/stat.h"
 #include "Request.hpp"
 #include "Server.hpp"
+#include "CGI.hpp"
 
 #define DEFAULT_CLIENT_MAX_BODY_SIZE 1000000
 
@@ -20,13 +21,16 @@ class Response {
 private:
 
 	Server									_server;
+	CGI										_CGI_response;
 	std::map<std::string, std::string>		_m_headers;
 	std::string								_response_content;
 	int										_status_code;
 	std::string								_response_body;
+	std::string								_path;
 	std::string								_location;
 	std::string								_target_file;
 	bool									_auto_index;
+	bool									_isCGIResponse;
 
 public:
 
@@ -39,6 +43,8 @@ public:
 	void		buildResponse();
 	int			buildBody();
 	int			readFile();
+
+	// Setters
 	void		setRequest(Request &req);
 	void		setStatusLine();
 	void		setHeaders();
@@ -47,6 +53,15 @@ public:
 	void		setConnection();
 	void		server();
 	void		setDate();
+
+	//IS
+	bool		isCGIResponse() const;
+
+	//Getters
+	std::string	getPath() const;
+	CGI			getCGIResponse() const;
+
+	int 		handleCGI(const Location &location);
 	int			handleRequest();
 	void		findLocation(std::string path, std::vector<Location> locations, std::string &location_key);
 	bool		isMethodAllowed(std::string method, std::vector<std::string> allowed_methods);
