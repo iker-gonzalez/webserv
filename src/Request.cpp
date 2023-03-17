@@ -24,10 +24,6 @@ bool Request::parseHeaders(std::string& request)
 	int k;
 	int j;
 
-	//std::cout << "****REQUEST NOT PARSED (STRING)****" << std::endl;
-	//std::cout << "-----------------------------------" << std::endl;
-	//std::cout << request << std::endl;
-	//std::cout << "-----------------------------------" << std::endl;
 	i = request.find_first_of(" ", 0);
 	_method = request.substr(0, i);
 	if (_method != "GET" && _method != "POST" && _method != "DELETE")
@@ -60,11 +56,11 @@ bool Request::parseHeaders(std::string& request)
 	_port = std::atoi(v_host[1].c_str());
 
 	//print map content
-	//std::cout << "*******REQUEST PARSED (MAP)********" << std::endl;
-	//std::cout << "-----------------------------------" << std::endl;
+	std::cout << "*******REQUEST PARSED (MAP)********" << std::endl;
+	std::cout << "-----------------------------------" << std::endl;
 	std::map<std::string, std::string>::iterator it;
    	for (it = _m_headers.begin(); it != _m_headers.end(); ++it) {
-	   	//std::cout << it->first << it->second << std::endl;
+	   	std::cout << it->first << it->second << std::endl;
    }
 	return true;
 }
@@ -231,6 +227,11 @@ bool Request::parseRequest(std::string request)
 std::string     Request::getServerName() const
 {
     return (this->_serverName);
+}
+
+std::string Request::getHeader(std::string const &name)
+{
+    return (_m_headers[name]);
 }
 
 std::ostream &operator<<(std::ostream &ors, const Request &a_request)

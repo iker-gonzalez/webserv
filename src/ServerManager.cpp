@@ -116,8 +116,9 @@ bool ServerManager::sendResponse(int fdToSend, Client &ar_client)
 	int bytes_sent;
 
 	std::string response_content = ar_client.response.getResponseContent();
-	// "response content:" << std::endl;
-	//std::cout <<	std::cout << response_content << std::endl;
+	std::cout << "response content:\n" << response_content << std::endl;
+	std::cout << "\033[38;2;255;165;0m_status code\033[0m: " << ar_client.response.getStatusCode() << std::endl;
+
 	bytes_sent = write(fdToSend, ar_client.response.getResponseContent().c_str(), ar_client.response.getResponseContent().length());
 	closeFd(fdToSend);
 	//if (bytes_sent < 0 )
@@ -259,7 +260,7 @@ bool ServerManager::readRequest(Client &a_client)
 		std::cerr << "Error receiving data" << std::endl;
 		return false;
 	}
-	std::cerr << "PARSE REQUEST" << std::endl;
+	std::cerr << "\033[32mNEW REQUEST PARSED\033[0m" << std::endl;
 	_s_buffer = buffer;
 
 	std::cerr << _s_buffer << std::endl;

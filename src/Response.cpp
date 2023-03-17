@@ -73,12 +73,11 @@ void	Response::setContentLength()
 
 void	Response::setConnection()
 {
-	if(request.getHeaders()["Connection: "] == "keep-alive")
-	{
-		_response_content.append("Connection: keep-alive\r\n");
-		_m_headers["Connection: "] = "keep-alive";
-	}
-
+		if (((request.getHeader("Connection:")).find("keep-alive")) != std::string::npos)
+		{
+			_response_content.append("Connection: keep-alive\r\n");
+			//_m_headers["Connection: "] = "keep-alive";
+		}
 }
 
 void	Response::server()
@@ -158,8 +157,8 @@ void	Response::buildResponse()
 		setStatusLine();
 	if (!_isCGIResponse)
 		setHeaders();
-	if (error && !_isCGIResponse) //??Siempre que sale CGI entra en error asique he tenido que poner esta condicion
-		ErrorPage();
+	//if (error && !_isCGIResponse) //??Siempre que sale CGI entra en error asique he tenido que poner esta condicion
+	//	ErrorPage();
 	
 	if (request.getMethod() == "GET")
 	{
@@ -176,14 +175,14 @@ void	Response::findLocation(std::string path, std::vector<Location> locations, s
 	{
 		if(path.find(it->getPath()) == 0)
 		{
-			   if( it->getPath() == "/" || path.length() == it->getPath().length() || path[it->getPath().length()] == '/')
-			   {
-					if(it->getPath().length() > biggest_match)
-					{
-						biggest_match = it->getPath().length();
-						location_key = it->getPath();
-					}
-			   }
+			if( it->getPath() == "/" || path.length() == it->getPath().length() || path[it->getPath().length()] == '/')
+			{
+				if(it->getPath().length() > biggest_match)
+				{
+					biggest_match = it->getPath().length();
+					location_key = it->getPath();
+				}
+			}
 		}
 	}
 }
@@ -211,8 +210,8 @@ bool	Response::checkIfReturn(Location &location)
 	if (!location.getReturn().empty())
 	{
 		_location = location.getReturn();
-		if (_location[0] != '/')
-			_location.insert(0, 1, '/');
+		//if (_location[0] != '/')
+		//	_location.insert(0, 1, '/');
 		return true;
 	}
 	return false;
@@ -317,7 +316,6 @@ int		Response::buildBody()
 		return (1);
 	if (_status_code)
 		return (0);
-	std::cout << "_status code" << _status_code << std::endl;
 	if (request.getMethod() == "GET")
 	{
 		if (readFile())
@@ -325,27 +323,29 @@ int		Response::buildBody()
 	}
 	else if (request.getMethod() == "POST")
 	{
+		std::cout << "TARGEEEEEET:\n" << _target_file << std::endl;
+		/*
 		if (fileExists(_target_file))
 		{
 			_status_code = 204;
 			return (0);
 		}
+		*/
 		std::ofstream file(_target_file.c_str(), std::ios::binary);
 		if (file.fail())
 		{
 			_status_code = 403;
 			return (1);
 		}
-		if (request.getHeaders().find("Content-Type") != request.getHeaders().end())
+		std::cout << "CONTENTO VALUE:" << request.getHeader("Content-Type:") << std::endl;
+		if (((request.getHeader("Content-Type:")).find("multipart/form-data")) != std::string::npos)
 		{
-			std::string content_type = request.getHeaders()["Content-Type"];
-			if (content_type.find("multipart/form-data") != std::string::npos) 
-			{
+				std::string content_type = request.getHeader("Content-Type:");
+				std::cout << "MULTIIIIIIIII\n";
 				size_t begin = content_type.find("boundary=") + 9;
 				std::string boundary = content_type.substr(begin);
 				// Use the boundary string to parse the request body
 				parseMultiPartRequest(request.getBody(), boundary);
-			}
 		}
 		 	//code assumes that the request is a regular request, and it simply
 			//writes the body of the request to the file
@@ -383,6 +383,9 @@ void Response::parseMultiPartRequest(const std::string& request_body, const std:
 	std::vector<std::string> parts;
 	size_t pos = 0;
 
+	std::cout << "PARSEAMOS MULTIII VAMOSSS" << std::endl;
+	std::cout << request_body << std::endl;
+	std::cout << "boundary: "<< boundary << std::endl;
 	// split the request body into parts based on the boundary
 	while ((pos = request_body.find(boundary, pos)) != std::string::npos)
 	{
@@ -452,9 +455,7 @@ int Response::handleDirectory(Location target_location)
 {
 	if (_target_file[_target_file.length() - 1] != '/')
 	{
-		std::cout << "HOLALA\n";
 		_location = request.getRequestFile() + "/";
-		std::cout << _location << std::endl;
 		_status_code = 301;
 		return (1);
 	}
@@ -462,6 +463,7 @@ int Response::handleDirectory(Location target_location)
 		_target_file += target_location.getIndex();
 	else
 		_target_file += _server.getIndex();
+	std::cout << "target file 2:" << _target_file << std::endl;
 	if (!fileExists(_target_file))
 	{
 		// allows to generate a directory listing for a given location
@@ -500,33 +502,41 @@ int Response::handleNoMatch()
 	_target_file = combinePaths(_server.getRoot(), request.getRequestFile(), "");
 	if (isDirectory(_target_file))
 	{
+		std::cout << "is directoryyy\n";
+		std::cout << "target file:" << _target_file << std::endl;
 		if (_target_file[_target_file.length() - 1] != '/')
 		{
+			std::cout << "redirect\n";
 			_status_code = 301;
 			_location = request.getRequestFile() + "/";
+			std::cout << "location:" << _location << std::endl;
 			return 1;
 		}
 		_target_file += _server.getIndex();
 		// if there is not index on this directory...
 		if (!fileExists(_target_file))
 		{
+			std::cout << "\033[31mError: Directory requested and not index for it: \033[0m" << _target_file << std::endl;
 			_status_code = 404;
 			return 1;
 		}
 		// if the index specified for this directory is another directory...
 		if (isDirectory(_target_file))
 		{
+			std::cout << "\033[31mRedirection: Directory requested and index is another directory: \033[0m" << _target_file << std::endl;
 			_status_code = 301;
 			_location = combinePaths(request.getRequestFile(), _server.getIndex(), "");
 			if(_location[_location.length() - 1] != '/')
 				_location.insert(_location.end(), '/');
+			std::cout << "\033[31mRedirected to: \033[0m" << _location << std::endl;
+			
 			return 1;
 		}
 	}
 	return (0);
 }
 
-Location	Response::findLocation(std::string target_location, std::vector<Location> locations)
+Location	Response::findLocationByName(std::string target_location, std::vector<Location> locations)
 {
 	for(std::vector<Location>::const_iterator it = locations.begin(); it != locations.end(); ++it)
 	{
@@ -543,7 +553,7 @@ int Response::handleMatch(std::string location)
 {
 	std::cout << std::endl;
 	std::cout << "\033[38;5;205mLOCATION\033[0m" << std::endl;
-	Location target_location = findLocation(location, _server.getLocations());
+	Location target_location = findLocationByName(location, _server.getLocations());
 	if (!(isMethodAllowed(request.getMethod(), target_location.getMethods()))) {
 		_status_code = 405;
 		return 1;
@@ -553,6 +563,7 @@ int Response::handleMatch(std::string location)
 		return 1;
 	}
 	if (checkIfReturn(target_location)) {
+		std::cout << "RETURN\n";
 		_status_code = 301;
 		return 1;
 	}
@@ -572,15 +583,13 @@ int Response::handleMatch(std::string location)
 			else
 				_target_file = combinePaths(_server.getRoot(), request.getRequestFile(), "");
 		}
+		std::cout << "target file: " << _target_file << std::endl;
 		
 
 	//! HANDLE CGI
 
-			std::cout << "target fileEEeee: " << _target_file << std::endl;
-			std::cout << "target path: " << target_location.getPath() << std::endl;
-	if (isDirectory(_target_file))
+	if (isDirectory(_target_file) && request.getMethod() != "POST")
 	{
-			std::cout << "PEPEE " << _target_file << std::endl;
 		return (handleDirectory(target_location));
 	}
 	return (0);
@@ -594,10 +603,7 @@ int Response::handleRequest()
 	std::string location_match;
 	int index;
 	index = 0;
-	std::cout << "match: "  << std::endl;
-
 	findLocation(request.getRequestFile(), _server.getLocations(), location_match);
-	std::cout << "match: " << location_match << std::endl;
 	if (location_match.empty())
 		return handleNoMatch();
 	else
@@ -611,10 +617,9 @@ int Response::getStatusCode()
 
 void 	Response::location()
 {
-	std::cout << "LOC:" << _location << std::endl;
+	std::cout << "location: " << _location << std::endl;
 	if (_location.length())
 	{
-		std::cout << "pepecdsc\n"; 
 		_response_content.append("Location: "+ _location +"\r\n");
 		_m_headers["Location: "] = _location;
 	}

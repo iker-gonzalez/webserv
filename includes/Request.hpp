@@ -40,6 +40,8 @@ class Request
 		std::string							parseChunkedBody() const;
 		std::string							getServerName() const;
 		int									getPort() const;
+		std::string 						getHeader(std::string const &name);
+
 };
 std::ostream& operator<<(std::ostream& ors, const Request& a_request);
 

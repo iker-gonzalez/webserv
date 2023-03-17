@@ -79,7 +79,7 @@ public:
 	int 		handleDirectory(Location target_location);
 	int 		getStatusCode();
 	void 		location();
-	Location	findLocation(std::string request_file, std::vector<Location> locations);
+	Location	findLocationByName(std::string request_file, std::vector<Location> locations);
 
 
 
