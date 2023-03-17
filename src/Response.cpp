@@ -218,10 +218,9 @@ void Response::ErrorPage()
 bool	isDirectory(std::string path)
 {
 	struct stat file_stat;
-	if (stat(path.c_str(), &file_stat) == 0 && S_ISDIR(file_stat.st_mode))
-		return true;
-	std::cout << "PEPE\n";
-	return false;
+	if (stat(path.c_str(), &file_stat) != 0)
+		return (false);
+	return (S_ISDIR(file_stat.st_mode));
 }
 
 /*
@@ -392,7 +391,9 @@ int Response::handleDirectory(Location target_location)
 {
 	if (_target_file[_target_file.length() - 1] != '/')
 	{
+		std::cout << "HOLALA\n";
 		_location = request.getRequestFile() + "/";
+		std::cout << _location << std::endl;
 		_status_code = 301;
 		return (1);
 	}
@@ -511,8 +512,12 @@ int Response::handleMatch(std::string location)
 	//! HANDLE CGI
 
 			std::cout << "target fileEEeee: " << _target_file << std::endl;
-	if (isDirectory(target_location.getPath()))
+			std::cout << "target path: " << target_location.getPath() << std::endl;
+	if (isDirectory(_target_file))
+	{
+			std::cout << "PEPEE " << _target_file << std::endl;
 		return (handleDirectory(target_location));
+	}
 	return (0);
 }
 
@@ -539,6 +544,11 @@ int Response::getStatusCode()
 
 void 	Response::location()
 {
+	std::cout << "LOC:" << _location << std::endl;
 	if (_location.length())
+	{
+		std::cout << "pepecdsc\n"; 
 		_response_content.append("Location: "+ _location +"\r\n");
+		_m_headers["Location: "] = _location;
+	}
 }
