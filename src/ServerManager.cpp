@@ -264,7 +264,7 @@ bool ServerManager::readRequest(Client &a_client)
 	_s_buffer = buffer;
 
 	std::cerr << _s_buffer << std::endl;
-	if (!a_client.request.parseRequest(_s_buffer))
+	if (!a_client.request.parseRequest(_s_buffer, a_client.getClientFd()))
 	{
 	removeFdSet(a_client.getClientFd() ,_read_fds);
 		return true;

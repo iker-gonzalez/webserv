@@ -17,6 +17,7 @@ public:
 	//***********Parseo**********
 	bool fillSpecificInfo(std::vector<std::string>& a_v_strSplit);
 	void pushBackLocation(Location& a_location);
+	int getMaxPayloadSize(int sock);
 
 	//Check
 	bool checkServerName(const std::string& aserver_name);

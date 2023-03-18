@@ -27,8 +27,9 @@ class Request
 
 		//Parseo
 		bool parseHeaders(std::string& request);
-		int	parseBody();
-		bool 								parseRequest(std::string request);
+		int	parseBody(int client_fd);
+		std::string							parseChunkedBody(int client_fd) const;
+		bool 								parseRequest(std::string request, int client_fd);
 		
 		//Getters
 		int									getClientFd(void) const;
@@ -37,7 +38,6 @@ class Request
 		std::string							getBody(void) const;
 		std::map<std::string, std::string>	getHeaders(void) const;
 		size_t								getContentLength(void) const;
-		std::string							parseChunkedBody() const;
 		std::string							getServerName() const;
 		int									getPort() const;
 		std::string 						getHeader(std::string const &name);

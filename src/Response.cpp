@@ -53,10 +53,11 @@ int		Response::readFile()
 
 void	Response::setContentType()
 {
-	//! This should be set dynamically based on the extension of the resource requested
+	std::string file_extension = _target_file.substr(_target_file.find_last_of(".") + 1);
+	std::string content_type = get_content_type(file_extension);
 	_response_content.append("Content-Type: ");
-	_response_content.append("text/html"); //? should any other content type different from html be considered?
-	_m_headers["Content-Type: "] = "text/html";
+	_response_content.append(content_type);
+	_m_headers["Content-Type: "] = content_type;
 	_response_content.append("\r\n");
 }
 
@@ -76,7 +77,7 @@ void	Response::setConnection()
 		if (((request.getHeader("Connection:")).find("keep-alive")) != std::string::npos)
 		{
 			_response_content.append("Connection: keep-alive\r\n");
-			//_m_headers["Connection: "] = "keep-alive";
+			_m_headers["Connection: "] = "keep-alive";
 		}
 }
 
@@ -92,13 +93,13 @@ void	Response::server()
 void	Response::setDate()
 {   
 		{ 
-    char date[1000];
-    time_t now = time(0);
-    struct tm tm = *gmtime(&now);
-    strftime(date, sizeof(date), "%a, %d %b %Y %H:%M:%S %Z", &tm);
-    _response_content.append("Date: ");
-    _response_content.append(date);
-    _response_content.append("\r\n");
+	char date[1000];
+	time_t now = time(0);
+	struct tm tm = *gmtime(&now);
+	strftime(date, sizeof(date), "%a, %d %b %Y %H:%M:%S %Z", &tm);
+	_response_content.append("Date: ");
+	_response_content.append(date);
+	_response_content.append("\r\n");
 	_m_headers["Date: "] = date;
 	return;
 
@@ -136,7 +137,7 @@ void	Response::setDate()
 
 bool Response::isCGIResponse() const
 {
-    return _isCGIResponse;
+	return _isCGIResponse;
 }
 void Response::setHeaders()
 {
@@ -219,18 +220,31 @@ bool	Response::checkIfReturn(Location &location)
 
 int Response::isClientSizeAllowed(Location &location)
 {
+	std::cout << "check 1\n";
 	if (!(location.getClientSize()))
 	{
+		std::cout << "check 2\n";
+
 		if (_server.getClientSize())
 		{
+					std::cout << "check 3\n";
+			std::cout << "request content lenght: " << request.getContentLength() << std::endl;
+			std::cout << "server client size: " << _server.getClientSize() << std::endl;
 			if (request.getContentLength() < _server.getClientSize())
 				return true;
 		}
+					std::cout << "check 4\n";
+
 		if (request.getContentLength() < DEFAULT_CLIENT_MAX_BODY_SIZE)
 			return true;
+					std::cout << "check 5\n";
+
 	}
-	if (request.getContentLength() < location.getClientSize())
-		return true;
+	else
+	{
+		if(request.getContentLength() < location.getClientSize())
+			return true;
+	}
 	return false;
 }
 
@@ -285,12 +299,12 @@ std::string combinePaths(std::string str1, std::string str2, std::string str3)
 
 std::string Response::getPath() const
 {
-    return _path;
+	return _path;
 }
 
 CGI Response::getCGIResponse() const
 {
-    return _CGI_response;
+	return _CGI_response;
 }
 int Response::handleCGI(const Location &location)
 {
@@ -307,7 +321,7 @@ int Response::handleCGI(const Location &location)
 
 
 	//exit(0);
-    return true;
+	return true;
 }
 
 int		Response::buildBody()
@@ -324,26 +338,24 @@ int		Response::buildBody()
 	else if (request.getMethod() == "POST")
 	{
 		std::cout << "TARGEEEEEET:\n" << _target_file << std::endl;
-		/*
 		if (fileExists(_target_file))
 		{
 			_status_code = 204;
 			return (0);
 		}
-		*/
 		std::ofstream file(_target_file.c_str(), std::ios::binary);
 		if (file.fail())
 		{
 			_status_code = 403;
 			return (1);
 		}
-		std::cout << "CONTENTO VALUE:" << request.getHeader("Content-Type:") << std::endl;
 		if (((request.getHeader("Content-Type:")).find("multipart/form-data")) != std::string::npos)
 		{
 				std::string content_type = request.getHeader("Content-Type:");
 				std::cout << "MULTIIIIIIIII\n";
 				size_t begin = content_type.find("boundary=") + 9;
 				std::string boundary = content_type.substr(begin);
+				std::cout << "boundary: " << boundary << std::endl;
 				// Use the boundary string to parse the request body
 				parseMultiPartRequest(request.getBody(), boundary);
 		}
@@ -570,7 +582,7 @@ int Response::handleMatch(std::string location)
 
 		if (target_location.getPath().find("cgi-bin") != std::string::npos)
 		{
-            return handleCGI(target_location);
+			return handleCGI(target_location);
 		}
 	//! HANDLE CGI
 
@@ -624,3 +636,26 @@ void 	Response::location()
 		_m_headers["Location: "] = _location;
 	}
 }
+
+std::string		Response::get_content_type(std::string file_extension)
+{
+	if (file_extension == "html" || file_extension == "htm")
+		return "text/html";
+	else if (file_extension == "json")
+		return "application/json";
+	else if (file_extension == "xml")
+		return "application/xml";
+	else if (file_extension == "png")
+		return "image/png";
+	else if (file_extension == "jpeg" || file_extension == "jpg")
+		return "image/jpeg";
+	else if (file_extension == "gif")
+		return "image/gif";
+	else if (file_extension == "pdf")
+		return "application/pdf";
+	else if (file_extension == "txt")
+		return "text/plain";
+	else
+		return "application/octet-stream";
+}
+

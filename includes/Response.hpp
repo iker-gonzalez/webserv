@@ -14,7 +14,7 @@
 #include "Server.hpp"
 #include "CGI.hpp"
 
-#define DEFAULT_CLIENT_MAX_BODY_SIZE 1000000
+#define DEFAULT_CLIENT_MAX_BODY_SIZE 20000
 
 class Response {
 
@@ -80,6 +80,8 @@ public:
 	int 		getStatusCode();
 	void 		location();
 	Location	findLocationByName(std::string request_file, std::vector<Location> locations);
+	std::string	get_content_type(std::string file_extension);
+
 
 
 

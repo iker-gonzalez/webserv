@@ -4,6 +4,7 @@
 #include <fcntl.h>					// for fcntl
 #include <arpa/inet.h>				// for htons
 #include <netinet/in.h>				// for sockaddr_in
+#include <netinet/tcp.h>			// for TCP_MAXSEG macro
 #include <cstdlib>					// for std::atoi 
 #include "../includes/Server.hpp"
 #include <cstring>
@@ -109,28 +110,30 @@ bool Server::setupServer(void)
 		std::cerr << "Error creating socket" << std::endl;
 		return false;
 	}
+
+	int max_payload = getMaxPayloadSize(_listen_fd);
 	// Set the socket to non-blocking mode
 	/*
 		The program sets the socket to non-blocking mode using the fcntl function,
 		it retrieves the current flags using F_GETFL and then sets the O_NONBLOCK flag using F_SETFL
 	*/
-    //! Opcion 1
+	//! Opcion 1
 	 int option_value = 1;
-    setsockopt(_listen_fd, SOL_SOCKET, SO_REUSEADDR, &option_value, sizeof(int));
+	setsockopt(_listen_fd, SOL_SOCKET, SO_REUSEADDR, &option_value, sizeof(int));
 	
-    //! Opcion 2
+	//! Opcion 2
 //	int flags = fcntl(_listen_fd, F_GETFL, 0);
 //	fcntl(_listen_fd, F_SETFL, flags | O_NONBLOCK);
 //	fcntl(_listen_fd, F_SETFL, O_NONBLOCK) ;
 //	
 
-    // Bind the socket to an address and port
+	// Bind the socket to an address and port
 	/*
 		The program binds the socket to an address and port using the bind function,
 		it creates a sockaddr_in struct and sets the address family, IP address and port number.
 	*/
 
-    struct sockaddr_in addr;
+	struct sockaddr_in addr;
 	memset(&addr, 0, sizeof(addr));
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(_port);
@@ -146,7 +149,7 @@ bool Server::setupServer(void)
 	
 	//char buf[INET_ADDRSTRLEN];
 	//std::string host_string = "127.0.0.1";
-    //inet_ntop(AF_INET, &host, buf, INET_ADDRSTRLEN);
+	//inet_ntop(AF_INET, &host, buf, INET_ADDRSTRLEN);
 	//std::cout << "listen" << _listen_fd << std::endl;
 	int status_bind = bind(_listen_fd, (struct sockaddr *)&addr, sizeof(addr));;
 	if (status_bind < 0) 
@@ -157,31 +160,47 @@ bool Server::setupServer(void)
 	}
 	std::cerr << "Bind status: "<<  status_bind <<  std::endl;
 	
-    return true;
+	return true;
 }
+
+int Server::getMaxPayloadSize(int sock) 
+{
+	int tcp_maxseg = TCP_MAXSEG;
+	int max_payload_size;
+	socklen_t len = sizeof(max_payload_size);
+	int ret = getsockopt(sock, IPPROTO_TCP, tcp_maxseg, &max_payload_size, &len);
+	if (ret < 0) {
+		std::cout << "ERRROR GARRRAFAL\n";
+		// error handling
+		return -1;
+	}
+	std::cout << "MAX_PAYLOAD_SIZE: " << max_payload_size << std::endl;
+	return max_payload_size;
+}
+
 bool Server::createSocket(void)
 {
-    return false;
+	return false;
 }
 bool Server::nonBlokingSocket(void)
 {
-    return false;
+	return false;
 }
 bool Server::bindSocket(void)
 {
-    return false;
+	return false;
 }
 int Server::getPort() const
 {
-    return _port;
+	return _port;
 }
 int Server::getListenFd() const
 {
-    return _listen_fd;
+	return _listen_fd;
 }
 std::string Server::getAddress() const
 {
-    return _address;
+	return _address;
 }
 std::vector<Location> Server::getLocations() const
 {
@@ -189,7 +208,7 @@ std::vector<Location> Server::getLocations() const
 }
 std::string Server::getServerName() const
 {
-    return _server_name;
+	return _server_name;
 }
 
 Location& Server::getLocationsByReference(int nbr_localitaion)
@@ -198,7 +217,7 @@ Location& Server::getLocationsByReference(int nbr_localitaion)
 }
 void Server::setServerName(const std::string& aserver_name)
 {
-	_server_name = _server_name;
+	_server_name = aserver_name;
 }
 bool Server::isPort() const
 {

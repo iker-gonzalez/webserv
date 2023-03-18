@@ -66,39 +66,34 @@ bool Request::parseHeaders(std::string& request)
 }
 
 	
-int	Request::parseBody() 
+int	Request::parseBody(int client_fd) 
 {
+	std::cout << "PARSING BODY!\n";
 	// parse the content length or check if chunked encoding is used
-	int content_length = -1;
 	bool is_chunked = false;
-	if (_m_headers.find("Content-Length") != _m_headers.end())
-	{
-		content_length = atoi(_m_headers["Content-Length"].c_str());
-	}
-	else if (_m_headers.find("Transfer-Encoding") != _m_headers.end() &&
-			   _m_headers["Transfer-Encoding"] == "chunked")
+	_content_length = atoi(_m_headers["Content-Length:"].c_str());
+	if (_m_headers.find("Transfer-Encoding:") != _m_headers.end() &&
+			   _m_headers["Transfer-Encoding:"] == "chunked")
 	{
 		is_chunked = true;
 	}
-
 	// read the request body into a buffer
 	std::string body_str;
 	if (is_chunked)
 	{
-		body_str = parseChunkedBody();
+		body_str = parseChunkedBody(client_fd);
 	}
 	else 
 	{
 		char buffer[1024];
-		int bytes_left = content_length;
-		//std::cout << "content-length:" << content_length << std::endl;
+		int bytes_left = _content_length;
 		while (bytes_left > 0)
 		{
-			int bytes_read = recv(getClientFd(), buffer, std::min(bytes_left, 1024), 0);
+			int bytes_read = recv(client_fd, buffer, std::min(bytes_left, 1024), 0);
 			// handle error
 			if (bytes_read < 0)
 			{
-				std::cerr << "Error receiving data" << std::endl;
+				std::cerr << "Error receiving dataAA" << std::endl;
 				return (1);
 			}
 			else
@@ -113,9 +108,9 @@ int	Request::parseBody()
 		
 	// store the request body in the member variable
 	_request_body = body_str;
-	//std::cout << "REQUEST BODY" << std::endl;
-	//std::cout << "------------" << std::endl;
-	//std::cout << _request_body << std::endl;
+	std::cout << "REQUEST BODY" << std::endl;
+	std::cout << "------------" << std::endl;
+	std::cout << _request_body << std::endl;
 	return 0;
 }
 
@@ -149,7 +144,7 @@ std::string Request::getBody(void) const
 	return _request_body;
 }
 
-std::string Request::parseChunkedBody() const
+std::string Request::parseChunkedBody(int client_fd) const
 {
 	std::string body_str;
 	char buffer[1024];
@@ -160,7 +155,7 @@ std::string Request::parseChunkedBody() const
 		std::string chunk_size_str;
 		int chunk_size;
 		while (true) {
-			int bytes_read = recv(getClientFd(), buffer, 1, 0);
+			int bytes_read = recv(client_fd, buffer, 1, 0);
 			// handle error
 			if (bytes_read < 0)
 			{
@@ -182,7 +177,7 @@ std::string Request::parseChunkedBody() const
 		// read the chunk data
 		bytes_left = chunk_size;
 		while (bytes_left > 0) {
-			int bytes_read = recv(getClientFd(), buffer, std::min(bytes_left, 1024), 0);
+			int bytes_read = recv(client_fd, buffer, std::min(bytes_left, 1024), 0);
 			// handle error
 			if (bytes_read < 0)
 			{
@@ -195,7 +190,7 @@ std::string Request::parseChunkedBody() const
 
 		// skip the chunk extension and trailing CRLF
 		while (true) {
-			int bytes_read = recv(getClientFd(), buffer, 1, 0);
+			int bytes_read = recv(client_fd, buffer, 1, 0);
 			// handle error
 			if (bytes_read < 0)
 			{
@@ -216,11 +211,11 @@ int Request::getPort() const
     return _port;
 }
 
-bool Request::parseRequest(std::string request)
+bool Request::parseRequest(std::string request, int client_fd)
 {
 	if (!parseHeaders(request))
 		return false;
-	parseBody();
+	parseBody(client_fd);
 	return true;
 }
 
