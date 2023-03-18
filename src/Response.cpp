@@ -397,8 +397,6 @@ std::string Response::parseMultiPartRequest(const std::string& request_body, con
 	size_t pos = 0;
 
 	std::cout << "PARSEAMOS MULTIII VAMOSSS" << std::endl;
-	std::cout << request_body << std::endl;
-	std::cout << "boundary: "<< boundary << std::endl;
 	// split the request body into parts based on the boundary
 	while ((pos = request_body.find(boundary, pos)) != std::string::npos)
 	{
@@ -415,6 +413,13 @@ std::string Response::parseMultiPartRequest(const std::string& request_body, con
 		std::string part = *it;
 		size_t header_pos = part.find("\r\n\r\n");
 		std::string data = part.substr(header_pos + 4); // Add 4 to remove the "\r\n\r\n" characters
+
+		// Remove the boundary from the data
+		size_t boundary_pos = data.rfind(boundary);
+		if (boundary_pos != std::string::npos)
+		{
+			data.erase(boundary_pos);
+		}
 
 		// Append the data to the result string
 		result += data;
@@ -633,5 +638,33 @@ std::string		Response::get_content_type(std::string file_extension)
 		return "text/plain";
 	else
 		return "application/octet-stream";
+}
+
+void Response::read_uploaded_file(const char* filepath)
+{
+	std::ifstream file(filepath, std::ios::in | std::ios::binary | std::ios::ate);
+	if (!file.is_open()) {
+		std::cerr << "Failed to open file: " << filepath << std::endl;
+		return;
+	}
+
+	std::streamsize size = file.tellg();
+	char* buffer = new char[1024];
+	file.seekg(0, std::ios::beg);
+
+	while (size > 0) 
+	{
+		int bytes_to_read = std::min((int)size, 1024);
+		file.read(buffer, bytes_to_read);
+
+		// do something with the data in the buffer
+		// for example, write it to stdout
+		fwrite(buffer, 1, bytes_to_read, stdout);
+
+		size -= bytes_to_read;
+	}
+
+	delete[] buffer;
+	file.close();
 }
 
