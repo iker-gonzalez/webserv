@@ -98,6 +98,8 @@ int	Request::parseBody(int client_fd)
 			}
 			else
 			{
+				std::cout << "buffer:\n";
+				std::cout << buffer << std::endl;
 				body_str.append(buffer, bytes_read);
 				bytes_left -= bytes_read;
 			}
@@ -111,6 +113,7 @@ int	Request::parseBody(int client_fd)
 	std::cout << "REQUEST BODY" << std::endl;
 	std::cout << "------------" << std::endl;
 	std::cout << _request_body << std::endl;
+	std::cout << "-----F------" << std::endl;
 	return 0;
 }
 

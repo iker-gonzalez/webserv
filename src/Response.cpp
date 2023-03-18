@@ -355,6 +355,8 @@ int		Response::buildBody()
 				size_t begin = content_type.find("boundary=") + 9;
 				std::string boundary = content_type.substr(begin);
 				// Use the boundary string to parse the request body
+				std::cout << "request body:\n";
+				std::cout << request.getBody() << std::endl;
 				std::string file_body = parseMultiPartRequest(request.getBody(), boundary);
 				std::cout << "file body:\n";
 				std::cout << file_body << std::endl;
@@ -396,7 +398,6 @@ std::string Response::parseMultiPartRequest(const std::string& request_body, con
 	std::vector<std::string> parts;
 	size_t pos = 0;
 
-	std::cout << "PARSEAMOS MULTIII VAMOSSS" << std::endl;
 	// split the request body into parts based on the boundary
 	while ((pos = request_body.find(boundary, pos)) != std::string::npos)
 	{
@@ -406,23 +407,33 @@ std::string Response::parseMultiPartRequest(const std::string& request_body, con
 		pos = end_pos;
 	}
 
-	// Concatenate all the data from the parts into a single string
+	// Find the part that contains the file data
 	std::string result;
 	for (std::vector<std::string>::iterator it = parts.begin(); it != parts.end(); ++it)
 	{
 		std::string part = *it;
-		size_t header_pos = part.find("\r\n\r\n");
-		std::string data = part.substr(header_pos + 4); // Add 4 to remove the "\r\n\r\n" characters
-
-		// Remove the boundary from the data
-		size_t boundary_pos = data.rfind(boundary);
-		if (boundary_pos != std::string::npos)
+		if (part.find("Content-Disposition: form-data; name=\"file\"") != std::string::npos)
 		{
-			data.erase(boundary_pos);
-		}
+			size_t header_pos = part.find("\r\n\r\n");
+			std::string data = part.substr(header_pos + 4); // Add 4 to remove the "\r\n\r\n" characters
 
-		// Append the data to the result string
-		result += data;
+			// Remove the boundary from the data
+			size_t boundary_pos = data.rfind(boundary);
+			if (boundary_pos != std::string::npos)
+			{
+				data.erase(boundary_pos);
+			}
+
+			// Append the data to the result string
+			result += data;
+			break;
+		}
+	}
+	// Remove the last line (---) from the result string
+	size_t last_newline_pos = result.find_last_of("\n");
+	if (last_newline_pos != std::string::npos)
+	{
+		result.erase(last_newline_pos);
 	}
 	return result;
 }
