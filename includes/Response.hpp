@@ -82,7 +82,7 @@ public:
 	Location	findLocationByName(std::string request_file, std::vector<Location> locations);
 	std::string	get_content_type(std::string file_extension);
 	void 		read_uploaded_file(const char* filepath);
-
+	std::string	getErrorPage(void);
 
 
 

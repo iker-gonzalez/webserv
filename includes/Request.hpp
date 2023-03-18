@@ -26,8 +26,8 @@ class Request
 		~Request();
 
 		//Parseo
-		bool parseHeaders(std::string& request);
-		int	parseBody(int client_fd);
+		void								parseHeaders(std::string& request);
+		int									parseBody(int client_fd);
 		std::string							parseChunkedBody(int client_fd) const;
 		bool 								parseRequest(std::string request, int client_fd);
 		
@@ -41,6 +41,7 @@ class Request
 		std::string							getServerName() const;
 		int									getPort() const;
 		std::string 						getHeader(std::string const &name);
+		int									checkErrors(void);
 
 };
 std::ostream& operator<<(std::ostream& ors, const Request& a_request);

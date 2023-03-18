@@ -17,7 +17,7 @@ Request::~Request()
 	
 }
 
-bool Request::parseHeaders(std::string& request)
+void Request::parseHeaders(std::string& request)
 {
 
 	int i;
@@ -26,11 +26,6 @@ bool Request::parseHeaders(std::string& request)
 
 	i = request.find_first_of(" ", 0);
 	_method = request.substr(0, i);
-	if (_method != "GET" && _method != "POST" && _method != "DELETE")
-	{
-		std::cerr << "Invalid Request Method" << std::endl;
-		return false;
-	}
 	k = request.find_first_of(" ", i + 1);
 	_requestFile = request.substr(i + 1, k - i - 1);
 	j = request.find_first_of('\r', k + 1);
@@ -62,7 +57,6 @@ bool Request::parseHeaders(std::string& request)
    	for (it = _m_headers.begin(); it != _m_headers.end(); ++it) {
 	   	std::cout << it->first << it->second << std::endl;
    }
-	return true;
 }
 
 	
@@ -216,20 +210,21 @@ int Request::getPort() const
 
 bool Request::parseRequest(std::string request, int client_fd)
 {
-	if (!parseHeaders(request))
-		return false;
+	parseHeaders(request);
+	//if (checkErrors())
+	//	return false;
 	parseBody(client_fd);
 	return true;
 }
 
-std::string     Request::getServerName() const
+std::string		Request::getServerName() const
 {
-    return (this->_serverName);
+	return (this->_serverName);
 }
 
 std::string Request::getHeader(std::string const &name)
 {
-    return (_m_headers[name]);
+	return (_m_headers[name]);
 }
 
 std::ostream &operator<<(std::ostream &ors, const Request &a_request)
@@ -251,4 +246,9 @@ std::ostream &operator<<(std::ostream &ors, const Request &a_request)
    std::cout << "Port: " << a_request.getPort() << std::endl;
 
 	return ors;
+}
+
+int		Request::checkErrors(void)
+{
+	// do preliminary error check
 }

@@ -91,48 +91,16 @@ void	Response::server()
 }
 
 void	Response::setDate()
-{   
-		{ 
+{
 	char date[1000];
 	time_t now = time(0);
 	struct tm tm = *gmtime(&now);
+	tm.tm_hour += 1;
 	strftime(date, sizeof(date), "%a, %d %b %Y %H:%M:%S %Z", &tm);
 	_response_content.append("Date: ");
 	_response_content.append(date);
 	_response_content.append("\r\n");
 	_m_headers["Date: "] = date;
-	return;
-
-
-	}
-	{
-	/* 
-	get current time
-	nullptr is used as an argument to indicate that the function should use 
-	the local time instead of the time from the system clock.
-	*/
-	std::time_t now = std::time(nullptr);
-
-	/* 
-	convert the now time to a std::tm structure, which represents the broken-down 
-	time in the Coordinated Universal Time (UTC) format. The * operator is used to
-	dereference the pointer returned by std::gmtime and store the result in the tm variable.
-	*/
-	std::tm tm = *std::gmtime(&now);
-	//set time to UTC + 1
-	tm.tm_hour += 1;
-
-	std::ostringstream date;
-	//used to format the tm structure into a string
-	//date << std::put_time(&tm, "%a, %d %b %Y %T %Z");
-
-	//_response_content.append("Date: ");
-	//_response_content.append(date.str());
-	//_response_content.append("\r\n");
-	//_m_headers["Date: "] = date.str();
-
-
-	}
 }
 
 bool Response::isCGIResponse() const
@@ -154,8 +122,7 @@ void	Response::buildResponse()
 {
 	int error;
 	error = buildBody();
-	
-		setStatusLine();
+	setStatusLine();
 	if (!_isCGIResponse)
 		setHeaders();
 	//if (error && !_isCGIResponse) //??Siempre que sale CGI entra en error asique he tenido que poner esta condicion
@@ -220,25 +187,17 @@ bool	Response::checkIfReturn(Location &location)
 
 int Response::isClientSizeAllowed(Location &location)
 {
-	std::cout << "check 1\n";
 	if (!(location.getClientSize()))
 	{
-		std::cout << "check 2\n";
-
 		if (_server.getClientSize())
 		{
-					std::cout << "check 3\n";
 			std::cout << "request content lenght: " << request.getContentLength() << std::endl;
 			std::cout << "server client size: " << _server.getClientSize() << std::endl;
 			if (request.getContentLength() < _server.getClientSize())
 				return true;
 		}
-					std::cout << "check 4\n";
-
 		if (request.getContentLength() < DEFAULT_CLIENT_MAX_BODY_SIZE)
 			return true;
-					std::cout << "check 5\n";
-
 	}
 	else
 	{
@@ -327,9 +286,16 @@ int Response::handleCGI(const Location &location)
 int		Response::buildBody()
 {
 	if (handleRequest())
-		return (1);
-	if (_status_code)
-		return (0);
+	{
+		std::string error_page = getErrorPage();
+		if (!(error_page.empty()))
+		{
+			_target_file = combinePaths(_server.getRoot(), error_page, "");
+			if (readFile())
+				return (1);
+		}
+		return(1);
+	}
 	if (request.getMethod() == "GET")
 	{
 		if (readFile())
@@ -374,12 +340,6 @@ int		Response::buildBody()
 			_status_code = 404;
 			return (1);
 		}
-		/*
-		If the file exists and can be successfully deleted, the function returns 0.
-
-		If the file does not exist or if there was an error deleting the file, the 
-		function returns a non-zero value to indicate an error.
-		*/
 		if (remove(_target_file.c_str()))
 		{
 			_status_code = 500;
@@ -651,31 +611,15 @@ std::string		Response::get_content_type(std::string file_extension)
 		return "application/octet-stream";
 }
 
-void Response::read_uploaded_file(const char* filepath)
+std::string	Response::getErrorPage(void)
 {
-	std::ifstream file(filepath, std::ios::in | std::ios::binary | std::ios::ate);
-	if (!file.is_open()) {
-		std::cerr << "Failed to open file: " << filepath << std::endl;
-		return;
-	}
-
-	std::streamsize size = file.tellg();
-	char* buffer = new char[1024];
-	file.seekg(0, std::ios::beg);
-
-	while (size > 0) 
+	std::map<int, std::string> errorPages = _server.getErrorPage();
+	std::map<int, std::string>::const_iterator it;
+	for (it = errorPages.begin(); it != errorPages.end(); ++it)
 	{
-		int bytes_to_read = std::min((int)size, 1024);
-		file.read(buffer, bytes_to_read);
-
-		// do something with the data in the buffer
-		// for example, write it to stdout
-		fwrite(buffer, 1, bytes_to_read, stdout);
-
-		size -= bytes_to_read;
+		if (it->first == _status_code)
+			return (errorPages[_status_code]);
 	}
-
-	delete[] buffer;
-	file.close();
+	return "";
 }
 

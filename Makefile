@@ -29,10 +29,10 @@ $(NAME) : $(OBJ)
 
 
 clean:
-	 rm -f $(OBJ)
+	rm -f $(OBJ)
 	#no descomentar porque borra los .cpp
 
-fclean: 
+fclean: clean
 	rm -f $(NAME)
 
 re: fclean all 

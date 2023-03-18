@@ -18,14 +18,15 @@ class Client
 		void	buildResponse();
 		void    setServer(Server &serv);
 
-
-
+		// Objects
 		Request		request;
 		Response	response;
 		Server		server;
+
+		// Check
 		bool	getIsCGI() const;
 
-		//Setter
+		// Setter
 		void	setIsCGI(bool a_is_CGI) ;
 
 		// Poner private

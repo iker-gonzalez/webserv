@@ -1,3 +1,5 @@
+
+
 function handleFileSelect()
 {
 	var fileInput = document.getElementById("file");
