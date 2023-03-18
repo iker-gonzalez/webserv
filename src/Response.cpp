@@ -352,12 +352,13 @@ int		Response::buildBody()
 		if (((request.getHeader("Content-Type:")).find("multipart/form-data")) != std::string::npos)
 		{
 				std::string content_type = request.getHeader("Content-Type:");
-				std::cout << "MULTIIIIIIIII\n";
 				size_t begin = content_type.find("boundary=") + 9;
 				std::string boundary = content_type.substr(begin);
-				std::cout << "boundary: " << boundary << std::endl;
 				// Use the boundary string to parse the request body
-				parseMultiPartRequest(request.getBody(), boundary);
+				std::string file_body = parseMultiPartRequest(request.getBody(), boundary);
+				std::cout << "file body:\n";
+				std::cout << file_body << std::endl;
+				file.write(file_body.c_str(), file_body.length());
 		}
 		 	//code assumes that the request is a regular request, and it simply
 			//writes the body of the request to the file
@@ -390,7 +391,7 @@ int		Response::buildBody()
 }
 
 
-void Response::parseMultiPartRequest(const std::string& request_body, const std::string& boundary)
+std::string Response::parseMultiPartRequest(const std::string& request_body, const std::string& boundary)
 {
 	std::vector<std::string> parts;
 	size_t pos = 0;
@@ -407,44 +408,19 @@ void Response::parseMultiPartRequest(const std::string& request_body, const std:
 		pos = end_pos;
 	}
 
-	// loop through the parts and extract the data
+	// Concatenate all the data from the parts into a single string
+	std::string result;
 	for (std::vector<std::string>::iterator it = parts.begin(); it != parts.end(); ++it)
 	{
 		std::string part = *it;
 		size_t header_pos = part.find("\r\n\r\n");
-		std::string header = part.substr(0, header_pos);
-		std::string data = part.substr(header_pos + 2);
+		std::string data = part.substr(header_pos + 4); // Add 4 to remove the "\r\n\r\n" characters
 
-		// extract the name and filename from the header
-		std::string name, filename;
-		size_t name_pos = header.find("name=\"");
-		size_t filename_pos = header.find("filename=\"");
-		if (name_pos != std::string::npos)
-		{
-			size_t end_pos = header.find("\"", name_pos + 6);
-			name = header.substr(name_pos + 6, end_pos - name_pos - 6);
-		}
-		if (filename_pos != std::string::npos)
-		{
-			size_t end_pos = header.find("\"", filename_pos + 10);
-			filename = header.substr(filename_pos + 10, end_pos - filename_pos - 10);
-		}
-
-		// output the name and data
-		//std::cout << "Name: " << name << std::endl;
-		if (!filename.empty())
-		{
-			//std::cout << "Filename: " << filename << std::endl;
-			std::ofstream outfile(filename.c_str(), std::ios::binary);
-			outfile.write(data.c_str(), data.length());
-		}
-		else
-		{
-			std::cout << "Data: " << data << std::endl;
-		}
+		// Append the data to the result string
+		result += data;
 	}
+	return result;
 }
-
 
 std::string	Response::getResponseContent()
 {

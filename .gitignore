@@ -36,5 +36,8 @@
 web_server.dSYM/*
 *.DS_Store
 
+# Uploaded files
+public/content/uploads/*
+
 
 src/diff.cpp

@@ -69,7 +69,7 @@ public:
 	//bool		isDirectory(std::string path);
 	//bool		fileExists(const std::string& f);
 	int			isClientSizeAllowed(Location& location);
-	void		parseMultiPartRequest(const std::string& request_body, const std::string& boundary);
+	std::string	parseMultiPartRequest(const std::string& request_body, const std::string& boundary);
 	//int			ft_check_errors(std::string target_file, Location target_location);
 	void		ErrorPage();
 	std::string	getResponseContent();
