@@ -121,7 +121,8 @@ void Response::setHeaders()
 void	Response::buildResponse()
 {
 	int error;
-	error = buildBody();
+	if (buildBody())
+		getErrorPage();
 	setStatusLine();
 	if (!_isCGIResponse)
 		setHeaders();
@@ -205,12 +206,6 @@ int Response::isClientSizeAllowed(Location &location)
 			return true;
 	}
 	return false;
-}
-
-void Response::ErrorPage()
-{
-	_response_content.append(buildErrorPage(_status_code));
-	_target_file = "public/content/html/error.html";
 }
 
 /*
@@ -522,34 +517,34 @@ int Response::handleMatch(std::string location)
 		_status_code = 405;
 		return 1;
 	}
-	if (!(isClientSizeAllowed(target_location))) {
+	if (!(isClientSizeAllowed(target_location)))
+	{
 		_status_code = 413;
 		return 1;
 	}
-	if (checkIfReturn(target_location)) {
+	if (checkIfReturn(target_location))
+	{
 		std::cout << "RETURN\n";
 		_status_code = 301;
 		return 1;
 	}
-
-		if (target_location.getPath().find("cgi-bin") != std::string::npos)
-		{
-			return handleCGI(target_location);
-		}
+	if (target_location.getPath().find("cgi-bin") != std::string::npos)
+	{
+		return handleCGI(target_location);
+	}
 	//! HANDLE CGI
 
-		if (!(target_location.getAlias().empty()))
-			_target_file = combinePaths(target_location.getAlias(), request.getRequestFile().substr(target_location.getPath().length()), "");
+	if (!(target_location.getAlias().empty()))
+		_target_file = combinePaths(target_location.getAlias(), request.getRequestFile().substr(target_location.getPath().length()), "");
+	else
+	{
+		if(!target_location.getRoot().empty())
+			_target_file = combinePaths(target_location.getRoot(), request.getRequestFile(), "");
 		else
-		{
-			if(!target_location.getRoot().empty())
-				_target_file = combinePaths(target_location.getRoot(), request.getRequestFile(), "");
-			else
-				_target_file = combinePaths(_server.getRoot(), request.getRequestFile(), "");
-		}
-		std::cout << "target file: " << _target_file << std::endl;
+			_target_file = combinePaths(_server.getRoot(), request.getRequestFile(), "");
+	}
+	std::cout << "target file: " << _target_file << std::endl;
 		
-
 	//! HANDLE CGI
 
 	if (isDirectory(_target_file) && request.getMethod() != "POST")
@@ -595,6 +590,8 @@ std::string		Response::get_content_type(std::string file_extension)
 		return "text/html";
 	else if (file_extension == "json")
 		return "application/json";
+	else if (file_extension == "css")
+		return "text/css";
 	else if (file_extension == "xml")
 		return "application/xml";
 	else if (file_extension == "png")
