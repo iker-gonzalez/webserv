@@ -18,7 +18,10 @@ ConfigFile::~ConfigFile()
 bool ConfigFile::CheckConfig() 
 {
 	if (!CheckExtension(_filename, std::string(".conf")))
+	{
+		std::cout << "Bad extension" << std::endl;
 		return false;
+	}
 	if (!ReadFile())
 		return false;
 	return true;

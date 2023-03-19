@@ -45,13 +45,10 @@ int		Response::readFile()
 	{
 		_status_code = 404;
 		std::string error_page = getErrorPage();
-		//std::cout << "errorPage: " << error_page << std::endl;
 		if (!(error_page.empty()))
 		{
 			std::string root = "public/";
 			_target_file = combinePaths(root, error_page, "");
-			//std::cout << "targetea q te vea: \n";
-			//std::cout << _target_file << std::endl;
 			std::ifstream error_file(_target_file.c_str());
 			ss << error_file.rdbuf();
 			_response_body = ss.str();
@@ -60,8 +57,6 @@ int		Response::readFile()
 	}
 	ss << file.rdbuf();
 	_response_body = ss.str();
-	//std::cout << "response body:\n"; 
-	//std::cout << _response_body; 
 	return (0);
 }
 
@@ -299,7 +294,6 @@ int		Response::buildBody()
 	}
 	else if (request.getMethod() == "POST")
 	{
-		//std::cout << "TARGEEEEEET:\n" << _target_file << std::endl;
 		if (fileExists(_target_file))
 		{
 			_status_code = 204;
