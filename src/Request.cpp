@@ -51,18 +51,18 @@ void Request::parseHeaders(std::string& request)
 	_port = std::atoi(v_host[1].c_str());
 
 	//print map content
-	std::cout << "*******REQUEST PARSED (MAP)********" << std::endl;
-	std::cout << "-----------------------------------" << std::endl;
+	//std::cout << "*******REQUEST PARSED (MAP)********" << std::endl;
+	//std::cout << "-----------------------------------" << std::endl;
 	std::map<std::string, std::string>::iterator it;
    	for (it = _m_headers.begin(); it != _m_headers.end(); ++it) {
-	   	std::cout << it->first << it->second << std::endl;
+	   	//std::cout << it->first << it->second << std::endl;
    }
 }
 
 	
 int	Request::parseBody(int client_fd) 
 {
-	std::cout << "PARSING BODY!\n";
+	//std::cout << "PARSING BODY!\n";
 	// parse the content length or check if chunked encoding is used
 	bool is_chunked = false;
 	_content_length = atoi(_m_headers["Content-Length:"].c_str());
@@ -92,8 +92,8 @@ int	Request::parseBody(int client_fd)
 			}
 			else
 			{
-				std::cout << "buffer:\n";
-				std::cout << buffer << std::endl;
+				//std::cout << "buffer:\n";
+				//std::cout << buffer << std::endl;
 				body_str.append(buffer, bytes_read);
 				bytes_left -= bytes_read;
 			}
@@ -104,10 +104,10 @@ int	Request::parseBody(int client_fd)
 		
 	// store the request body in the member variable
 	_request_body = body_str;
-	std::cout << "REQUEST BODY" << std::endl;
-	std::cout << "------------" << std::endl;
-	std::cout << _request_body << std::endl;
-	std::cout << "-----F------" << std::endl;
+	//std::cout << "REQUEST BODY" << std::endl;
+	//std::cout << "------------" << std::endl;
+	//std::cout << _request_body << std::endl;
+	//std::cout << "-----F------" << std::endl;
 	return 0;
 }
 
@@ -229,21 +229,21 @@ std::string Request::getHeader(std::string const &name)
 
 std::ostream &operator<<(std::ostream &ors, const Request &a_request)
 {
-   std::cout << "CLIENT_FD: " << a_request.getClientFd() << std::endl;
-   std::cout << "METHOD: " << a_request.getMethod() << std::endl;
-   std::cout << "RequestFile: " << a_request.getRequestFile() << std::endl;
-   //std::cout << "BODY: " << a_request.getBody() << std::endl;
-   //std::cout << "HEADERS: " << a_request.getHeaders() << std::endl;
+   //std::cout << "CLIENT_FD: " << a_request.getClientFd() << std::endl;
+   //std::cout << "METHOD: " << a_request.getMethod() << std::endl;
+   //std::cout << "RequestFile: " << a_request.getRequestFile() << std::endl;
+   ////std::cout << "BODY: " << a_request.getBody() << std::endl;
+   ////std::cout << "HEADERS: " << a_request.getHeaders() << std::endl;
    std::map<std::string, std::string> map = a_request.getHeaders();
 	std::map<std::string, std::string>::iterator it;
  	std::map<std::string, std::string>::iterator it_end = a_request.getHeaders().end();
 	for (it == map.begin(); it != it_end; ++it)
-	//	std::cout << "FIRST" << (*it).first <<  "SECOND" << (*it).second << std::endl;
+	//	//std::cout << "FIRST" << (*it).first <<  "SECOND" << (*it).second << std::endl;
 
-   std::cout << "CONTENT LENGHT: " << a_request.getContentLength() << std::endl;
-  // std::cout << "PARSE Chunked Body: " << a_request.parseChunkedBody() << std::endl;
-  // std::cout << "SeverName: " << a_request.getServerName() << std::endl;
-   std::cout << "Port: " << a_request.getPort() << std::endl;
+   //std::cout << "CONTENT LENGHT: " << a_request.getContentLength() << std::endl;
+  // //std::cout << "PARSE Chunked Body: " << a_request.parseChunkedBody() << std::endl;
+  // //std::cout << "SeverName: " << a_request.getServerName() << std::endl;
+   //std::cout << "Port: " << a_request.getPort() << std::endl;
 
 	return ors;
 }

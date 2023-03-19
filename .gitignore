@@ -39,5 +39,8 @@ web_server.dSYM/*
 # Uploaded files
 public/content/uploads/*
 
+# Bin files
+public/bin/*
+
 
 src/diff.cpp

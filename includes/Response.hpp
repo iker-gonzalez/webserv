@@ -68,7 +68,7 @@ public:
 	bool		checkIfReturn(Location& location);
 	bool		isDirectory(std::string path);
 	bool		fileExists(const std::string& f);
-	int			isClientSizeAllowed(Location& location);
+	int			isClientSizeAllowed(int client_size);
 	std::string	parseMultiPartRequest(const std::string& request_body, const std::string& boundary);
 	std::string	getResponseContent();
 	void		setServer(Server &server);
@@ -81,6 +81,8 @@ public:
 	std::string	get_content_type(std::string file_extension);
 	std::string	getErrorPage(void);
 	std::string combinePaths(std::string str1, std::string str2, std::string str3);
+	int 		checkErrors(int code);
+
 
 };
 

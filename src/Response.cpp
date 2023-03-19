@@ -45,13 +45,13 @@ int		Response::readFile()
 	{
 		_status_code = 404;
 		std::string error_page = getErrorPage();
-		std::cout << "errorPage: " << error_page << std::endl;
+		//std::cout << "errorPage: " << error_page << std::endl;
 		if (!(error_page.empty()))
 		{
 			std::string root = "public/";
 			_target_file = combinePaths(root, error_page, "");
-			std::cout << "targetea q te vea: \n";
-			std::cout << _target_file << std::endl;
+			//std::cout << "targetea q te vea: \n";
+			//std::cout << _target_file << std::endl;
 			std::ifstream error_file(_target_file.c_str());
 			ss << error_file.rdbuf();
 			_response_body = ss.str();
@@ -60,8 +60,8 @@ int		Response::readFile()
 	}
 	ss << file.rdbuf();
 	_response_body = ss.str();
-	std::cout << "response body:\n"; 
-	std::cout << _response_body; 
+	//std::cout << "response body:\n"; 
+	//std::cout << _response_body; 
 	return (0);
 }
 
@@ -197,26 +197,14 @@ bool	Response::checkIfReturn(Location &location)
 	return false;
 }
 
-int Response::isClientSizeAllowed(Location &location)
+int Response::isClientSizeAllowed(int client_size_allowed)
 {
-	if (!(location.getClientSize()))
-	{
-		if (_server.getClientSize())
-		{
-			std::cout << "request content lenght: " << request.getContentLength() << std::endl;
-			std::cout << "server client size: " << _server.getClientSize() << std::endl;
-			if (request.getContentLength() < _server.getClientSize())
-				return true;
-		}
-		if (request.getContentLength() < DEFAULT_CLIENT_MAX_BODY_SIZE)
-			return true;
-	}
-	else
-	{
-		if(request.getContentLength() < location.getClientSize())
-			return true;
-	}
-	return false;
+	std::cout << "client_size_allowed: " << client_size_allowed << std::endl;
+	if (!client_size_allowed)
+		client_size_allowed = DEFAULT_CLIENT_MAX_BODY_SIZE;
+	if (request.getContentLength() > client_size_allowed)
+		return false;
+	return true;
 }
 
 /*
@@ -274,7 +262,7 @@ CGI Response::getCGIResponse() const
 int Response::handleCGI(const Location &location)
 {
 	_isCGIResponse= true;
-	//std::cout << "CGI:Request File" << request.getRequestFile() << std::endl;
+	////std::cout << "CGI:Request File" << request.getRequestFile() << std::endl;
 	std::string requestFile = request.getRequestFile();
 
 	const std::string index_file = location.getIndex();
@@ -296,7 +284,7 @@ int		Response::buildBody()
 		std::string error_page = getErrorPage();
 		if (!(error_page.empty()))
 		{
-			std::cout << "ARE YOU HERE?" << std::endl;
+			//std::cout << "ARE YOU HERE?" << std::endl;
 			_target_file = combinePaths(_server.getRoot(), error_page, "");
 			if (readFile())
 				return (1);
@@ -311,7 +299,7 @@ int		Response::buildBody()
 	}
 	else if (request.getMethod() == "POST")
 	{
-		std::cout << "TARGEEEEEET:\n" << _target_file << std::endl;
+		//std::cout << "TARGEEEEEET:\n" << _target_file << std::endl;
 		if (fileExists(_target_file))
 		{
 			_status_code = 204;
@@ -329,11 +317,11 @@ int		Response::buildBody()
 				size_t begin = content_type.find("boundary=") + 9;
 				std::string boundary = content_type.substr(begin);
 				// Use the boundary string to parse the request body
-				std::cout << "request body:\n";
-				std::cout << request.getBody() << std::endl;
+				//std::cout << "request body:\n";
+				//std::cout << request.getBody() << std::endl;
 				std::string file_body = parseMultiPartRequest(request.getBody(), boundary);
-				std::cout << "file body:\n";
-				std::cout << file_body << std::endl;
+				//std::cout << "file body:\n";
+				//std::cout << file_body << std::endl;
 				file.write(file_body.c_str(), file_body.length());
 		}
 		 	//code assumes that the request is a regular request, and it simply
@@ -435,7 +423,7 @@ int Response::handleDirectory(Location target_location)
 		_target_file += target_location.getIndex();
 	else
 		_target_file += _server.getIndex();
-	std::cout << "target file 2:" << _target_file << std::endl;
+	//std::cout << "target file 2:" << _target_file << std::endl;
 	if (!fileExists(_target_file))
 	{
 		// allows to generate a directory listing for a given location
@@ -472,35 +460,45 @@ int Response::handleNoMatch()
 	std::cout << std::endl;
 	std::cout << "\033[33m" << "SERVER" << "\033[0m" << std::endl;
 	_target_file = combinePaths(_server.getRoot(), request.getRequestFile(), "");
+	if(!(isMethodAllowed(request.getMethod(),_server.getMethods())))
+	{
+		_status_code = 403;
+		return (1);
+	}
+	if (!(isClientSizeAllowed(_server.getClientSize())))
+	{
+		_status_code = 413;
+		return (1);
+	}
 	if (isDirectory(_target_file))
 	{
-		std::cout << "is directoryyy\n";
-		std::cout << "target file:" << _target_file << std::endl;
+		//std::cout << "is directoryyy\n";
+		//std::cout << "target file:" << _target_file << std::endl;
 		if (_target_file[_target_file.length() - 1] != '/')
 		{
-			std::cout << "redirect\n";
+			//std::cout << "redirect\n";
 			_status_code = 301;
 			_location = request.getRequestFile() + "/";
-			std::cout << "location:" << _location << std::endl;
+			//std::cout << "location:" << _location << std::endl;
 			return 1;
 		}
 		_target_file += _server.getIndex();
 		// if there is not index on this directory...
 		if (!fileExists(_target_file))
 		{
-			std::cout << "\033[31mError: Directory requested and not index for it: \033[0m" << _target_file << std::endl;
+			//std::cout << "\033[31mError: Directory requested and not index for it: \033[0m" << _target_file << std::endl;
 			_status_code = 404;
 			return 1;
 		}
 		// if the index specified for this directory is another directory...
 		if (isDirectory(_target_file))
 		{
-			std::cout << "\033[31mRedirection: Directory requested and index is another directory: \033[0m" << _target_file << std::endl;
+			//std::cout << "\033[31mRedirection: Directory requested and index is another directory: \033[0m" << _target_file << std::endl;
 			_status_code = 301;
 			_location = combinePaths(request.getRequestFile(), _server.getIndex(), "");
 			if(_location[_location.length() - 1] != '/')
 				_location.insert(_location.end(), '/');
-			std::cout << "\033[31mRedirected to: \033[0m" << _location << std::endl;
+			//std::cout << "\033[31mRedirected to: \033[0m" << _location << std::endl;
 			
 			return 1;
 		}
@@ -530,14 +528,14 @@ int Response::handleMatch(std::string location)
 		_status_code = 405;
 		return 1;
 	}
-	if (!(isClientSizeAllowed(target_location)))
+	if (!(isClientSizeAllowed(target_location.getClientSize())))
 	{
 		_status_code = 413;
 		return 1;
 	}
 	if (checkIfReturn(target_location))
 	{
-		std::cout << "RETURN\n";
+		//std::cout << "RETURN\n";
 		_status_code = 301;
 		return 1;
 	}
@@ -589,7 +587,7 @@ int Response::getStatusCode()
 
 void 	Response::location()
 {
-	std::cout << "location: " << _location << std::endl;
+	//std::cout << "location: " << _location << std::endl;
 	if (_location.length())
 	{
 		_response_content.append("Location: "+ _location +"\r\n");

@@ -158,7 +158,7 @@ bool Server::setupServer(void)
 		perror("bind");
 		return false;
 	}
-	std::cerr << "Bind status: "<<  status_bind <<  std::endl;
+	//std::cerr << "Bind status: "<<  status_bind <<  std::endl;
 	
 	return true;
 }
@@ -174,7 +174,7 @@ int Server::getMaxPayloadSize(int sock)
 		// error handling
 		return -1;
 	}
-	std::cout << "MAX_PAYLOAD_SIZE: " << max_payload_size << std::endl;
+	//std::cout << "MAX_PAYLOAD_SIZE: " << max_payload_size << std::endl;
 	return max_payload_size;
 }
 

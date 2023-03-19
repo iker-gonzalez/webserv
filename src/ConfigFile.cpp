@@ -87,11 +87,11 @@ bool ConfigFile::ReadFile(void)
 		}
 
 		
-		std::cout << line << std::endl;
+		//std::cout << line << std::endl;
 	}
 	for (unsigned int i = 0; i < _v_server.size(); i++)
 	{
-		std::cout << _v_server[i] << std::endl;
+		//std::cout << _v_server[i] << std::endl;
 	}
 	return true;
 }

@@ -97,7 +97,7 @@ bool ServerManager::setupServers()
 
 		// Store Server and Fd
 		_m_fd_server[_v_server[i].getListenFd()] = _v_server[i];
-		//std::cout << "\033[1;31mNew Server. Port:" << _v_server[i].getPort() << ". Address: "<<  _v_server[i].getAddress() << "\033[0m\n" << std::endl;
+		std::cout << "\033[1;31mNew Server. Port:" << _v_server[i].getPort() << ". Address: "<<  _v_server[i].getAddress() << "\033[0m\n" << std::endl;
 	}
 	return true;
 }
@@ -116,7 +116,7 @@ bool ServerManager::sendResponse(int fdToSend, Client &ar_client)
 	int bytes_sent;
 
 	std::string response_content = ar_client.response.getResponseContent();
-	std::cout << "response content:\n" << response_content << std::endl;
+	//std::cout << "response content:\n" << response_content << std::endl;
 	std::cout << "\033[38;2;255;165;0m_status code\033[0m: " << ar_client.response.getStatusCode() << std::endl;
 
 	bytes_sent = write(fdToSend, ar_client.response.getResponseContent().c_str(), ar_client.response.getResponseContent().length());
