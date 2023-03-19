@@ -41,9 +41,8 @@ class Request
 		std::string							getServerName() const;
 		int									getPort() const;
 		std::string 						getHeader(std::string const &name);
-		int									checkErrors(void);
-
 };
+
 std::ostream& operator<<(std::ostream& ors, const Request& a_request);
 
 #endif

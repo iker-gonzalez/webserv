@@ -66,12 +66,10 @@ public:
 	void		findLocation(std::string path, std::vector<Location> locations, std::string &location_key);
 	bool		isMethodAllowed(std::string method, std::vector<std::string> allowed_methods);
 	bool		checkIfReturn(Location& location);
-	//bool		isDirectory(std::string path);
-	//bool		fileExists(const std::string& f);
+	bool		isDirectory(std::string path);
+	bool		fileExists(const std::string& f);
 	int			isClientSizeAllowed(Location& location);
 	std::string	parseMultiPartRequest(const std::string& request_body, const std::string& boundary);
-	//int			ft_check_errors(std::string target_file, Location target_location);
-	void		ErrorPage();
 	std::string	getResponseContent();
 	void		setServer(Server &server);
 	int 		handleMatch(std::string target_location);
@@ -81,11 +79,8 @@ public:
 	void 		location();
 	Location	findLocationByName(std::string request_file, std::vector<Location> locations);
 	std::string	get_content_type(std::string file_extension);
-	void 		read_uploaded_file(const char* filepath);
 	std::string	getErrorPage(void);
-
-
-
+	std::string combinePaths(std::string str1, std::string str2, std::string str3);
 
 };
 

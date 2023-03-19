@@ -40,14 +40,28 @@ int		Response::readFile()
 {
 	std::ifstream file(_target_file.c_str());
 	std::cout << "\033[1;34mtarget file: " << _target_file << "\033[0m" << std::endl;
+	std::ostringstream ss;
 	if (file.fail())
 	{
 		_status_code = 404;
+		std::string error_page = getErrorPage();
+		std::cout << "errorPage: " << error_page << std::endl;
+		if (!(error_page.empty()))
+		{
+			std::string root = "public/";
+			_target_file = combinePaths(root, error_page, "");
+			std::cout << "targetea q te vea: \n";
+			std::cout << _target_file << std::endl;
+			std::ifstream error_file(_target_file.c_str());
+			ss << error_file.rdbuf();
+			_response_body = ss.str();
+		}
 		return (1);
 	}
-	std::ostringstream ss;
 	ss << file.rdbuf();
 	_response_body = ss.str();
+	std::cout << "response body:\n"; 
+	std::cout << _response_body; 
 	return (0);
 }
 
@@ -126,10 +140,7 @@ void	Response::buildResponse()
 	setStatusLine();
 	if (!_isCGIResponse)
 		setHeaders();
-	//if (error && !_isCGIResponse) //??Siempre que sale CGI entra en error asique he tenido que poner esta condicion
-	//	ErrorPage();
-	
-	if (request.getMethod() == "GET")
+	if (!(_response_body.empty()))
 	{
 		_response_content.append(_response_body);
 	}
@@ -214,7 +225,7 @@ int Response::isClientSizeAllowed(Location &location)
 	The S_ISDIR macro is then used to test if the file is a directory, and the result is returned.
 */
 
-bool	isDirectory(std::string path)
+bool	Response::isDirectory(std::string path)
 {
 	struct stat file_stat;
 	if (stat(path.c_str(), &file_stat) != 0)
@@ -227,13 +238,13 @@ The return value of this function will be true if the file/directory exists
 and is ready for reading, and false otherwise.
 */
 
-bool fileExists (const std::string& f)
+bool Response::fileExists (const std::string& f)
 {
 	std::ifstream file(f.c_str());
 	return (file.good());
 }
 
-std::string combinePaths(std::string str1, std::string str2, std::string str3)
+std::string Response::combinePaths(std::string str1, std::string str2, std::string str3)
 {
 	int			len1;
 	int			len2;
@@ -285,9 +296,11 @@ int		Response::buildBody()
 		std::string error_page = getErrorPage();
 		if (!(error_page.empty()))
 		{
+			std::cout << "ARE YOU HERE?" << std::endl;
 			_target_file = combinePaths(_server.getRoot(), error_page, "");
 			if (readFile())
 				return (1);
+			return (0);
 		}
 		return(1);
 	}

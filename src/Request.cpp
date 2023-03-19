@@ -247,8 +247,3 @@ std::ostream &operator<<(std::ostream &ors, const Request &a_request)
 
 	return ors;
 }
-
-int		Request::checkErrors(void)
-{
-	// do preliminary error check
-}
