@@ -192,7 +192,7 @@ std::string getStatusMessage(int statusCode)
 
 bool errorMessage(const std::string message)
 {
-	std::cout << message << std::endl;
+	//std::cout << message << std::endl;
 	return false;
 }
 /*

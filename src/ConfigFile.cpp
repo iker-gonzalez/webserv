@@ -19,7 +19,7 @@ bool ConfigFile::CheckConfig()
 {
 	if (!CheckExtension(_filename, std::string(".conf")))
 	{
-		std::cout << "Bad extension" << std::endl;
+		//std::cout << "Bad extension" << std::endl;
 		return false;
 	}
 	if (!ReadFile())
@@ -43,7 +43,7 @@ bool ConfigFile::ReadFile(void)
 	std::ifstream infile(_filename.c_str());
 	if (!infile.is_open())
 	{
-		std::cout << "Infile unable to open" << std::endl;
+		//std::cout << "Infile unable to open" << std::endl;
 		return (false);
 	}
 	std::string line;
@@ -79,7 +79,7 @@ bool ConfigFile::ReadFile(void)
 			{
 				int nbr_location = _v_server.at(_v_server.size() - 1).getLocations().size();
 				Location& tmp_location = _v_server.at(_v_server.size() - 1).getLocationsByReference(nbr_location - 1);
-//				std::cout << "tem_loca: " << tmp_location << std::endl; 
+//				//std::cout << "tem_loca: " << tmp_location << std::endl; 
 				if (!tmp_location.Parse(line))
 					return false;
 				if (tmp_location.isCloseBracket())
@@ -90,11 +90,11 @@ bool ConfigFile::ReadFile(void)
 		}
 
 		
-		//std::cout << line << std::endl;
+		////std::cout << line << std::endl;
 	}
 	for (unsigned int i = 0; i < _v_server.size(); i++)
 	{
-		//std::cout << _v_server[i] << std::endl;
+		////std::cout << _v_server[i] << std::endl;
 	}
 	return true;
 }

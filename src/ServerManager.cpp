@@ -52,8 +52,9 @@ bool ServerManager::serverCore()
             }
             else if (FD_ISSET(i, &read_fds) && _m_fd_client.find(i) != _m_fd_client.end()) 
             {
+
             //   readRequest(_m_fd_client.at(i));
-               if (!readRequest(_m_fd_client.at(i)))
+               if (!readRequest(i, _m_fd_client.at(i)))
 		       	return false;
             }
             else if (FD_ISSET(i, &write_fds))
@@ -66,8 +67,8 @@ bool ServerManager::serverCore()
 				//{
 				//	readCGIResponse(waiting_client);
 				//}
-		        if (!sendResponse(i, _m_fd_client[i]))
-		            return false;
+		        sendResponse(i, _m_fd_client[i]);
+		          
                 //std::cout << "MANDAMOS???????" << std::endl;
             
 
@@ -118,24 +119,36 @@ bool ServerManager::sendResponse(int fdToSend, Client &ar_client)
 	std::string response_content = ar_client.response.getResponseContent();
 	//std::cout << "response content:\n" << response_content << std::endl;
 	std::cout << "\033[38;2;255;165;0m_status code\033[0m: " << ar_client.response.getStatusCode() << std::endl;
+	std::cout << "\033[38;2;255;165;0mFD\033[0m: " << fdToSend << std::endl;
 
 	bytes_sent = write(fdToSend, ar_client.response.getResponseContent().c_str(), ar_client.response.getResponseContent().length());
 	closeFd(fdToSend);
-	//if (bytes_sent < 0 )
-	//	return false;
-	//else if (bytes_sent == 0 || bytes_sent == ar_client.request.getContentLength())
-    //{
-	//	if (ar_client.getIsCGI())
-	//	{
-    //        std:: cerr << "Client " << ar_client.getClientFd() << " Connection Closed." << std::endl;
-    //        closeFd(fdToSend);
-	//	}
-	//	else
-	//	{
-	//		removeFdSet(fdToSend, _write_fds);
-    //        addFdSet(fdToSend, _read_fds);
-	//	}
-    //}
+	return true;
+	//std::cerr << "_--WRITE BYTE" << bytes_sent << std::endl;
+	//std::cerr << "CONTENT LENGHT" << ar_client.response.getResponseContent().length() << std::endl;
+	if (bytes_sent < 0 )
+		return false;
+	else if (bytes_sent == 0 || bytes_sent == ar_client.response.getResponseContent().length())
+    {
+		if (ar_client.getIsCGI())
+		{
+            std:: cerr << "Client " << ar_client.getClientFd() << " Connection Closed." << std::endl;
+            closeFd(fdToSend);
+		}
+		else
+		{
+			removeFdSet(fdToSend, _write_fds);
+//	std::cerr << "_--WRITE BYTE2" << bytes_sent << std::endl;
+
+            addFdSet(fdToSend, _read_fds);
+//	std::cerr << "_--WRITE BYTE3C" << bytes_sent << std::endl;
+
+			ar_client.clear();
+//	std::cerr << "_--WRITE BYTE4S" << bytes_sent << std::endl;
+
+		}
+    }
+
 	//! meter condicion KEEP-ALIVE
 	//int bytes_sent = send(fdToSend, _s_buffer.c_str(),atoi(request.getHeaders()["Content-length"].c_str()), 0);
 	////std::cout << "bytes sent:" << bytes_sent << std::endl;
@@ -144,6 +157,7 @@ bool ServerManager::sendResponse(int fdToSend, Client &ar_client)
 
 void ServerManager::closeFd(const int fd_to_close)
 {
+    std:: cerr << "\033[32m " << fd_to_close << " Connection Closed.\033[0m" << std::endl;
 	if (FD_ISSET(fd_to_close, &_read_fds))
 		removeFdSet(fd_to_close, _read_fds);
 	else 
@@ -236,6 +250,8 @@ bool ServerManager::acceptNewConnection(Server &a_m_server)
 
 		//Remove fd to _write_fds
 		addFdSet(client_sock, _read_fds);
+		//std::cerr << "COUNT: " << _m_fd_client.count(client_sock) << std::endl;
+
 		if (_m_fd_client.count(client_sock) != 0)
 		{
 			std::cerr << "ERASEEEE" << std::endl;
@@ -250,30 +266,39 @@ bool ServerManager::acceptNewConnection(Server &a_m_server)
 	return true;
 
 }
-bool ServerManager::readRequest(Client &a_client)
+bool ServerManager::readRequest(int fd, Client &a_client)
 {
 	char buffer[1024];
 	
-	int bytes_received = recv(a_client.getClientFd(), buffer, sizeof(buffer), 0);
+	int bytes_received = recv(fd, buffer, sizeof(buffer), 0);
 	if (bytes_received < 0) 
 	{
 		std::cerr << "Error receiving data" << std::endl;
 		return false;
 	}
+	else if (bytes_received == 0)
+	{
+    	std:: cerr << "\033[32m CLient close \033[0m";
+		closeFd(fd);
+		return true;
+	}
 	std::cerr << "\033[32mNEW REQUEST PARSED\033[0m" << std::endl;
+//	std::cout << "\033[1;31mReadRequest Client. FD:" << fd << "\033[0m\n" << std::endl;
+
+//	std::cerr << "PARSE REQUEST" << std::endl;
 	_s_buffer = buffer;
 
 	std::cerr << _s_buffer << std::endl;
 	if (!a_client.request.parseRequest(_s_buffer, a_client.getClientFd()))
 	{
-	removeFdSet(a_client.getClientFd() ,_read_fds);
+		removeFdSet(a_client.getClientFd() ,_read_fds);
 		return true;
 
 	}
 	assignServerToClient(a_client);
 
     std::cout << "\x1B[36mRequest Recived From Socket" << a_client.getClientFd() << "Method = "<< a_client.request.getMethod() <<"\033[0m\n" << std::endl;
-//>:cerr << "REQUEST" << a_client.request << std::endl;
+	std::cerr << "REQUEST" << a_client.request << std::endl;
 	
 	a_client.buildResponse();
 	if (a_client.response.isCGIResponse())
@@ -298,7 +323,8 @@ void ServerManager::addFdSet(int new_fd, fd_set &a_fds_set)
 
 void ServerManager::removeFdSet(int remove_fd, fd_set &a_fds_set)
 {
-	FD_CLR(remove_fd, &a_fds_set);
+//	if (FD_ISSET(remove_fd, &a_fds_set))
+		FD_CLR(remove_fd, &a_fds_set);
 	//std::cout << "\033[1;31m" << "REMOVEE" << "\033[0m\n" << std::endl;
 	if (remove_fd == _max_socket)
 		 _max_socket -= 1;

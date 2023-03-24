@@ -24,7 +24,7 @@ int non_blocking_server(ConfigFile& conf)
 		int sock = socket(AF_INET, SOCK_STREAM, 0);
 		if (sock < 0) 
 		{
-			std::cerr << "Error creating socket" << std::endl;
+			//std::cerr << "Error creating socket" << std::endl;
 			return 1;
 		}
 
@@ -56,13 +56,13 @@ int non_blocking_server(ConfigFile& conf)
     	//inet_ntop(AF_INET, &host, buf, INET_ADDRSTRLEN);
 		if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) 
 		{
-			std::cerr << "Error binding socket" << std::endl;
+			//std::cerr << "Error binding socket" << std::endl;
 			return 1;
 		}
 
 
 
-	//std::cout <<  "Start listening for incoming connections" << std::endl; 
+	////std::cout <<  "Start listening for incoming connections" << std::endl; 
 	//! Start listening for incoming connections
 	/*
 		The program starts listening for incoming connections using the listen function,
@@ -72,13 +72,13 @@ int non_blocking_server(ConfigFile& conf)
 
 		if (listen(sock, SOMAXCONN) < 0) 
 		{
-			std::cerr << "Error listening on socket" << std::endl;
+			//std::cerr << "Error listening on socket" << std::endl;
 			return 1;
 		}
 
 	while (true) 
 	{
-		//std::cout << "Set up the file descriptor set for the select function" << std::endl;
+		////std::cout << "Set up the file descriptor set for the select function" << std::endl;
 		//! Set up the file descriptor set for the select function
 		/*
 			The program enters an infinite loop, in which it calls the select function to wait
@@ -112,14 +112,14 @@ int non_blocking_server(ConfigFile& conf)
 
 			int nfds = select(sock + 1, &read_fds, &write_fds, NULL, &timeout);
 			if (nfds < 0) {
-				std::cerr << "Error in select" << std::endl;
+				//std::cerr << "Error in select" << std::endl;
 				return 1;
 			}
 
 
 			if (FD_ISSET(sock, &read_fds)) {
 			//! Accept an incoming connection
-			//std::cout << "Accept an incoming connection" <<std::endl;
+			////std::cout << "Accept an incoming connection" <<std::endl;
 			/*
 				The program checks if the socket is set in the read_fds set, if it is, it calls the 
 				accept function to accept a new incoming connection.
@@ -132,7 +132,7 @@ int non_blocking_server(ConfigFile& conf)
 				// Unable to accept new connections, continue with the loop
 				continue;
 				} else {
-				std::cerr << "Error accepting connection" << std::endl;
+				//std::cerr << "Error accepting connection" << std::endl;
 				return 1;
 				}
 				}
@@ -151,7 +151,7 @@ int non_blocking_server(ConfigFile& conf)
 				}
 
 
-			//std::cout <<  "!loop over the read_fds" << std::endl;
+			////std::cout <<  "!loop over the read_fds" << std::endl;
 			/*
 				The program loops over the read_fds set and checks which descriptor is set. If the descriptor is set,
 				the program calls the recv function to receive data from the client.
@@ -167,14 +167,14 @@ int non_blocking_server(ConfigFile& conf)
 					{
 						if (errno == EAGAIN || errno == EWOULDBLOCK) 
 						{
-							std::cerr << " Unable to receive data, continue with the loop" << std::endl;
+							//std::cerr << " Unable to receive data, continue with the loop" << std::endl;
 
 							// Unable to receive data, continue with the loop
 							continue;
 						} 
 						else 
 						{
-							std::cerr << "Error receiving data" << std::endl;
+							//std::cerr << "Error receiving data" << std::endl;
 							return 1;
 						}
 					}
@@ -183,7 +183,7 @@ int non_blocking_server(ConfigFile& conf)
 						The program echoes the data back to the client using the send function.
 					*/
 				std::string s_buffer = buffer;
-					//std::cout << "buffer:" << s_buffer << std::endl;
+					////std::cout << "buffer:" << s_buffer << std::endl;
 	//				int bytes_sent = send(i, buffer, bytes_received, 0);
 	//				if (bytes_sent < 0) 
 	//				{
@@ -194,7 +194,7 @@ int non_blocking_server(ConfigFile& conf)
 	//					} 
 	//					else 
 	//					{
-	//						std::cerr << "Error sending data" << std::endl;
+	//						//std::cerr << "Error sending data" << std::endl;
 	//						return 1;
 	//					}
 	//				}

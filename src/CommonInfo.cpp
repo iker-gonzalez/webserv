@@ -208,10 +208,10 @@ bool CommonInfo::checkMethods(const std::vector<std::string>& a_v_methods)
 
 	if (_is_v_methods == true)
 		return false;
-	//std::cout << _is_v_methods << std::endl;
+	////std::cout << _is_v_methods << std::endl;
 	for (unsigned int i = 0; i < a_v_methods.size(); i++)
 	{
-		//std::cout << "m:" << a_v_methods[i] << std::endl;
+		////std::cout << "m:" << a_v_methods[i] << std::endl;
 		if (a_v_methods[i] != "GET" &&
 			a_v_methods[i] != "DELETE" &&
 			a_v_methods[i] != "POST")

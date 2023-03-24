@@ -1,5 +1,5 @@
 #include "../includes/Server.hpp"
-#include <iostream> 				// for std::cerr
+#include <iostream> 				// for //std::cerr
 #include <sys/socket.h> 			// for socket
 #include <fcntl.h>					// for fcntl
 #include <arpa/inet.h>				// for htons
@@ -83,12 +83,12 @@ bool Server::listenConnections()
 {
 	if (listen(_listen_fd, SOMAXCONN) < 0) 
 	{
-		std::cerr << "Error listening on socket" << std::endl;
+		//std::cerr << "Error listening on socket" << std::endl;
 		return false;
 	}
 	if (fcntl(_listen_fd, F_SETFL, O_NONBLOCK) < 0)
 	{
-		std::cerr << "Error fcntl on socket" << std::endl;
+		//std::cerr << "Error fcntl on socket" << std::endl;
 		return false;
 	}
 	return true;
@@ -107,7 +107,7 @@ bool Server::setupServer(void)
 	_listen_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (_listen_fd < 0) 
 	{
-		std::cerr << "Error creating socket" << std::endl;
+		//std::cerr << "Error creating socket" << std::endl;
 		return false;
 	}
 
@@ -143,22 +143,22 @@ bool Server::setupServer(void)
 
 	//? 2) if (inet_aton(_address.c_str(), &addr.sin_addr) == 0) 
 	//?{
-	//?	std::cerr << "Invalid address: " << _address << std::endl;
+	//?	//std::cerr << "Invalid address: " << _address << std::endl;
 	//?	return false;
 	//?}
 	
 	//char buf[INET_ADDRSTRLEN];
 	//std::string host_string = "127.0.0.1";
 	//inet_ntop(AF_INET, &host, buf, INET_ADDRSTRLEN);
-	//std::cout << "listen" << _listen_fd << std::endl;
+	////std::cout << "listen" << _listen_fd << std::endl;
 	int status_bind = bind(_listen_fd, (struct sockaddr *)&addr, sizeof(addr));;
 	if (status_bind < 0) 
 	{
-		std::cerr << "Error binding socket:" << status_bind <<  std::endl;
+		//std::cerr << "Error binding socket:" << status_bind <<  std::endl;
 		perror("bind");
 		return false;
 	}
-	//std::cerr << "Bind status: "<<  status_bind <<  std::endl;
+	////std::cerr << "Bind status: "<<  status_bind <<  std::endl;
 	
 	return true;
 }
@@ -170,11 +170,11 @@ int Server::getMaxPayloadSize(int sock)
 	socklen_t len = sizeof(max_payload_size);
 	int ret = getsockopt(sock, IPPROTO_TCP, tcp_maxseg, &max_payload_size, &len);
 	if (ret < 0) {
-		std::cout << "ERRROR GARRRAFAL\n";
+		//std::cout << "ERRROR GARRRAFAL\n";
 		// error handling
 		return -1;
 	}
-	//std::cout << "MAX_PAYLOAD_SIZE: " << max_payload_size << std::endl;
+	////std::cout << "MAX_PAYLOAD_SIZE: " << max_payload_size << std::endl;
 	return max_payload_size;
 }
 

@@ -24,9 +24,11 @@ class Request
 
 		Request ();
 		~Request();
+    	Request &operator=(const Request & rhs);
+
 
 		//Parseo
-		void								parseHeaders(std::string& request);
+		bool								parseHeaders(std::string& request);
 		int									parseBody(int client_fd);
 		std::string							parseChunkedBody(int client_fd) const;
 		bool 								parseRequest(std::string request, int client_fd);

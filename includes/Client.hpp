@@ -15,6 +15,7 @@ class Client
 
 		// Getters
 		int		getClientFd() const;
+		Server	getServer() const;
 		void	buildResponse();
 		void    setServer(Server &serv);
 
@@ -31,6 +32,7 @@ class Client
 
 		// Poner private
 		//Request _request;
+		void	clear();
 
 	private:
 		int		_client_fd; 

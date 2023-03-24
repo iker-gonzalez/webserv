@@ -18,12 +18,12 @@ int main(int ac, char **av)
 		filename = "config/default.conf";
 	else
 		filename = av[1];
-	std::cout << filename << std::endl;
+	//std::cout << filename << std::endl;
 	// Check configuration file and get all information
 	ConfigFile conf(filename);
 	if (!conf.CheckConfig())
 	{
-		std::cout << "Bad ConfigFile" << std::endl;
+		//std::cout << "Bad ConfigFile" << std::endl;
 		return false;
 	}
 
@@ -32,14 +32,14 @@ int main(int ac, char **av)
 	}
 	catch(std::string error)
 	{
-		std::cerr << error << std::endl;
+		//std::cerr << error << std::endl;
 	}
 	
 	//! TODO Create Select Core
 	ServerManager manager(conf.getServers());
 	if (!manager.setupServers()) 
 		return false;
-	std::cout <<  "Start listening for incoming connections" << std::endl;
+	//std::cout <<  "Start listening for incoming connections" << std::endl;
 
 	if (!manager.serverCore())
 	{

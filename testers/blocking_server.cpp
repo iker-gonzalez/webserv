@@ -25,7 +25,7 @@ int block_server(ConfigFile &conf)
 
 		int sock = socket(AF_INET, SOCK_STREAM, 0);
 		if (sock < 0) {
-			std::cerr << "Failed to create socket" << std::endl;
+			//std::cerr << "Failed to create socket" << std::endl;
 			return 1;
 		}
 
@@ -60,7 +60,7 @@ int block_server(ConfigFile &conf)
 	*/
 
 		if (connect(sock, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0) {
-			std::cerr << "Failed to connect to server" << std::endl;
+			//std::cerr << "Failed to connect to server" << std::endl;
 			return 1;
 	}
 	 return 0;
@@ -96,7 +96,7 @@ int block_server(ConfigFile &conf)
 		The code then prints the response by passing the response buffer to cout
 	*/
 
-		//std::cout << response << std::endl;
+		////std::cout << response << std::endl;
 
 
 	//! Close the socket
