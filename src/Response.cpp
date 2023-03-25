@@ -322,7 +322,7 @@ CGI Response::getCGIResponse() const
 int Response::handleCGI(const Location &location)
 {
 	_isCGIResponse= true;
-	//std::cout << "CGI:Request File" << request.getRequestFile() << std::endl;
+	std::cout << "CGI:Request File" << request.getRequestFile() << std::endl;
 	std::string requestFile = request.getRequestFile();
 
 	const std::string index_file = location.getIndex();
@@ -335,17 +335,19 @@ int Response::handleCGI(const Location &location)
 
 
 	//exit(0);
-	return true;
+	return 0;
 }
 
 int		Response::buildBody()
 {
 	if (handleRequest())
 	{
+		std::cerr << "-------------file body00:--------------\n";
+
 		std::string error_page = getErrorPage();
 		if (!(error_page.empty()))
 		{
-			//std::cout << "ARE YOU HERE?" << std::endl;
+			std::cout << "ARE YOU HERE?" << std::endl;
 			_target_file = combinePaths(_server.getRoot(), error_page, "");
 			if (readFile())
 				return (1);
@@ -353,6 +355,8 @@ int		Response::buildBody()
 		}
 		return(1);
 		}
+	std::cerr << "-------------file body0:--------------\n";
+
 	if (_status_code)
 		return (0);
 	if (_auto_index)
@@ -365,17 +369,26 @@ int		Response::buildBody()
 	}
 	else if (request.getMethod() == "POST")
 	{
+		std::cerr << "-------------file body1:--------------TagetFile" << _target_file << std::endl ;
+
+		if (!_isCGIResponse)
+
 		if (fileExists(_target_file))
 		{
+		std::cerr << "-------------file body2:--------------\n";
+
 			_status_code = 204;
 			return (0);
 		}
 		std::ofstream file(_target_file.c_str(), std::ios::binary);
 		if (file.fail())
 		{
+			std::cerr << "-------------file body2:--------------\n";
+
 			_status_code = 403;
 			return (1);
 		}
+
 		if (((request.getHeader("Content-Type:")).find("multipart/form-data")) != std::string::npos)
 		{
 				std::string content_type = request.getHeader("Content-Type:");
@@ -385,8 +398,8 @@ int		Response::buildBody()
 				////std::cout << "request body:\n";
 				////std::cout << request.getBody() << std::endl;
 				std::string file_body = parseMultiPartRequest(request.getBody(), boundary);
-				////std::cout << "file body:\n";
-				////std::cout << file_body << std::endl;
+				std::cerr << "-------------file body:--------------\n";
+				std::cerr << file_body << std::endl;
 				file.write(file_body.c_str(), file_body.length());
 		}
 		 	//code assumes that the request is a regular request, and it simply

@@ -182,8 +182,14 @@ void CGI::createCGIEnvironment(const Request &ar_request, const Location& ar_loc
        // _m_env["UPLOAD_DIRECTORY"] =  
     }
 
-    std::string script_name = ar_request.getRequestFile() + "/" +ar_location.getIndex();
-   if (ar_request.getRequestFile()[0] == '/')
+    std::string script_name = ar_request.getRequestFile();
+    // If the request file is a .py dont apend the index
+    int pos = script_name.find(".py");
+    if (pos == script_name.length()- 3)
+    {
+        script_name += "/" + ar_location.getIndex();
+    }
+     if (ar_request.getRequestFile()[0] == '/')
         script_name = script_name.substr(1,script_name.length() );
     
     this->_m_env["REQUEST_URI"] = ar_location.getCgiPass();
