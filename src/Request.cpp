@@ -201,9 +201,15 @@ std::string Request::parseChunkedBody(int client_fd) const
 			// handle error
 			if (bytes_read < 0)
 			{
-				//std::cerr << "Error receiving data" << std::endl;
+				std::cerr << "Error receiving data BB" << std::endl;
 				return "";
 			}
+			//else if (bytes_read == 0)
+			//{
+    		//	std:: cerr << "\033[32m CLient close \033[0m";
+			//	close(client_fd);
+			//	return "";
+			//}
 			body_str.append(buffer, bytes_read);
 			bytes_left -= bytes_read;
 		}

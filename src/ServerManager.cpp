@@ -277,6 +277,7 @@ bool ServerManager::readRequest(int fd, Client &a_client)
 		closeFd(fd);
 		return true;
 	}
+	buffer[bytes_received] = '\0';
 	std::cerr << "\033[32mNEW REQUEST PARSED\033[0m" << std::endl;
 //	std::cout << "\033[1;31mReadRequest Client. FD:" << fd << "\033[0m\n" << std::endl;
 
