@@ -36,7 +36,14 @@ void Client::setIsCGI(bool a_is_CGI)
     _is_CGI = a_is_CGI;
 }
 
-void    Client::setServer(Server &serv)
+void Client::clear()
+{
+    Response new_response;
+    response = new_response;
+    Request new_request;
+    request = new_request;
+}
+void Client::setServer(Server &serv)
 {
     response.setServer(serv);
 }

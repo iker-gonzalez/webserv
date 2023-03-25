@@ -63,6 +63,7 @@ public:
 
 	int 		handleCGI(const Location &location);
 	int			handleRequest();
+	int 		createAutoIndexBody();
 	void		findLocation(std::string path, std::vector<Location> locations, std::string &location_key);
 	bool		isMethodAllowed(std::string method, std::vector<std::string> allowed_methods);
 	bool		checkIfReturn(Location& location);
@@ -74,7 +75,7 @@ public:
 	void		setServer(Server &server);
 	int 		handleMatch(std::string target_location);
 	int 		handleNoMatch();
-	int 		handleDirectory(Location target_location);
+	int 		handleDirectory(Location& target_location);
 	int 		getStatusCode();
 	void 		location();
 	Location	findLocationByName(std::string request_file, std::vector<Location> locations);

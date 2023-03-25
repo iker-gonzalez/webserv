@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 #include <iostream>
+#include <dirent.h>
 
 
 Response::Response()
@@ -126,7 +127,62 @@ void Response::setHeaders()
 	setDate();
 	_response_content.append("\r\n");
 }
+int		Response::createAutoIndexBody()
+{
+	DIR             *directoryPath;
+    std::string     dirListPage;
+	if (_target_file.empty())
+		return 1;
+	if (_target_file[_target_file.length() - 1] != '/')
+	{
+    	_target_file += "/";
+		_status_code = 301;
+	}
+	std::cerr << "--------AUTOINDEX2-----------" << _target_file <<  std::endl;
 
+    directoryPath = opendir(_target_file.c_str());
+	if (directoryPath == NULL)
+	{
+		std::cerr << "Could not open directory for autoindex creation" << std::endl;
+		return 0;
+	}
+	_response_body == "<html>\n<head>\n<title>Index of" + _target_file + "</title>\n</head>\n<body>\n";
+   _response_body += "<h1> Index of " + _target_file + "</h1>\n";
+   _response_body += "<table style=\"width:80%; font-size: 15px\">\n";
+   _response_body += "<hr>\n";
+   _response_body += "<th style=\"text-align:left\"> File Name </th>\n";
+   _response_body += "<th style=\"text-align:left\"> File Size </th>\n";
+
+	struct dirent *directoryStruct;
+	struct stat file_stat;
+    std::string file_path;
+    std::string file_name;
+	int filesFound = 0;
+	
+	// Get all the directorys and list them
+    while((directoryStruct = readdir(directoryPath)) != NULL)
+    {
+		file_name = directoryStruct->d_name;
+		file_path = _target_file + directoryStruct->d_name;
+       	if  (stat(file_path.c_str() , &file_stat) == 0)
+		{
+			if (directoryStruct->d_name[0] == '.')
+				continue;
+			filesFound++;
+        	if (S_ISDIR(file_stat.st_mode))
+				_response_body +=  "<tr>\n<td>\n<a href=\"" + file_name + "/\">" + file_name + "/</a>\n</td>\n</tr>\n";
+			else
+				_response_body +=  "<tr>\n<td>\n<a href=\"" + file_name + "\">" + file_name + "/</a>\n</td>\n</tr>\n";
+		}
+    }
+	_response_body += "<p>Total files found : " + std::to_string(filesFound) + "</p>\n";
+    _response_body.append("</body>\n");
+    _response_body.append("</html>\n");
+	std::cerr << "--------AUTOINDEX2-----------" << _response_body <<  std::endl;
+	if (closedir(directoryPath) == -1)
+		return 1;
+	return 0;
+}
 void	Response::buildResponse()
 {
 	int error;
@@ -286,7 +342,12 @@ int		Response::buildBody()
 			return (0);
 		}
 		return(1);
-	}
+		}
+	if (_status_code)
+		return (0);
+	if (_auto_index)
+		return 0;
+	std::cout << "_status code" << _status_code << std::endl;
 	if (request.getMethod() == "GET")
 	{
 		if (readFile())
@@ -405,33 +466,51 @@ void     Response::setServer(Server &server)
 
 // This function checks if the requested file is a directory and appends a slash if needed.
 // If a slash is added, it returns 1 and sets the path variable to the new request file.
-int Response::handleDirectory(Location target_location)
+int Response::handleDirectory(Location& target_location)
 {
+	std::cerr << "--------HOLAAA-1----" <<_target_file << std::endl;
+	// ?? No entiendo
 	if (_target_file[_target_file.length() - 1] != '/')
 	{
 		_location = request.getRequestFile() + "/";
 		_status_code = 301;
 		return (1);
 	}
+		std::cerr << "--------HOLAAA--2---" <<_target_file << std::endl;
+
+	// Add index file to request path if index exist
 	if (!target_location.getIndex().empty())
+	{
 		_target_file += target_location.getIndex();
-	else
-		_target_file += _server.getIndex();
-	//std::cout << "target file 2:" << _target_file << std::endl;
+		return 0;
+	}
+	// Check if autoindex is on
+	else if (target_location.getAutoindex())
+	{
+	// allows to generate a directory listing for a given location
+		std::cerr << "--------HOLAAA-3----" <<_target_file << std::endl;
+		_auto_index = true;
+		if (_target_file[_target_file.length() - 1] != '/')
+		{
+    		_target_file += "/";
+			_status_code = 301;
+		}
+		int error = createAutoIndexBody();
+		if (error)
+			_status_code = 500;
+		else if (!error && _status_code != 301) //We previusly modify request file
+			_status_code = 200;
+		return 0;
+	}
+	// Add index of the server
+	else  
+		_target_file += _server.getIndex();	
+
+		std::cerr << "--------HOLAAA--4---" <<_target_file << std::endl;
+	// ?? Cuando llega aqui
+	// If the created _target_file does not exist
 	if (!fileExists(_target_file))
 	{
-		// allows to generate a directory listing for a given location
-		if (target_location.getAutoindex())
-		{
-			_target_file.erase(_target_file.find_last_of('/') + 1);
-			_auto_index = true;
-			return (0);
-		}
-		else
-				{
-			_status_code = 404;
-					return (1);
-		}
 		if (isDirectory(_target_file))
 		{
 			_status_code = 301;
@@ -516,7 +595,7 @@ Location	Response::findLocationByName(std::string target_location, std::vector<L
 int Response::handleMatch(std::string location)
 {
 	std::cout << std::endl;
-	std::cout << "\033[38;5;205mLOCATION\033[0m" << std::endl;
+	std::cout << "\033[38;5;205mLOCATION\033[0m" <<  std::endl;
 	Location target_location = findLocationByName(location, _server.getLocations());
 	if (!(isMethodAllowed(request.getMethod(), target_location.getMethods()))) {
 		_status_code = 405;
@@ -533,9 +612,10 @@ int Response::handleMatch(std::string location)
 		_status_code = 301;
 		return 1;
 	}
+
 	if (target_location.getPath().find("cgi-bin") != std::string::npos)
 	{
-		return handleCGI(target_location);
+        return handleCGI(target_location);
 	}
 	//! HANDLE CGI
 
@@ -551,13 +631,15 @@ int Response::handleMatch(std::string location)
 	std::cout << "target file: " << _target_file << std::endl;
 		
 	//! HANDLE CGI
-
+	std::cout << "target fileEEeee: " << _target_file << std::endl;
+	//if (isDirectory(target_location.getPath()))
 	if (isDirectory(_target_file) && request.getMethod() != "POST")
 	{
 		return (handleDirectory(target_location));
 	}
 	return (0);
 }
+
 
 // This is the main function that handles a request.
 // It first tries to find a matching location and calls handleMatch or handleNoMatch depending on the result.

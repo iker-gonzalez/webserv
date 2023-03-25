@@ -31,6 +31,7 @@ class Client
 
 		// Poner private
 		//Request _request;
+		void	clear();
 
 	private:
 		int		_client_fd; 

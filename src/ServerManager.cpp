@@ -52,8 +52,9 @@ bool ServerManager::serverCore()
             }
             else if (FD_ISSET(i, &read_fds) && _m_fd_client.find(i) != _m_fd_client.end()) 
             {
+
             //   readRequest(_m_fd_client.at(i));
-               if (!readRequest(_m_fd_client.at(i)))
+               if (!readRequest(i, _m_fd_client.at(i)))
 		       	return false;
             }
             else if (FD_ISSET(i, &write_fds))
@@ -121,9 +122,11 @@ bool ServerManager::sendResponse(int fdToSend, Client &ar_client)
 
 	bytes_sent = write(fdToSend, ar_client.response.getResponseContent().c_str(), ar_client.response.getResponseContent().length());
 	closeFd(fdToSend);
+	//std::cerr << "_--WRITE BYTE" << bytes_sent << std::endl;
+	//std::cerr << "CONTENT LENGHT" << ar_client.response.getResponseContent().length() << std::endl;
 	//if (bytes_sent < 0 )
 	//	return false;
-	//else if (bytes_sent == 0 || bytes_sent == ar_client.request.getContentLength())
+	//else if (bytes_sent == 0 || bytes_sent == ar_client.response.getResponseContent().length())
     //{
 	//	if (ar_client.getIsCGI())
 	//	{
@@ -132,10 +135,14 @@ bool ServerManager::sendResponse(int fdToSend, Client &ar_client)
 	//	}
 	//	else
 	//	{
+//
 	//		removeFdSet(fdToSend, _write_fds);
     //        addFdSet(fdToSend, _read_fds);
+	//		ar_client.clear();
 	//	}
     //}
+	//else
+	//	close(fdToSend);
 	//! meter condicion KEEP-ALIVE
 	//int bytes_sent = send(fdToSend, _s_buffer.c_str(),atoi(request.getHeaders()["Content-length"].c_str()), 0);
 	////std::cout << "bytes sent:" << bytes_sent << std::endl;
@@ -236,6 +243,8 @@ bool ServerManager::acceptNewConnection(Server &a_m_server)
 
 		//Remove fd to _write_fds
 		addFdSet(client_sock, _read_fds);
+		//std::cerr << "COUNT: " << _m_fd_client.count(client_sock) << std::endl;
+
 		if (_m_fd_client.count(client_sock) != 0)
 		{
 			std::cerr << "ERASEEEE" << std::endl;
@@ -250,15 +259,22 @@ bool ServerManager::acceptNewConnection(Server &a_m_server)
 	return true;
 
 }
-bool ServerManager::readRequest(Client &a_client)
+bool ServerManager::readRequest(int fd, Client &a_client)
 {
 	char buffer[1024];
 	
-	int bytes_received = recv(a_client.getClientFd(), buffer, sizeof(buffer), 0);
+	int bytes_received = recv(fd, buffer, sizeof(buffer), 0);
 	if (bytes_received < 0) 
 	{
 		std::cerr << "Error receiving data" << std::endl;
 		return false;
+	}
+	else if (bytes_received == 0)
+	{
+		std::cerr << "\033[32mClose Client FD\033[0m" << fd << std::endl;
+		closeFd(fd);
+		return true;
+
 	}
 	std::cerr << "\033[32mNEW REQUEST PARSED\033[0m" << std::endl;
 	_s_buffer = buffer;
@@ -266,7 +282,7 @@ bool ServerManager::readRequest(Client &a_client)
 	std::cerr << _s_buffer << std::endl;
 	if (!a_client.request.parseRequest(_s_buffer, a_client.getClientFd()))
 	{
-	removeFdSet(a_client.getClientFd() ,_read_fds);
+		removeFdSet(a_client.getClientFd() ,_read_fds);
 		return true;
 
 	}
