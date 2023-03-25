@@ -129,17 +129,15 @@ void Response::setHeaders()
 
 void	Response::buildResponse()
 {
-	int error;
-	if (buildBody())
-		getErrorPage();
+	buildBody();
 	setStatusLine();
 	if (!_isCGIResponse)
 		setHeaders();
 	if (!(_response_body.empty()))
-	{
 		_response_content.append(_response_body);
-	}
-	//std::cerr << _response_content << std::endl;
+
+	std::cout << "SERVER RESPONSE" << std::endl;
+	std::cerr << _response_content << std::endl;
 }
 
 void	Response::findLocation(std::string path, std::vector<Location> locations, std::string &location_key)
@@ -279,12 +277,13 @@ int		Response::buildBody()
 		std::string error_page = getErrorPage();
 		if (!(error_page.empty()))
 		{
-			//std::cout << "ARE YOU HERE?" << std::endl;
 			_target_file = combinePaths(_server.getRoot(), error_page, "");
+			//std::cout << "ARE YOU HERE?" << std::endl;
 			if (readFile())
 				return (1);
 			return (0);
 		}
+		std::cout << "targeteoooo: " << _target_file << std::endl;
 		return(1);
 	}
 	if (request.getMethod() == "GET")
@@ -299,6 +298,7 @@ int		Response::buildBody()
 			_status_code = 204;
 			return (0);
 		}
+		std::cout << "\033[1;34mtarget file: " << _target_file << "\033[0m" << std::endl;
 		std::ofstream file(_target_file.c_str(), std::ios::binary);
 		if (file.fail())
 		{
@@ -521,6 +521,17 @@ int Response::handleMatch(std::string location)
 	std::cout << std::endl;
 	std::cout << "\033[38;5;205mLOCATION\033[0m" << std::endl;
 	Location target_location = findLocationByName(location, _server.getLocations());
+	if (!(target_location.getAlias().empty()))
+		_target_file = combinePaths(target_location.getAlias(), request.getRequestFile().substr(target_location.getPath().length()), "");
+	else
+	{
+		if(!target_location.getRoot().empty())
+			_target_file = combinePaths(target_location.getRoot(), request.getRequestFile(), "");
+		else
+			_target_file = combinePaths(_server.getRoot(), request.getRequestFile(), "");
+	}
+	std::cout << "target file: " << _target_file << std::endl;
+
 	if (!(isMethodAllowed(request.getMethod(), target_location.getMethods()))) {
 		_status_code = 405;
 		return 1;
@@ -542,16 +553,6 @@ int Response::handleMatch(std::string location)
 	}
 	//! HANDLE CGI
 
-	if (!(target_location.getAlias().empty()))
-		_target_file = combinePaths(target_location.getAlias(), request.getRequestFile().substr(target_location.getPath().length()), "");
-	else
-	{
-		if(!target_location.getRoot().empty())
-			_target_file = combinePaths(target_location.getRoot(), request.getRequestFile(), "");
-		else
-			_target_file = combinePaths(_server.getRoot(), request.getRequestFile(), "");
-	}
-	std::cout << "target file: " << _target_file << std::endl;
 		
 	//! HANDLE CGI
 
@@ -594,6 +595,7 @@ void 	Response::location()
 
 std::string		Response::get_content_type(std::string file_extension)
 {
+	std::cout << "file extension:" << file_extension << std::endl;
 	if (file_extension == "html" || file_extension == "htm")
 		return "text/html";
 	else if (file_extension == "json")
