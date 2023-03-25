@@ -36,6 +36,7 @@ public:
 
 	Response();
 	Response(Request& request);
+    Response &operator=(const Response & rhs);
 	Response(Server& ar_server);
 	~Response();
 

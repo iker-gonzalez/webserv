@@ -40,16 +40,15 @@ std::map<std::string, std::string> CGI::getEnvMap() const
 
 bool CGI::setupPipes()
 {
-  // if (pipe(pipe_in) < 0)
-  // {
-  //     //_code = 500;
-  //     return false;
-  // }
+   // if (!content.empty())
+   // {
+   //     if (pipe(pipe_in) < 0)
+   //         return false;
+   // }
     if (pipe(pipe_out) < 0)
     {
-        //_code = 500;
-      //  close(pipe_in[0]);
-		//close(pipe_in[1]);
+        close(pipe_in[0]);
+	    close(pipe_in[1]);
         return false;
     }
     return true;
@@ -96,7 +95,7 @@ std::string CGI::execute()
 
         if (readBytes == -1)
 		{
-			std::cerr << "Couldn't read from CGI " << _argv[0] << ": " << strerror(errno) << std::endl;
+			//std::cerr << "Couldn't read from CGI " << _argv[0] << ": " << strerror(errno) << std::endl;
 			close(pipe_out[0]);
 			return "";
 		}
@@ -106,17 +105,17 @@ std::string CGI::execute()
     }
 	else
 	{
-        std::cerr << "Fork failed" << std::endl;
+        //std::cerr << "Fork failed" << std::endl;
         return NULL;
 	//	error_code = 500;
 	}
-    //std::cerr << "-------------EXECUTE CGI---------------" << std::endl;
+    ////std::cerr << "-------------EXECUTE CGI---------------" << std::endl;
     //for (size_t i = 0; _env_char[i]; i++)
 	//	std::free(_env_char[i]);
 	//for (size_t i = 0; _argv[i]; i++)
 	//	std::free(_argv[i]);
-    //std::cerr << "-------------CGI RESPONSEEE---------------" << std::endl;
-    //std::cerr << res << std::endl;
+    ////std::cerr << "-------------CGI RESPONSEEE---------------" << std::endl;
+    ////std::cerr << res << std::endl;
 
     return res;
 }
@@ -168,8 +167,8 @@ void CGI::createCGIEnvironment(const Request &ar_request, const Location& ar_loc
    //this->_m_env["SCRIPT_FILENAME"] = cgi_executable;
    //this->_m_env["REQUEST_URI"] = ar_request.getRequestFile();//
 
-   // std::cerr << "-----REQUESTT----" << std::endl;
-    //std::cerr << ar_request << std::endl;
+   // //std::cerr << "-----REQUESTT----" << std::endl;
+    ////std::cerr << ar_request << std::endl;
 
     if (ar_request.getMethod() == "GET")
         _m_env["QUERY_STRING"] = "";
@@ -194,7 +193,7 @@ void CGI::createCGIEnvironment(const Request &ar_request, const Location& ar_loc
      std::map<std::string, std::string>::iterator it;
      std::map<std::string, std::string>::iterator it_end = _m_env.end();
    // for (it = _m_env.begin(); it != it_end; it++)
-     //   std::cout << (*it).first << " : " << (*it).second << std::endl;
+     //   //std::cout << (*it).first << " : " << (*it).second << std::endl;
     prepareArgForExecve();
 
 }
@@ -210,7 +209,7 @@ void CGI::prepareArgForExecve()
     for ( it = _m_env.begin(); it != it_end; it++ )
     {
         std::string env_varible = (*it).first + "=" + (*it).second;
- //       std::cout << "ENV_var: " << env_varible << std::endl;
+ //       //std::cout << "ENV_var: " << env_varible << std::endl;
         _env_char[i] = strdup(env_varible.c_str());
 
         i++;

@@ -19,7 +19,16 @@
 		<main>
 			<p>Welcome to our webserv!</p>
 		</main>
-		
+
+		<div class="cgi-post cgi">
+			<h1>This is a CGI using the POST method (python)</h1>
+			<form action="/cgi-bin/helloworld.py" method="POST" enctype="multipart/form-data">
+				<label>Username:<br><input type="text" name="username" placeholder="Username"></label>
+				<label>Password (will be shown after):<br><input type="password" name="password" placeholder="Password"></label>
+				<button class="btn">Submit</button>
+			</form>
+		</div>
+
 		<footer>
 			<p>&copy; 2023 Iker & Zaloa's Webserv. All rights reserved.</p>
 		</footer>

@@ -40,7 +40,7 @@ void	Response::setStatusLine()
 int		Response::readFile()
 {
 	std::ifstream file(_target_file.c_str());
-	std::cout << "\033[1;34mtarget file: " << _target_file << "\033[0m" << std::endl;
+	//std::cout << "\033[1;34mtarget file: " << _target_file << "\033[0m" << std::endl;
 	std::ostringstream ss;
 	if (file.fail())
 	{
@@ -63,8 +63,16 @@ int		Response::readFile()
 
 void	Response::setContentType()
 {
+//	_response_content.append("Content-Type: ");
+//_response_content.append("text/html"); //? should any other content type different from html be considered?
+//_m_headers["Content-Type: "] = "text/html";
+//_response_content.append("\r\n");
+//return;
 	std::string file_extension = _target_file.substr(_target_file.find_last_of(".") + 1);
 	std::string content_type = get_content_type(file_extension);
+	//std::cout << "---CONTETNTYPE---" << content_type << std::endl;
+	if (_auto_index)
+		content_type = "text/html";
 	_response_content.append("Content-Type: ");
 	_response_content.append(content_type);
 	_m_headers["Content-Type: "] = content_type;
@@ -138,7 +146,7 @@ int		Response::createAutoIndexBody()
     	_target_file += "/";
 		_status_code = 301;
 	}
-	std::cerr << "--------AUTOINDEX2-----------" << _target_file <<  std::endl;
+	//std::cerr << "--------AUTOINDEX2-----------" << _target_file <<  std::endl;
 
     directoryPath = opendir(_target_file.c_str());
 	if (directoryPath == NULL)
@@ -147,7 +155,6 @@ int		Response::createAutoIndexBody()
 		return 0;
 	}
 	_response_body == "<html>\n<head>\n<title>Index of" + _target_file + "</title>\n</head>\n<body>\n";
-   _response_body += "<h1> Index of " + _target_file + "</h1>\n";
    _response_body += "<table style=\"width:80%; font-size: 15px\">\n";
    _response_body += "<hr>\n";
    _response_body += "<th style=\"text-align:left\"> File Name </th>\n";
@@ -178,7 +185,7 @@ int		Response::createAutoIndexBody()
 	_response_body += "<p>Total files found : " + std::to_string(filesFound) + "</p>\n";
     _response_body.append("</body>\n");
     _response_body.append("</html>\n");
-	std::cerr << "--------AUTOINDEX2-----------" << _response_body <<  std::endl;
+	////std::cerr << "--------AUTOINDEX2-----------" << _response_body <<  std::endl;
 	if (closedir(directoryPath) == -1)
 		return 1;
 	return 0;
@@ -186,16 +193,18 @@ int		Response::createAutoIndexBody()
 void	Response::buildResponse()
 {
 	int error;
-	if (buildBody())
-		getErrorPage();
+	error = buildBody();
 	setStatusLine();
 	if (!_isCGIResponse)
 		setHeaders();
+		////std::cerr << "-----BUILD BODY----" << std::endl;  
+		////std::cerr <<_response_content << std::endl;  
+		////std::cerr <<_response_body << std::endl;  
 	if (!(_response_body.empty()))
 	{
 		_response_content.append(_response_body);
 	}
-	//std::cerr << _response_content << std::endl;
+	////std::cerr << _response_content << std::endl;
 }
 
 void	Response::findLocation(std::string path, std::vector<Location> locations, std::string &location_key)
@@ -250,7 +259,7 @@ bool	Response::checkIfReturn(Location &location)
 
 int Response::isClientSizeAllowed(int client_size_allowed)
 {
-	std::cout << "client_size_allowed: " << client_size_allowed << std::endl;
+	//std::cout << "client_size_allowed: " << client_size_allowed << std::endl;
 	if (!client_size_allowed)
 		client_size_allowed = DEFAULT_CLIENT_MAX_BODY_SIZE;
 	if (request.getContentLength() > client_size_allowed)
@@ -313,13 +322,14 @@ CGI Response::getCGIResponse() const
 int Response::handleCGI(const Location &location)
 {
 	_isCGIResponse= true;
-	////std::cout << "CGI:Request File" << request.getRequestFile() << std::endl;
+	//////std::cout << "CGI:Request File" << request.getRequestFile() << std::endl;
 	std::string requestFile = request.getRequestFile();
 
 	const std::string index_file = location.getIndex();
 
 	_CGI_response.createCGIEnvironment(request, location);
-	_CGI_response.setupPipes();
+	
+	//_CGI_response.setupPipes(request.);
 	//_response_body.clear();
 	_response_body = _CGI_response.execute();
 
@@ -372,11 +382,11 @@ int		Response::buildBody()
 				size_t begin = content_type.find("boundary=") + 9;
 				std::string boundary = content_type.substr(begin);
 				// Use the boundary string to parse the request body
-				//std::cout << "request body:\n";
-				//std::cout << request.getBody() << std::endl;
+				////std::cout << "request body:\n";
+				////std::cout << request.getBody() << std::endl;
 				std::string file_body = parseMultiPartRequest(request.getBody(), boundary);
-				//std::cout << "file body:\n";
-				//std::cout << file_body << std::endl;
+				////std::cout << "file body:\n";
+				////std::cout << file_body << std::endl;
 				file.write(file_body.c_str(), file_body.length());
 		}
 		 	//code assumes that the request is a regular request, and it simply
@@ -468,7 +478,7 @@ void     Response::setServer(Server &server)
 // If a slash is added, it returns 1 and sets the path variable to the new request file.
 int Response::handleDirectory(Location& target_location)
 {
-	std::cerr << "--------HOLAAA-1----" <<_target_file << std::endl;
+	//std::cerr << "--------HOLAAA-1----" <<_target_file << std::endl;
 	// ?? No entiendo
 	if (_target_file[_target_file.length() - 1] != '/')
 	{
@@ -476,7 +486,7 @@ int Response::handleDirectory(Location& target_location)
 		_status_code = 301;
 		return (1);
 	}
-		std::cerr << "--------HOLAAA--2---" <<_target_file << std::endl;
+		//std::cerr << "--------HOLAAA--2---" <<_target_file << std::endl;
 
 	// Add index file to request path if index exist
 	if (!target_location.getIndex().empty())
@@ -488,12 +498,14 @@ int Response::handleDirectory(Location& target_location)
 	else if (target_location.getAutoindex())
 	{
 	// allows to generate a directory listing for a given location
-		std::cerr << "--------HOLAAA-3----" <<_target_file << std::endl;
+		//std::cerr << "--------HOLAAA-3----" <<_target_file << std::endl;
 		_auto_index = true;
 		if (_target_file[_target_file.length() - 1] != '/')
 		{
     		_target_file += "/";
 			_status_code = 301;
+			//std::cerr << "--------HOLAAA-4----" <<_target_file << std::endl;
+
 		}
 		int error = createAutoIndexBody();
 		if (error)
@@ -506,7 +518,7 @@ int Response::handleDirectory(Location& target_location)
 	else  
 		_target_file += _server.getIndex();	
 
-		std::cerr << "--------HOLAAA--4---" <<_target_file << std::endl;
+		//std::cerr << "--------HOLAAA--5---" <<_target_file << std::endl;
 	// ?? Cuando llega aqui
 	// If the created _target_file does not exist
 	if (!fileExists(_target_file))
@@ -530,8 +542,8 @@ int Response::handleDirectory(Location& target_location)
 // It sets the target file to the path combined with the server root and calls handleDirectory.
 int Response::handleNoMatch() 
 {
-	std::cout << std::endl;
-	std::cout << "\033[33m" << "SERVER" << "\033[0m" << std::endl;
+	//std::cout << std::endl;
+	//std::cout << "\033[33m" << "SERVER" << "\033[0m" << std::endl;
 	_target_file = combinePaths(_server.getRoot(), request.getRequestFile(), "");
 	if(!(isMethodAllowed(request.getMethod(),_server.getMethods())))
 	{
@@ -545,33 +557,33 @@ int Response::handleNoMatch()
 	}
 	if (isDirectory(_target_file))
 	{
-		//std::cout << "is directoryyy\n";
-		//std::cout << "target file:" << _target_file << std::endl;
+		////std::cout << "is directoryyy\n";
+		////std::cout << "target file:" << _target_file << std::endl;
 		if (_target_file[_target_file.length() - 1] != '/')
 		{
-			//std::cout << "redirect\n";
+			////std::cout << "redirect\n";
 			_status_code = 301;
 			_location = request.getRequestFile() + "/";
-			//std::cout << "location:" << _location << std::endl;
+			////std::cout << "location:" << _location << std::endl;
 			return 1;
 		}
 		_target_file += _server.getIndex();
 		// if there is not index on this directory...
 		if (!fileExists(_target_file))
 		{
-			//std::cout << "\033[31mError: Directory requested and not index for it: \033[0m" << _target_file << std::endl;
+			////std::cout << "\033[31mError: Directory requested and not index for it: \033[0m" << _target_file << std::endl;
 			_status_code = 404;
 			return 1;
 		}
 		// if the index specified for this directory is another directory...
 		if (isDirectory(_target_file))
 		{
-			//std::cout << "\033[31mRedirection: Directory requested and index is another directory: \033[0m" << _target_file << std::endl;
+			////std::cout << "\033[31mRedirection: Directory requested and index is another directory: \033[0m" << _target_file << std::endl;
 			_status_code = 301;
 			_location = combinePaths(request.getRequestFile(), _server.getIndex(), "");
 			if(_location[_location.length() - 1] != '/')
 				_location.insert(_location.end(), '/');
-			//std::cout << "\033[31mRedirected to: \033[0m" << _location << std::endl;
+			////std::cout << "\033[31mRedirected to: \033[0m" << _location << std::endl;
 			
 			return 1;
 		}
@@ -608,7 +620,7 @@ int Response::handleMatch(std::string location)
 	}
 	if (checkIfReturn(target_location))
 	{
-		//std::cout << "RETURN\n";
+		////std::cout << "RETURN\n";
 		_status_code = 301;
 		return 1;
 	}
@@ -628,7 +640,7 @@ int Response::handleMatch(std::string location)
 		else
 			_target_file = combinePaths(_server.getRoot(), request.getRequestFile(), "");
 	}
-	std::cout << "target file: " << _target_file << std::endl;
+	//std::cout << "target file: " << _target_file << std::endl;
 		
 	//! HANDLE CGI
 	std::cout << "target fileEEeee: " << _target_file << std::endl;
@@ -637,6 +649,7 @@ int Response::handleMatch(std::string location)
 	{
 		return (handleDirectory(target_location));
 	}
+	
 	return (0);
 }
 
@@ -644,7 +657,7 @@ int Response::handleMatch(std::string location)
 // This is the main function that handles a request.
 // It first tries to find a matching location and calls handleMatch or handleNoMatch depending on the result.
 // It returns 0 on success, 1 on failure.
-int Response::handleRequest() 
+int Response::handleRequest()
 {
 	std::string location_match;
 	int index;
@@ -654,6 +667,7 @@ int Response::handleRequest()
 		return handleNoMatch();
 	else
 		return handleMatch(location_match);
+	return 0;
 }
 
 int Response::getStatusCode()
@@ -663,7 +677,7 @@ int Response::getStatusCode()
 
 void 	Response::location()
 {
-	//std::cout << "location: " << _location << std::endl;
+	////std::cout << "location: " << _location << std::endl;
 	if (_location.length())
 	{
 		_response_content.append("Location: "+ _location +"\r\n");
@@ -706,4 +720,17 @@ std::string	Response::getErrorPage(void)
 	}
 	return "";
 }
-
+Response &Response::operator=(const Response &rhs)
+{
+  	_server = rhs._server;
+	_CGI_response = rhs._CGI_response;
+	_m_headers = rhs._m_headers;
+	_response_content = rhs._response_content;
+	_status_code = rhs._status_code;
+	_response_body = rhs._response_body;
+	_path = rhs._path;
+	_location = rhs._location;
+	_target_file = rhs._target_file;
+	_auto_index = rhs._auto_index;
+	_isCGIResponse = rhs._isCGIResponse;
+}

@@ -1,6 +1,7 @@
 #include "../includes/Client.hpp"
 
 
+
 Client::Client(Server &serv, int a_fd) : _client_fd(a_fd), _is_CGI(false)
 {
     setServer(serv);
@@ -18,9 +19,14 @@ int Client::getClientFd() const
     return _client_fd;
 }
 
-void    Client::buildResponse()
+Server Client::getServer() const
 {
-	//std::cerr << "build Body" << std::endl;
+    return server;
+}
+
+void Client::buildResponse()
+{
+	////std::cerr << "build Body" << std::endl;
 
     response.setRequest(this->request);
     response.buildResponse();
