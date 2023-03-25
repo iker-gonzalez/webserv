@@ -22,6 +22,7 @@ function handleFileSelect()
 	var reader = new FileReader();
 	reader.onload = function(event){
 		fileContentInput.value = event.target.result;
+		console.log(event.target.result); // print file content to console
 	};
 	reader.readAsText(fileInput.files[0]);
 }

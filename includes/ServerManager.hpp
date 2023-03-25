@@ -24,7 +24,7 @@ public:
 
     // Server core. Infinitive loop
     bool acceptNewConnection(Server &a_m_server);
-    bool readRequest(Client &a_client);
+    bool readRequest(int fd, Client &a_client);
     bool sendResponse(int fdToSend, Client& ar_client);
     bool sendCGIResponse(Client &a_client);
     bool readCGIResponse(Client &a_client);

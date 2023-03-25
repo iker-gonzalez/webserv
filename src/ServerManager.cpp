@@ -53,7 +53,7 @@ bool ServerManager::serverCore()
             else if (FD_ISSET(i, &read_fds) && _m_fd_client.find(i) != _m_fd_client.end()) 
             {
             //   readRequest(_m_fd_client.at(i));
-               if (!readRequest(_m_fd_client.at(i)))
+               if (!readRequest(i, _m_fd_client.at(i)))
 		       	return false;
             }
             else if (FD_ISSET(i, &write_fds))
@@ -250,23 +250,31 @@ bool ServerManager::acceptNewConnection(Server &a_m_server)
 	return true;
 
 }
-bool ServerManager::readRequest(Client &a_client)
+bool ServerManager::readRequest(int fd, Client &a_client)
 {
-	char buffer[1024];
-	
-	int bytes_received = recv(a_client.getClientFd(), buffer, sizeof(buffer), 0);
-	if (bytes_received < 0) 
-	{
-		std::cerr << "Error receiving data" << std::endl;
-		return false;
-	}
-	std::cerr << "\033[32mNEW REQUEST PARSED\033[0m" << std::endl;
-	_s_buffer = buffer;
+	ssize_t bytes_read;
+	std::string headers = "";
+	size_t end;
+	char c;
 
-	std::cerr << _s_buffer << std::endl;
-	if (!a_client.request.parseRequest(_s_buffer, a_client.getClientFd()))
+	while ((end = headers.find("\r\n\r\n")) == std::string::npos)
 	{
-	removeFdSet(a_client.getClientFd() ,_read_fds);
+		if ((bytes_read = recv(fd, &c, 1, 0)) == -1 || bytes_read == 0)
+		{
+			std::cout << "Error receiving\n";
+			return false;
+		}
+		headers.push_back(c);
+	}
+	std::cout << headers << std::endl;
+
+	std::cerr << "\033[32mNEW REQUEST\033[0m" << std::endl;
+	//_s_buffer = data;
+
+	std::cerr << headers << std::endl;
+	if (!a_client.request.parseRequest(headers, a_client.getClientFd()))
+	{
+		removeFdSet(a_client.getClientFd() ,_read_fds);
 		return true;
 
 	}

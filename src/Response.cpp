@@ -348,6 +348,9 @@ std::string Response::parseMultiPartRequest(const std::string& request_body, con
 	std::vector<std::string> parts;
 	size_t pos = 0;
 
+	std::cout << "REQUEST BODY\n";
+	std::cout << request_body << std::endl;
+
 	// split the request body into parts based on the boundary
 	while ((pos = request_body.find(boundary, pos)) != std::string::npos)
 	{

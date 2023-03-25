@@ -17,7 +17,7 @@ Request::~Request()
 	
 }
 
-void Request::parseHeaders(std::string& request)
+bool Request::parseHeaders(std::string& request)
 {
 
 	int i;
@@ -26,6 +26,11 @@ void Request::parseHeaders(std::string& request)
 
 	i = request.find_first_of(" ", 0);
 	_method = request.substr(0, i);
+	if (_method != "GET" && _method != "POST" && _method != "DELETE")
+	{
+		std::cerr << "Invalid Request Method" << std::endl;
+		return false;
+	}
 	k = request.find_first_of(" ", i + 1);
 	_requestFile = request.substr(i + 1, k - i - 1);
 	j = request.find_first_of('\r', k + 1);
@@ -53,10 +58,10 @@ void Request::parseHeaders(std::string& request)
 	//print map content
 	//std::cout << "*******REQUEST PARSED (MAP)********" << std::endl;
 	//std::cout << "-----------------------------------" << std::endl;
-	std::map<std::string, std::string>::iterator it;
-   	for (it = _m_headers.begin(); it != _m_headers.end(); ++it) {
+	//std::map<std::string, std::string>::iterator it;
+   	//for (it = _m_headers.begin(); it != _m_headers.end(); ++it) {
 	   	//std::cout << it->first << it->second << std::endl;
-   }
+   //}
 }
 
 	
@@ -79,15 +84,16 @@ int	Request::parseBody(int client_fd)
 	}
 	else 
 	{
-		char buffer[1024];
+		char buffer[20000];
 		int bytes_left = _content_length;
 		while (bytes_left > 0)
 		{
-			int bytes_read = recv(client_fd, buffer, std::min(bytes_left, 1024), 0);
+			int bytes_read = recv(client_fd, buffer, sizeof(buffer), 0);
 			// handle error
 			if (bytes_read < 0)
 			{
 				std::cerr << "Error receiving dataAA" << std::endl;
+				perror("");
 				return (1);
 			}
 			else
@@ -211,8 +217,6 @@ int Request::getPort() const
 bool Request::parseRequest(std::string request, int client_fd)
 {
 	parseHeaders(request);
-	//if (checkErrors())
-	//	return false;
 	parseBody(client_fd);
 	return true;
 }
