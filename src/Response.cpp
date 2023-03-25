@@ -197,14 +197,14 @@ void	Response::buildResponse()
 	setStatusLine();
 	if (!_isCGIResponse)
 		setHeaders();
-		////std::cerr << "-----BUILD BODY----" << std::endl;  
-		////std::cerr <<_response_content << std::endl;  
-		////std::cerr <<_response_body << std::endl;  
+		//std::cerr << "-----BUILD BODY---- " << std::endl;  
+		//std::cerr <<_response_content << std::endl;  
+		//std::cerr <<_response_body << std::endl;  
 	if (!(_response_body.empty()))
 	{
 		_response_content.append(_response_body);
 	}
-	////std::cerr << _response_content << std::endl;
+	//std::cerr << _response_content << std::endl;
 }
 
 void	Response::findLocation(std::string path, std::vector<Location> locations, std::string &location_key)
@@ -322,14 +322,14 @@ CGI Response::getCGIResponse() const
 int Response::handleCGI(const Location &location)
 {
 	_isCGIResponse= true;
-	//////std::cout << "CGI:Request File" << request.getRequestFile() << std::endl;
+	//std::cout << "CGI:Request File" << request.getRequestFile() << std::endl;
 	std::string requestFile = request.getRequestFile();
 
 	const std::string index_file = location.getIndex();
 
 	_CGI_response.createCGIEnvironment(request, location);
 	
-	//_CGI_response.setupPipes(request.);
+	_CGI_response.setupPipes();
 	//_response_body.clear();
 	_response_body = _CGI_response.execute();
 
@@ -627,6 +627,7 @@ int Response::handleMatch(std::string location)
 
 	if (target_location.getPath().find("cgi-bin") != std::string::npos)
 	{
+		//std::cerr << "--- cg in 1 " << std::endl; 
         return handleCGI(target_location);
 	}
 	//! HANDLE CGI
@@ -733,4 +734,5 @@ Response &Response::operator=(const Response &rhs)
 	_target_file = rhs._target_file;
 	_auto_index = rhs._auto_index;
 	_isCGIResponse = rhs._isCGIResponse;
+	return *this;
 }
