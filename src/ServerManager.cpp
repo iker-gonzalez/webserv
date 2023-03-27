@@ -44,20 +44,28 @@ bool ServerManager::serverCore()
         //loop over the read_fds"
         for (int i = 0; i < _max_socket ; ++i)
         {
+							std::cout << "ULALAAAA\n";
+
             // New connection
             if (FD_ISSET(i, &read_fds) && _m_fd_server.find(i) != _m_fd_server.end())
             {
+							std::cout << "NEW CONNECCCT\n";
+
                 if (!acceptNewConnection(_m_fd_server.at(i)))
 		            return false;
             }
             else if (FD_ISSET(i, &read_fds) && _m_fd_client.find(i) != _m_fd_client.end()) 
             {
+							std::cout << "REAAAAADSSS\n";
+
             //   readRequest(_m_fd_client.at(i));
                if (!readRequest(i, _m_fd_client.at(i)))
 		       	return false;
             }
             else if (FD_ISSET(i, &write_fds))
             {
+							std::cout << "WRITEEEESS\n";
+
                 //Client waiting_client  = _m_fd_client[i];
 				//bool isCGI = waiting_client.getIsCGI();
                 //if (isCGI && FD_ISSET(waiting_client.response.getCGIResponse().pipe_in[1], &write_fds) )
@@ -261,10 +269,12 @@ bool ServerManager::readRequest(int fd, Client &a_client)
 	{
 		if ((bytes_read = recv(fd, &c, 1, 0)) == -1 || bytes_read == 0)
 		{
-			std::cout << "Error receiving\n";
+			std::cout << "Error receivingdw\n";
+			perror("");
 			return false;
 		}
 		headers.push_back(c);
+		std::cout << headers << std::endl;
 	}
 	std::cout << headers << std::endl;
 

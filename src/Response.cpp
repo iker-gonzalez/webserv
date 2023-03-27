@@ -182,6 +182,7 @@ bool	Response::checkIfReturn(Location &location)
 {
 	if (!location.getReturn().empty())
 	{
+		std::cout << "RETUUUU\n";
 		_location = location.getReturn();
 		//if (_location[0] != '/')
 		//	_location.insert(0, 1, '/');
@@ -302,7 +303,7 @@ int		Response::buildBody()
 		std::ofstream file(_target_file.c_str(), std::ios::binary);
 		if (file.fail())
 		{
-			_status_code = 403;
+			_status_code = 404;
 			return (1);
 		}
 		if (((request.getHeader("Content-Type:")).find("multipart/form-data")) != std::string::npos)
@@ -459,7 +460,7 @@ int Response::handleNoMatch()
 	_target_file = combinePaths(_server.getRoot(), request.getRequestFile(), "");
 	if(!(isMethodAllowed(request.getMethod(),_server.getMethods())))
 	{
-		_status_code = 403;
+		_status_code = 405;
 		return (1);
 	}
 	if (!(isClientSizeAllowed(_server.getClientSize())))
