@@ -263,7 +263,7 @@ bool ServerManager::acceptNewConnection(Server &a_m_server)
 }
 bool ServerManager::readRequest(int fd, Client &a_client)
 {
-	char buffer[2000];
+	char buffer[4000];
 	
 	int bytes_received = recv(fd, buffer, sizeof(buffer), 0);
 	if (bytes_received < 0) 
@@ -277,11 +277,11 @@ bool ServerManager::readRequest(int fd, Client &a_client)
 		closeFd(fd);
 		return true;
 	}
-	//buffer[bytes_received] = '\0';
+	buffer[bytes_received] = '\0';
 //	std::cerr << "\033[32mNEW REQUEST PARSED\033[0m" << std::endl;
 	std::cout << "\033[1;31mReadRequest Client. FD:" << fd <<"BYTES:" <<bytes_received <<  "\033[0m\n" << std::endl;
 
-//	std::cerr << "PARSE REQUEST" << std::endl;
+	std::cerr << "PARSE REQUEST" << a_client.request.getRawBody()<< std::endl;
 	_s_buffer = buffer;
 
 	std::cerr << _s_buffer << std::endl;

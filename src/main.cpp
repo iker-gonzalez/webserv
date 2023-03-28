@@ -10,6 +10,8 @@
 #include "../includes/Response.hpp"
 #include "../includes/ServerManager.hpp"
 
+//Para ver los procesos abierto con un puerto en específico lsof -i :'Numero de puerto'
+// kill PID_DEL_PROCESSO
 int main(int ac, char **av)
 {
 	// Get the configuration file, if there is not one given as argument take default.conf 

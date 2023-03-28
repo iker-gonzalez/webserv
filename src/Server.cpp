@@ -213,6 +213,7 @@ std::string Server::getServerName() const
 
 Location& Server::getLocationsByReference(int nbr_localitaion)
 {
+
 	return (_v_location.at(nbr_localitaion));
 }
 void Server::setServerName(const std::string& aserver_name)

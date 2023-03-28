@@ -217,5 +217,16 @@ std::string buildErrorPage(int status_code)
 }
 
 */
+void getLastLineofString( const std::string & string, std::string& last_line)
+{
+	int count = string.length() - 1;
+	char c = string[count];
+	while (string[count] != '\n')
+	{
+		count--;
+	}
+
+	last_line = string.substr(count, string.length());
+}
 
 

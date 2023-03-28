@@ -22,6 +22,7 @@ Request &Request::operator=(const Request &rhs)
     _client_fd = rhs._client_fd;
 
 	_request_body = rhs._request_body;
+	_raw_body = rhs._raw_body;
 	_method	= rhs._method;
 	_requestFile = rhs._requestFile;
 	_m_headers = rhs._m_headers;
@@ -57,6 +58,16 @@ bool Request::parseHeaders(std::string &request)
 		j = request.find_first_of("\r\n", k);
 		if (j == std::string::npos)
 			break;
+		std::string header_key = request.substr(i, k - i + 1);
+		if (header_key == "Content-Type:")
+		{
+			if (_m_headers.count(header_key) != 0)
+			{
+				std::cerr << "FOUNDDD" << std::endl;
+				i = j + 2;
+				break;
+			}
+		}
 		_m_headers[request.substr(i, k - i + 1)] = request.substr(k + 1, j - k);
 		i = j + 2;
 	}
@@ -69,7 +80,7 @@ bool Request::parseHeaders(std::string &request)
 		return false;
 	_serverName = v_host[0];
 	_port = std::atoi(v_host[1].c_str());
-	//std::cerr << "!!!!!!!!!!!!1" <<_serverName<< _port<< std::endl;
+	std::cerr << "!!!!!!!!!!!!1" <<_serverName<< _port<< std::endl;
 
 	//print map content
 	////std::cout << "*******REQUEST PARSED (MAP)********" << std::endl;
@@ -110,7 +121,7 @@ int	Request::parseBody(int client_fd)
 			// handle error
 			if (bytes_read < 0)
 			{
-				//std::cerr << "Error receiving dataAA" << std::endl;
+				std::cerr << "Error receiving dataAA" << std::endl;
 				return (1);
 			}
 			else
@@ -126,10 +137,7 @@ int	Request::parseBody(int client_fd)
 	//if (_requestFile == "/cgi-bin" )
 		
 	// store the request body in the member variable
-	_request_body = body_str;
-	////std::cout << "REQUEST BODY" << std::endl;
-	////std::cout << "------------" << std::endl;
-	////std::cout << _request_body << std::endl;
+
 	////std::cout << "-----F------" << std::endl;
 	return 0;
 }
@@ -220,7 +228,7 @@ std::string Request::parseChunkedBody(int client_fd) const
 			// handle error
 			if (bytes_read < 0)
 			{
-				//std::cerr << "Error receiving data" << std::endl;
+				std::cerr << "Error receiving data" << std::endl;
 				return "";
 			}
 			if (buffer[0] == '\n') {
@@ -239,6 +247,8 @@ int Request::getPort() const
 
 bool Request::parseRequest(std::string request, int client_fd)
 {
+	_raw_body = request;
+
 	if (!parseHeaders(request))
 		return false;
 	//if (checkErrors())
@@ -252,11 +262,17 @@ std::string		Request::getServerName() const
 	return (this->_serverName);
 }
 
-std::string Request::getHeader(std::string const &name)
-{
-	return (_m_headers[name]);
+std::string Request::getHeader(std::string const &name) const
+{	
+	if (_m_headers.count(name))
+		return (_m_headers.at(name));
+	return (NULL);
 }
 
+std::string Request::getRawBody() const
+{
+    return _raw_body;
+}
 std::ostream &operator<<(std::ostream &ors, const Request &a_request)
 {
 	if (a_request.getClientFd() == 0)

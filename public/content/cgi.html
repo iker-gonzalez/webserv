@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>File Upload</title>
+	
+</head>
+<body>
+    <div class="cgi-post cgi">
+        <h1>This is a CGI using the POST method (python)</h1>
+        <form action="/cgi-bin/helloworld.py" method="POST">
+            <label>Username:<br><input type="text" name="username" placeholder="Username"></label>
+            <label>Password (will be shown after):<br><input type="password" name="password" placeholder="Password"></label>
+            <button class="btn">Submit</button>
+        </form>
+    </div>
+    <div class="cgi-post upload">
+        <h1>This is a CGI using the POST method UPLOAD file (python)</h1>
+        <form enctype="multipart/form-data" action = "../cgi-bin/upload.py" method="post" >
+        <p>File: <input type="file" name="filename" id="fileid" class="form-control">
+            <input type="submit" value="SEND" href="#"></p>
+     </form>
+    </div>
+    <footer>
+		<p>&copy; 2023 Iker & Zaloa's Webserv. All rights reserved.</p>
+	</footer>
+</body>
+</html>

@@ -38,13 +38,13 @@ std::map<std::string, std::string> CGI::getEnvMap() const
     return _m_env;
 }
 
-bool CGI::setupPipes()
+bool CGI::setupPipes(std::string &content)
 {
-   // if (!content.empty())
-   // {
-   //     if (pipe(pipe_in) < 0)
-   //         return false;
-   // }
+     if (!content.empty())
+    {
+        if (pipe(pipe_in) < 0)
+            return false;
+    }
     if (pipe(pipe_out) < 0)
     {
         close(pipe_in[0]);
@@ -53,10 +53,10 @@ bool CGI::setupPipes()
     }
     return true;
 }
-std::string CGI::execute()
+std::string CGI::execute(std::string &content)
 {
 
-    	std::string res = "";
+    std::string res = "";
     _pid_CGI = fork();
 	if (_pid_CGI == 0)
 	{
@@ -64,56 +64,63 @@ std::string CGI::execute()
 		dup2(pipe_out[1], STDOUT_FILENO);
 		close(pipe_out[1]);
 
+        if (!content.empty())
+		{
+			close(pipe_in[1]);
+			dup2(pipe_in[0], STDIN_FILENO);
+			close(pipe_in[0]);
+		}
 
-       //FILE	*fIn = tmpfile();
-	   //FILE	*fOut = tmpfile();
-	   //pipe_in[0] = fileno(fIn);
-	   //pipe_out[1] = fileno(fOut);
-
-       //dup2(pipe_in[0], STDIN_FILENO);
-		//dup2(pipe_out[1], STDOUT_FILENO);
-
-		//dup2(pipe_in[0], STDIN_FILENO);
-		//dup2(pipe_out[1], STDOUT_FILENO);
-		//close(pipe_in[0]);
-		//close(pipe_in[1]);
-		//close(pipe_out[0]);
-		//close(pipe_out[1]);
 		bool status = execve(this->_argv[0], this->_argv, this->_env_char);
 		exit(status);
 	}
-	else if (this->_pid_CGI > 0)
+	else if (_pid_CGI > 0)
     {
         close(pipe_out[1]);
 
+		if (!content.empty())
+		{
+			close(pipe_in[0]);
+			write(pipe_in[1], content.c_str(), content.size());
+			std::cerr << "PIPE INFO:\n" << content.c_str() << std::endl;
+            close(pipe_in[1]);
+		}
         char buffer[1024];
 		int  readBytes;
+		int  readBytesTotal = 0;
 		while ((readBytes = read(pipe_out[0], buffer, 1024)) > 0)
 		{
 			res.append(buffer, readBytes);
+            readBytesTotal +=  readBytes;
 		}
-
         if (readBytes == -1)
 		{
-			//std::cerr << "Couldn't read from CGI " << _argv[0] << ": " << strerror(errno) << std::endl;
+			std::cerr << "Couldn't read from CGI " << _argv[0] << ": " << strerror(errno) << std::endl;
 			close(pipe_out[0]);
 			return "";
 		}
+
+        std::cout << "Finished reading from CGI " << _argv[0] << std::endl;
+        std::cout << "Finished RES: " << res << std::endl;
+        std::cout << "Finished Bytes: " << readBytes << std::endl;
+
         close(pipe_out[0]);
 		waitpid(_pid_CGI, NULL, WNOHANG);
         // continue process
     }
 	else
 	{
-        //std::cerr << "Fork failed" << std::endl;
+        std::cerr << "Fork failed" << std::endl;
         return NULL;
 	//	error_code = 500;
 	}
+
     ////std::cerr << "-------------EXECUTE CGI---------------" << std::endl;
     //for (size_t i = 0; _env_char[i]; i++)
 	//	std::free(_env_char[i]);
 	//for (size_t i = 0; _argv[i]; i++)
 	//	std::free(_argv[i]);
+    std::free(_argv);
     ////std::cerr << "-------------CGI RESPONSEEE---------------" << std::endl;
     ////std::cerr << res << std::endl;
 
@@ -175,17 +182,25 @@ void CGI::createCGIEnvironment(const Request &ar_request, const Location& ar_loc
 
     if (ar_request.getMethod() == "POST")
     {
-        std::map<std::string, std::string>	m_requestHeaders =
-                                           ar_request.getHeaders();
-        _m_env["CONTENT_LENGTH"] =  m_requestHeaders["content-length"];
-        _m_env["CONTENT_TYPE"] =  m_requestHeaders["content-type"];
+        _m_env["CONTENT_LENGTH"] =  ar_request.getHeader("Content-Length:");
+        _m_env["CONTENT_TYPE"] =  ar_request.getHeader("Content-Type:");
+        _m_env["UPLOAD_DIRECTORY"] =  "public/content/uploads"; //
+       std::cerr << "------CONTENTE_LENGHT" <<_m_env["CONTENT_LENGTH"] <<std::endl; 
+       std::cerr << "------CONTENT_TYPE" <<_m_env["CONTENT_TYPE"] <<std::endl; 
+       	std::map<std::string, std::string>::iterator it;
+     	//for (it = m_requestHeaders.begin(); it != m_requestHeaders.end(); ++it) 
+          //  std::cout << it->first << it->second << std::endl;
+       
        // _m_env["UPLOAD_DIRECTORY"] =  
     }
 
     std::string script_name = ar_request.getRequestFile();
     // If the request file is a .py dont apend the index
     int pos = script_name.find(".py");
-    if (pos == script_name.length()- 3)
+    std::cout << "-----SCRIPT_NAME----" << script_name << std::endl;
+    std::cout << "-----REQUEST_URI----" << ar_location.getCgiPass() << std::endl;
+    std::cout << "-----REQUEST_METHOD----" << ar_request.getMethod() << std::endl;
+    if (pos != script_name.length()- 3)
     {
         script_name += "/" + ar_location.getIndex();
     }
@@ -215,8 +230,8 @@ void CGI::prepareArgForExecve()
     for ( it = _m_env.begin(); it != it_end; it++ )
     {
         std::string env_varible = (*it).first + "=" + (*it).second;
- //       //std::cout << "ENV_var: " << env_varible << std::endl;
         _env_char[i] = strdup(env_varible.c_str());
+        std::cout << "ENV_var: " << _env_char[i] << std::endl;
 
         i++;
     }

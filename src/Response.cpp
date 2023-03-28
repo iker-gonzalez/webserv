@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <dirent.h>
+#include <algorithm>
 
 
 Response::Response()
@@ -321,6 +322,40 @@ CGI Response::getCGIResponse() const
 }
 int Response::handleCGI(const Location &location)
 {
+		std::cout << "handleCGI" << std::endl;
+
+	std::string content;
+	if (((request.getHeader("Content-Type:")).find("application/x-www-form-urlencoded")) != std::string::npos)
+	{
+		getLastLineofString(request.getRawBody(),content );
+	}
+	else if (((request.getHeader("Content-Type:")).find("multipart/form-data")) != std::string::npos)
+	{
+		std::string content_type = request.getHeader("Content-Type:");
+		size_t boundary_begin = content_type.find("boundary=") + 9;
+		size_t boundary_length = content_type.length();
+		std::cout << "CGI:end" << boundary_length << std::endl;
+		std::cout << "CGI:begin" << boundary_begin << std::endl;
+		if (boundary_begin == std::string::npos)
+			return 1;
+		std::string boundary = content_type.substr(boundary_begin, boundary_length - boundary_begin);
+		std::cout << "CGI:BOIUNDARY" << boundary << std::endl;
+		std::string raw_temp = request.getRawBody();
+		size_t pos = raw_temp.find(boundary);
+		if (pos == std::string::npos)
+			return 1;
+		std::cout << "CGI:pos" << pos << std::endl;
+        raw_temp.erase(pos, boundary.length());
+		size_t boundary_first_occurrence = raw_temp.find(boundary);
+		if (boundary_first_occurrence == std::string::npos)
+			return 1;
+		std::cout << "CGI:boundary_first_occurrence" << boundary_first_occurrence << std::endl;
+		content = raw_temp.substr(boundary_first_occurrence, raw_temp.length() -boundary_first_occurrence );
+
+		std::cout << "CGI:CONTENT" << content << std::endl;
+		std::cout << "CGI:CONTENT TYPE" << content_type << std::endl;
+	}
+
 	_isCGIResponse= true;
 	std::cout << "CGI:Request File" << request.getRequestFile() << std::endl;
 	std::string requestFile = request.getRequestFile();
@@ -329,17 +364,18 @@ int Response::handleCGI(const Location &location)
 
 	_CGI_response.createCGIEnvironment(request, location);
 	
-	_CGI_response.setupPipes();
+	_CGI_response.setupPipes(content);
 	//_response_body.clear();
-	_response_body = _CGI_response.execute();
+	_response_body = _CGI_response.execute(content);
 
 
 	//exit(0);
-	return 0;
+	return 1;
 }
 
 int		Response::buildBody()
 {
+
 	if (handleRequest())
 	{
 		std::cerr << "-------------file body00:--------------\n";
@@ -371,7 +407,7 @@ int		Response::buildBody()
 	{
 		std::cerr << "-------------file body1:--------------TagetFile" << _target_file << std::endl ;
 
-		if (!_isCGIResponse)
+
 
 		if (fileExists(_target_file))
 		{

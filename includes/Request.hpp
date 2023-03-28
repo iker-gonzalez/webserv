@@ -12,6 +12,7 @@ class Request
 		int									_client_fd;
 
 		std::string							_request_body;
+		std::string							_raw_body;
 		std::string							_method; 		// GET, POST or DELETe
 		std::string							_requestFile; 	// Request HTML file (ej. /cgi-bin)
 		std::map<std::string, std::string>	_m_headers;		// All information
@@ -42,7 +43,8 @@ class Request
 		size_t								getContentLength(void) const;
 		std::string							getServerName() const;
 		int									getPort() const;
-		std::string 						getHeader(std::string const &name);
+		std::string 						getHeader(std::string const &name) const;
+		std::string 						getRawBody() const;
 };
 
 std::ostream& operator<<(std::ostream& ors, const Request& a_request);

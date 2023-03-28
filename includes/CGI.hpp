@@ -25,8 +25,8 @@ class CGI
         void    createCGIEnvironment(const Request &ar_request,
                                     const Location &ar_location);
         void    prepareArgForExecve();
-        bool    setupPipes();
-        std::string    execute(); 
+        bool    setupPipes(std::string &content);
+        std::string    execute(std::string &content); 
    
     private:
         // Enviromnet variables 

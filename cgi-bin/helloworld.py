@@ -7,8 +7,10 @@ import cgi
 form = cgi.FieldStorage()
 
 # Get data from fields
-username = form.getvalue('username')
-password = form.getvalue('password')
+# username = form.getvalue('username')
+username = "gfdgd"
+#password = form.getvalue('password')
+password = "Sloa"
 
 #print(form.keys())
 

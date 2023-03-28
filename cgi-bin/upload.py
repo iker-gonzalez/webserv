@@ -1,32 +1,20 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
-# Import modules for CGI handling 
-import cgi 
+import cgi, os
 
-# Create instance of FieldStorage 
 form = cgi.FieldStorage()
 
-# Get data from fields
-username = form.getvalue('username')
-password = form.getvalue('password')
+# Get filename here
+fileitem = form['filename']
 
-#print(form.keys())
-
-content = [
-	"<html>",
-	"<head>",
-	"<title>Hello - Second CGI Program</title>",
-	"</head>",
-	"<body>",
-	"<h2>Hello {username}, your password is {password}</h2>".format(username = username, password = password),
-	"</body>",
-	"</html>"
-]
-
-contentLength = sum(len(s) for s in content)
-
-print("Content-Length: {clength}".format(clength = contentLength))
-print("Content-type: text/html\r\n\r\n")
-
-for s in content:
-	print(s)
+# Test if the file was uploaded
+#if fileitem.filename:
+#   open(os.getcwd() + '/cgi-bin/tmp/' + os.path.basename(fileitem.filename), 'wb').write(fileitem.file.read())
+#   message = 'The file "' + os.path.basename(fileitem.filename) + '" was uploaded to ' + os.getcwd() + '/cgi-bin/tmp'
+#else:
+#   message = 'Uploading Failed'
+print("HTTP/1.1 200 OK")
+print ("Content-type:text/html\r\n")
+print("<html>")
+print("<head>")
+print("<h1> " + fileitem.filename + " </h1>")
