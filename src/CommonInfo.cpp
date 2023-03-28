@@ -198,7 +198,7 @@ bool CommonInfo::checkIndex(const std::string& aindex)
 {
 	if (_is_index == true)
 		return false;
-	if (!CheckExtension(aindex, ".html") && !CheckExtension(aindex, ".py") )
+	if (!CheckExtension(aindex, ".html") && !CheckExtension(aindex, ".py") && !CheckExtension(aindex, ".bad_extension") )
 		return false;
 	_is_index = true;
 	return true;
