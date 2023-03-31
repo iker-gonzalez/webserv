@@ -10,7 +10,16 @@ form = cgi.FieldStorage()
 username = form.getvalue('username')
 password = form.getvalue('password')
 
-#print(form.keys())
+# Descomenta esto y mira que tengas python3 installado. A ver si recoge la información el cgi.FieldStorage()
+# echo "username=foo&password=bar" | python3 helloword.py
+
+# Print the form data to the console
+if form:
+    for key in form.keys():
+        print("{}: {}".format(key, form.getvalue(key)))
+else:
+    print("No form data found")
+
 
 content = [
 	"<html>",
