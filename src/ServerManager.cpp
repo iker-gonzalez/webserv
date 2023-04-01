@@ -44,8 +44,6 @@ bool ServerManager::serverCore()
         //loop over the read_fds"
         for (int i = 0; i < _max_socket ; ++i)
         {
-							std::cout << "ULALAAAA\n";
-
             // New connection
             if (FD_ISSET(i, &read_fds) && _m_fd_server.find(i) != _m_fd_server.end())
             {
@@ -264,7 +262,9 @@ bool ServerManager::readRequest(int fd, Client &a_client)
 	std::string headers = "";
 	size_t end;
 	char c;
+	int total_bytes_read;
 
+	total_bytes_read = 0;
 	while ((end = headers.find("\r\n\r\n")) == std::string::npos)
 	{
 		if ((bytes_read = recv(fd, &c, 1, 0)) == -1 || bytes_read == 0)
@@ -274,9 +274,15 @@ bool ServerManager::readRequest(int fd, Client &a_client)
 			return false;
 		}
 		headers.push_back(c);
-		std::cout << headers << std::endl;
+		total_bytes_read += bytes_read;
 	}
-	std::cout << headers << std::endl;
+	if (!total_bytes_read)
+	{
+		closeFd(fd);
+		return true;
+	}
+	headers[total_bytes_read] = '\0';
+	//std::cout << headers << std::endl;
 
 	std::cerr << "\033[32mNEW REQUEST\033[0m" << std::endl;
 	//_s_buffer = data;

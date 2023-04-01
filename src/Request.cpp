@@ -82,7 +82,7 @@ int	Request::parseBody(int client_fd)
 	{
 		body_str = parseChunkedBody(client_fd);
 	}
-	else 
+	else
 	{
 		char buffer[20000];
 		int bytes_left = _content_length;
