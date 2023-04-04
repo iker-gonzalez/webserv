@@ -1,16 +1,25 @@
 #!/usr/bin/python3
 
 # Import modules for CGI handling 
+import os 
+import sys 
 import cgi 
+import cgitb; cgitb.enable()
 
 # Create instance of FieldStorage 
 form = cgi.FieldStorage()
 
+if form:
+	for key in form.key():
+		print("{}: {}".format(key, form.getvalue(key)))
+else
+	print("No from data found")
+
 # Get data from fields
-# username = form.getvalue('username')
-username = "gfdgd"
-#password = form.getvalue('password')
-password = "Sloa"
+username = form.getvalue("username")
+#username = "gfdgd"
+password = form.getvalue("password")
+#password = "Sloa"
 
 #print(form.keys())
 

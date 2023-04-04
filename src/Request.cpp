@@ -135,7 +135,7 @@ int	Request::parseBody(int client_fd)
 	}
 	
 	//if (_requestFile == "/cgi-bin" )
-		
+	_request_body = body_str;
 	// store the request body in the member variable
 
 	////std::cout << "-----F------" << std::endl;
@@ -177,6 +177,7 @@ std::string Request::parseChunkedBody(int client_fd) const
 	std::string body_str;
 	char buffer[1024];
 	int bytes_left = 0;
+	 std::cerr << "Error receiving data Chunked_1" << std::endl;
 
 	while (true) {
 		// read the chunk size
@@ -187,7 +188,7 @@ std::string Request::parseChunkedBody(int client_fd) const
 			// handle error
 			if (bytes_read < 0)
 			{
-				//std::cerr << "Error receiving data" << std::endl;
+				std::cerr << "Error receiving data Chunked_1" << std::endl;
 				return "";
 			}
 			if (buffer[0] == '\r') {
@@ -209,7 +210,7 @@ std::string Request::parseChunkedBody(int client_fd) const
 			// handle error
 			if (bytes_read < 0)
 			{
-				std::cerr << "Error receiving data BB" << std::endl;
+				std::cerr << "Error receiving data Chunked_2" << std::endl;
 				return "";
 			}
 			//else if (bytes_read == 0)
@@ -228,7 +229,7 @@ std::string Request::parseChunkedBody(int client_fd) const
 			// handle error
 			if (bytes_read < 0)
 			{
-				std::cerr << "Error receiving data" << std::endl;
+				std::cerr << "Error receiving data Chunked_3"  << std::endl;
 				return "";
 			}
 			if (buffer[0] == '\n') {

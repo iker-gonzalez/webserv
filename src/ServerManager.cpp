@@ -268,7 +268,7 @@ bool ServerManager::readRequest(int fd, Client &a_client)
 	int bytes_received = recv(fd, buffer, sizeof(buffer), 0);
 	if (bytes_received < 0) 
 	{
-		std::cerr << "Error receiving data" << std::endl;
+		std::cerr << "Error receiving data 1" << std::endl;
 		return false;
 	}
 	else if (bytes_received == 0)
