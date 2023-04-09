@@ -19,7 +19,7 @@ bool ConfigFile::CheckConfig()
 {
 	if (!CheckExtension(_filename, std::string(".conf")))
 	{
-		std::cout << "Bad extension" << std::endl;
+		std::cerr << "Bad extension" << std::endl;
 		return false;
 	}
 	if (!ReadFile())
@@ -43,7 +43,7 @@ bool ConfigFile::ReadFile(void)
 	std::ifstream infile(_filename.c_str());
 	if (!infile.is_open())
 	{
-		std::cout << "Infile unable to open" << std::endl;
+		std::cerr << "Infile unable to open" << std::endl;
 		return (false);
 	}
 	std::string line;

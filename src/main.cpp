@@ -10,20 +10,23 @@
 #include "../includes/Response.hpp"
 #include "../includes/ServerManager.hpp"
 
+//Para ver los procesos abierto con un puerto en específico lsof -i :'Numero de puerto'
+// kill PID_DEL_PROCESSO
 int main(int ac, char **av)
 {
+
 	// Get the configuration file, if there is not one given as argument take default.conf 
 	std::string filename;
 	if (ac == 1)
 		filename = "config/default.conf";
 	else
 		filename = av[1];
-	std::cout << filename << std::endl;
+	std::cerr << filename << std::endl;
 	// Check configuration file and get all information
 	ConfigFile conf(filename);
 	if (!conf.CheckConfig())
 	{
-		std::cout << "Bad ConfigFile" << std::endl;
+		std::cerr << "Bad ConfigFile" << std::endl;
 		return false;
 	}
 

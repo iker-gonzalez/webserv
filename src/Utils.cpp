@@ -16,7 +16,7 @@ bool isDigit(const std::string& a_attributes)
 }
 
 
-bool splitString(std::string& aline, std::string character, std::vector<std::string>& asplit_line)
+bool splitString(std::string aline, std::string character, std::vector<std::string>& asplit_line)
 {
 	std::string create_line;
 	std::string::iterator it = aline.begin();
@@ -192,7 +192,7 @@ std::string getStatusMessage(int statusCode)
 
 bool errorMessage(const std::string message)
 {
-	std::cout << message << std::endl;
+	std::cerr << message << std::endl;
 	return false;
 }
 /*
@@ -217,5 +217,16 @@ std::string buildErrorPage(int status_code)
 }
 
 */
+void getLastLineofString( const std::string & string, std::string& last_line)
+{
+	int count = string.length() - 1;
+	char c = string[count];
+	while (string[count] != '\n')
+	{
+		count--;
+	}
+
+	last_line = string.substr(count, string.length());
+}
 
 

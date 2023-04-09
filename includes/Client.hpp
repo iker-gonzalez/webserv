@@ -15,6 +15,7 @@ class Client
 
 		// Getters
 		int		getClientFd() const;
+		Server	getServer() const;
 		void	buildResponse();
 		void    setServer(Server &serv);
 

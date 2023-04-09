@@ -3,6 +3,8 @@
 #include <sstream>
 #include <string>
 #include <iostream>
+#include <dirent.h>
+#include <algorithm>
 
 
 Response::Response()
@@ -39,7 +41,7 @@ void	Response::setStatusLine()
 int		Response::readFile()
 {
 	std::ifstream file(_target_file.c_str());
-	std::cout << "\033[1;34mtarget file: " << _target_file << "\033[0m" << std::endl;
+	std::cerr << "\033[1;34mtarget file: " << _target_file << "\033[0m" << std::endl;
 	std::ostringstream ss;
 	if (file.fail())
 	{
@@ -64,6 +66,9 @@ void	Response::setContentType()
 {
 	std::string file_extension = _target_file.substr(_target_file.find_last_of(".") + 1);
 	std::string content_type = get_content_type(file_extension);
+	//std::cout << "---CONTETNTYPE---" << content_type << std::endl;
+	if (_auto_index)
+		content_type = "text/html";
 	_response_content.append("Content-Type: ");
 	_response_content.append(content_type);
 	_m_headers["Content-Type: "] = content_type;
@@ -83,7 +88,7 @@ void	Response::setContentLength()
 
 void	Response::setConnection()
 {
-		if (((request.getHeader("Connection:")).find("keep-alive")) != std::string::npos)
+		if ((_m_headers["Connection: "].find("keep-alive")) != std::string::npos)
 		{
 			_response_content.append("Connection: keep-alive\r\n");
 			_m_headers["Connection: "] = "keep-alive";
@@ -126,18 +131,90 @@ void Response::setHeaders()
 	setDate();
 	_response_content.append("\r\n");
 }
+int		Response::createAutoIndexBody()
+{
+	DIR             *directoryPath;
+    std::string     dirListPage;
+	if (_target_file.empty())
+		return 1;
+	if (_target_file[_target_file.length() - 1] != '/')
+	{
+    	_target_file += "/";
+		_status_code = 301;
+	}
+	//std::cerr << "--------AUTOINDEX2-----------" << _target_file <<  std::endl;
+
+    directoryPath = opendir(_target_file.c_str());
+	if (directoryPath == NULL)
+	{
+		std::cerr << "Could not open directory for autoindex creation" << std::endl;
+		return 0;
+	}
+	_response_body == "<html>\n<head>\n<title>Index of" + _target_file + "</title>\n</head>\n<body>\n";
+   _response_body += "<table style=\"width:80%; font-size: 15px\">\n";
+   _response_body += "<hr>\n";
+   _response_body += "<th style=\"text-align:left\"> File Name </th>\n";
+   _response_body += "<th style=\"text-align:left\"> File Size </th>\n";
+
+	struct dirent *directoryStruct;
+	struct stat file_stat;
+    std::string file_path;
+    std::string file_name;
+	int filesFound = 0;
+	
+	// Get all the directorys and list them
+    while((directoryStruct = readdir(directoryPath)) != NULL)
+    {
+		file_name = directoryStruct->d_name;
+		file_path = _target_file + directoryStruct->d_name;
+       	if  (stat(file_path.c_str() , &file_stat) == 0)
+		{
+			if (directoryStruct->d_name[0] == '.')
+				continue;
+			filesFound++;
+        	if (S_ISDIR(file_stat.st_mode))
+				_response_body +=  "<tr>\n<td>\n<a href=\"" + file_name + "/\">" + file_name + "/</a>\n</td>\n</tr>\n";
+			else
+				_response_body +=  "<tr>\n<td>\n<a href=\"" + file_name + "\">" + file_name + "/</a>\n</td>\n</tr>\n";
+		}
+    }
+	_response_body += "<p>Total files found : " + std::to_string(filesFound) + "</p>\n";
+    _response_body.append("</body>\n");
+    _response_body.append("</html>\n");
+	////std::cerr << "--------AUTOINDEX2-----------" << _response_body <<  std::endl;
+	if (closedir(directoryPath) == -1)
+		return 1;
+	return 0;
+}
 
 void	Response::buildResponse()
 {
-	buildBody();
+    std::cerr << "\x1B[36 Building Body"  << std::endl;
+	// Create the body of the response
+	int buildStatus = buildBody();
+	if (buildStatus)
+	{
+		
+		std::cerr << "SERVER RESPONSE" << std::endl;
+		std::cerr << _response_content << std::endl;
+		if (!_isCGIResponse && !_auto_index)
+    		std::cerr << "\x1B[33mError Building Body"  << std::endl;
+	}
+
+	// Set status line at the beginning of the Respose message
 	setStatusLine();
+
+	// Set Headers except for CGI case, in this case the script already set headers
+	//?? Mirar si como norma siempre el CGI debe hacer eso o es algo que hemos puesto nosotros porquesi
 	if (!_isCGIResponse)
 		setHeaders();
-	if (!(_response_body.empty()))
-		_response_content.append(_response_body);
 
-	std::cout << "SERVER RESPONSE" << std::endl;
-	std::cerr << _response_content << std::endl;
+	if (!(_response_body.empty()))
+	{
+
+		_response_content.append(_response_body);
+	}
+
 }
 
 void	Response::findLocation(std::string path, std::vector<Location> locations, std::string &location_key)
@@ -182,7 +259,7 @@ bool	Response::checkIfReturn(Location &location)
 {
 	if (!location.getReturn().empty())
 	{
-		std::cout << "RETUUUU\n";
+		std::cerr << "RETUUUU\n";
 		_location = location.getReturn();
 		//if (_location[0] != '/')
 		//	_location.insert(0, 1, '/');
@@ -193,7 +270,7 @@ bool	Response::checkIfReturn(Location &location)
 
 int Response::isClientSizeAllowed(int client_size_allowed)
 {
-	std::cout << "client_size_allowed: " << client_size_allowed << std::endl;
+	std::cerr << "client_size_allowed: " << client_size_allowed << std::endl;
 	if (!client_size_allowed)
 		client_size_allowed = DEFAULT_CLIENT_MAX_BODY_SIZE;
 	if (request.getContentLength() > client_size_allowed)
@@ -253,40 +330,65 @@ CGI Response::getCGIResponse() const
 {
 	return _CGI_response;
 }
-int Response::handleCGI(const Location &location)
+
+int Response::handleCGI(const Location &location, const std::string& a_Method)
 {
 	_isCGIResponse= true;
-	////std::cout << "CGI:Request File" << request.getRequestFile() << std::endl;
-	std::string requestFile = request.getRequestFile();
 
+	std::cerr << "handleCGI2" << "-- MEthod:"<< a_Method << std::endl;
+	std::string content;
+	if (a_Method == "POST")
+	{
+		content = request.getBody();
+	}
+
+
+
+	std::cerr << "CGI:Request File" << request.getRequestFile() << std::endl;
+	std::string requestFile = request.getRequestFile();
+	if (a_Method == "DELETE")
+	{
+		content = request.getBody();
+
+		requestFile = "cgi-bin/delete.py";
+	}
 	const std::string index_file = location.getIndex();
 
 	_CGI_response.createCGIEnvironment(request, location);
-	_CGI_response.setupPipes();
-	//_response_body.clear();
-	_response_body = _CGI_response.execute();
+	
+	_CGI_response.setupPipes(content);
+	_response_body = _CGI_response.execute(content);
 
-
-	//exit(0);
-	return true;
+	return 1;
 }
 
 int		Response::buildBody()
 {
+	// Before
 	if (handleRequest())
 	{
+		std::cerr << "-------------file body00:--------------\n";
+
 		std::string error_page = getErrorPage();
 		if (!(error_page.empty()))
 		{
+			std::cerr << "ARE YOU HERE?" << std::endl;
 			_target_file = combinePaths(_server.getRoot(), error_page, "");
 			//std::cout << "ARE YOU HERE?" << std::endl;
 			if (readFile())
 				return (1);
 			return (0);
 		}
-		std::cout << "targeteoooo: " << _target_file << std::endl;
+		std::cerr << "targeteoooo: " << _target_file << std::endl;
 		return(1);
 	}
+	std::cerr << "-------------file body0:--------------\n";
+
+	if (_status_code)
+		return (0);
+	if (_auto_index)
+		return 0;
+	std::cerr << "_status code" << _status_code << std::endl;
 	if (request.getMethod() == "GET")
 	{
 		if (readFile())
@@ -294,16 +396,24 @@ int		Response::buildBody()
 	}
 	else if (request.getMethod() == "POST")
 	{
+		std::cerr << "-------------file body1:--------------TagetFile" << _target_file << std::endl ;
+
+
+
 		if (fileExists(_target_file))
 		{
+		std::cerr << "-------------file body2:--------------\n";
+
 			_status_code = 204;
 			return (0);
 		}
-		std::cout << "\033[1;34mtarget file: " << _target_file << "\033[0m" << std::endl;
+		std::cerr << "\033[1;34mtarget file: " << _target_file << "\033[0m" << std::endl;
 		std::ofstream file(_target_file.c_str(), std::ios::binary);
 		if (file.fail())
 		{
-			_status_code = 404;
+			std::cerr << "-------------file body2:--------------\n";
+
+			_status_code = 403;
 			return (1);
 		}
 		if (((request.getHeader("Content-Type:")).find("multipart/form-data")) != std::string::npos)
@@ -349,8 +459,8 @@ std::string Response::parseMultiPartRequest(const std::string& request_body, con
 	std::vector<std::string> parts;
 	size_t pos = 0;
 
-	std::cout << "REQUEST BODY\n";
-	std::cout << request_body << std::endl;
+	std::cerr << "REQUEST BODY\n";
+	std::cerr << request_body << std::endl;
 
 	// split the request body into parts based on the boundary
 	while ((pos = request_body.find(boundary, pos)) != std::string::npos)
@@ -409,7 +519,7 @@ void     Response::setServer(Server &server)
 
 // This function checks if the requested file is a directory and appends a slash if needed.
 // If a slash is added, it returns 1 and sets the path variable to the new request file.
-int Response::handleDirectory(Location target_location)
+int Response::handleDirectory(Location& target_location)
 {
 	if (_target_file[_target_file.length() - 1] != '/')
 	{
@@ -418,24 +528,39 @@ int Response::handleDirectory(Location target_location)
 		return (1);
 	}
 	if (!target_location.getIndex().empty())
+	{
 		_target_file += target_location.getIndex();
-	else
-		_target_file += _server.getIndex();
-	//std::cout << "target file 2:" << _target_file << std::endl;
-	if (!fileExists(_target_file))
+		return 0;
+	}
+	// Check if autoindex is on
+	else if (target_location.getAutoindex())
 	{
 		// allows to generate a directory listing for a given location
-		if (target_location.getAutoindex())
-		{
-			_target_file.erase(_target_file.find_last_of('/') + 1);
+		//std::cerr << "--------HOLAAA-3----" <<_target_file << std::endl;
 			_auto_index = true;
-			return (0);
+		if (_target_file[_target_file.length() - 1] != '/')
+		{
+    		_target_file += "/";
+			_status_code = 301;
+			//std::cerr << "--------HOLAAA-4----" <<_target_file << std::endl;
+
 		}
+		int error = createAutoIndexBody();
+		if (error)
+			_status_code = 500;
+		else if (!error && _status_code != 301) //We previusly modify request file
+			_status_code = 200;
+		return 0;
+	}
+	// Add index of the server
 		else
-				{
-			_status_code = 404;
-					return (1);
-		}
+		_target_file += _server.getIndex();	
+
+		//std::cerr << "--------HOLAAA--5---" <<_target_file << std::endl;
+	// ?? Cuando llega aqui
+	// If the created _target_file does not exist
+	if (!fileExists(_target_file))
+	{
 		if (isDirectory(_target_file))
 		{
 			_status_code = 301;
@@ -455,12 +580,13 @@ int Response::handleDirectory(Location target_location)
 // It sets the target file to the path combined with the server root and calls handleDirectory.
 int Response::handleNoMatch() 
 {
-	std::cout << std::endl;
-	std::cout << "\033[33m" << "SERVER" << "\033[0m" << std::endl;
+	std::cerr << "\033[38;5;205mNO-MatchLOCATION\033[0m" << std::endl;
 	_target_file = combinePaths(_server.getRoot(), request.getRequestFile(), "");
+	
+	//?? Mirar si se puede agrupar esto y el de handle MAtch
 	if(!(isMethodAllowed(request.getMethod(),_server.getMethods())))
 	{
-		_status_code = 405;
+		_status_code = 403; //? En handleMAtch el status_code es diferente
 		return (1);
 	}
 	if (!(isClientSizeAllowed(_server.getClientSize())))
@@ -468,10 +594,11 @@ int Response::handleNoMatch()
 		_status_code = 413;
 		return (1);
 	}
+
 	if (isDirectory(_target_file))
 	{
-		//std::cout << "is directoryyy\n";
-		//std::cout << "target file:" << _target_file << std::endl;
+		////std::cout << "is directoryyy\n";
+		////std::cout << "target file:" << _target_file << std::endl;
 		if (_target_file[_target_file.length() - 1] != '/')
 		{
 			//std::cout << "redirect\n";
@@ -484,7 +611,7 @@ int Response::handleNoMatch()
 		// if there is not index on this directory...
 		if (!fileExists(_target_file))
 		{
-			//std::cout << "\033[31mError: Directory requested and not index for it: \033[0m" << _target_file << std::endl;
+			std::cerr << "\033[31mError: Directory requested and not index for it: \033[0m" << _target_file << std::endl;
 			_status_code = 404;
 			return 1;
 		}
@@ -519,9 +646,10 @@ Location	Response::findLocationByName(std::string target_location, std::vector<L
 // It then calls handleDirectory.
 int Response::handleMatch(std::string location)
 {
-	std::cout << std::endl;
-	std::cout << "\033[38;5;205mLOCATION\033[0m" << std::endl;
+	std::cerr << "\033[38;5;205mMatchLOCATION\033[0m" << std::endl;
 	Location target_location = findLocationByName(location, _server.getLocations());
+
+	// Get target file with the relative path
 	if (!(target_location.getAlias().empty()))
 		_target_file = combinePaths(target_location.getAlias(), request.getRequestFile().substr(target_location.getPath().length()), "");
 	else
@@ -531,8 +659,7 @@ int Response::handleMatch(std::string location)
 		else
 			_target_file = combinePaths(_server.getRoot(), request.getRequestFile(), "");
 	}
-	std::cout << "target file: " << _target_file << std::endl;
-
+	std::cerr << "****target file:******" << _target_file << std::endl;
 	if (!(isMethodAllowed(request.getMethod(), target_location.getMethods()))) {
 		_status_code = 405;
 		return 1;
@@ -542,25 +669,28 @@ int Response::handleMatch(std::string location)
 		_status_code = 413;
 		return 1;
 	}
+
 	if (checkIfReturn(target_location))
 	{
+		// If there is a return 
 		//std::cout << "RETURN\n";
 		_status_code = 301;
 		return 1;
 	}
+
+	// 
 	if (target_location.getPath().find("cgi-bin") != std::string::npos)
 	{
-		return handleCGI(target_location);
+		return handleCGI(target_location, request.getMethod());
 	}
-	//! HANDLE CGI
-
-		
-	//! HANDLE CGI
-
 	if (isDirectory(_target_file) && request.getMethod() != "POST")
 	{
+		std::cerr << "****handleDirectory:******" << _target_file << std::endl;
 		return (handleDirectory(target_location));
 	}
+	//! HANDLE CGI
+
+
 	return (0);
 }
 
@@ -570,9 +700,9 @@ int Response::handleMatch(std::string location)
 int Response::handleRequest() 
 {
 	std::string location_match;
-	int index;
-	index = 0;
+	
 	findLocation(request.getRequestFile(), _server.getLocations(), location_match);
+	
 	if (location_match.empty())
 		return handleNoMatch();
 	else
@@ -596,7 +726,7 @@ void 	Response::location()
 
 std::string		Response::get_content_type(std::string file_extension)
 {
-	std::cout << "file extension:" << file_extension << std::endl;
+	std::cerr << "file extension:" << file_extension << std::endl;
 	if (file_extension == "html" || file_extension == "htm")
 		return "text/html";
 	else if (file_extension == "json")

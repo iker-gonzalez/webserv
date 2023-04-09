@@ -6,7 +6,6 @@
 #include <netinet/in.h>				// for sockaddr_in
 #include <netinet/tcp.h>			// for TCP_MAXSEG macro
 #include <cstdlib>					// for std::atoi 
-#include "../includes/Server.hpp"
 #include <cstring>
 #include <cstdio>
 
@@ -170,7 +169,7 @@ int Server::getMaxPayloadSize(int sock)
 	socklen_t len = sizeof(max_payload_size);
 	int ret = getsockopt(sock, IPPROTO_TCP, tcp_maxseg, &max_payload_size, &len);
 	if (ret < 0) {
-		std::cout << "ERRROR GARRRAFAL\n";
+		std::cerr << "ERRROR GARRRAFAL\n";
 		// error handling
 		return -1;
 	}

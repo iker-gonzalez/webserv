@@ -1,6 +1,7 @@
 #include "../includes/Client.hpp"
 
 
+
 Client::Client(Server &serv, int a_fd) : _client_fd(a_fd), _is_CGI(false)
 {
     setServer(serv);
@@ -18,11 +19,15 @@ int Client::getClientFd() const
     return _client_fd;
 }
 
+Server Client::getServer() const
+{
+    return server;
+}
+
 void    Client::buildResponse()
 {
 	//std::cerr << "build Body" << std::endl;
-
-    response.setRequest(this->request);
+    response.setRequest(this->request); //?? El que deberia de crear la respuesta es Response y pasarle el Request como parametro de constructro?
     response.buildResponse();
 
 }
