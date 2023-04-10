@@ -16,7 +16,7 @@ SRC = src/main.cpp\
 OBJ	= $(SRC:.cpp=.o)
 
 
-CC = g++ -std=c++11 -g -fsanitize=address
+CC = c++ -std=c++11 -g3 -fsanitize=address
 CFLAGS = -Wall -Wextra -Werror 
 
 all : $(NAME)
