@@ -30,7 +30,11 @@ CGI::~CGI()
 
 CGI::CGI(const CGI &other)
 {
-   
+        pipe_out[0] = other.pipe_out[0];
+        pipe_out[1] = other.pipe_out[1];
+        pipe_in[1] = other.pipe_in[1];
+        pipe_in[0] = other.pipe_in[0];
+        _pid_CGI = other._pid_CGI;
 }
 
 std::map<std::string, std::string> CGI::getEnvMap() const
@@ -45,20 +49,23 @@ bool CGI::setupPipes(std::string &content)
         std::cerr << "Post pipe_in\n";
         if (pipe(pipe_in) < 0)
             return false;
-       // if (fcntl(pipe_in[0], F_SETFL, O_NONBLOCK) < 0)
-       //         std::cerr << "Prueba 2 fcntl fallida\n";
-        //if (fcntl(pipe_in[1], F_SETFL, O_NONBLOCK) < 0)
-        //        std::cerr << "Prueba 3 fcntl fallida\n";
+      // if (fcntl(pipe_in[0], F_SETFL, O_NONBLOCK) < 0)
+        //      std::cerr << "Prueba 2 fcntl fallida\n";
+      // if (fcntl(pipe_in[1], F_SETFL, O_NONBLOCK) < 0)
+        //       std::cerr << "Prueba 3 fcntl fallida\n";
+    std::cerr << pipe_in[1]<< "GET/POST pipeoit\n";
     }
-    std::cerr << "GET/POST pipeoit\n";
     if (pipe(pipe_out) < 0)
     {
         close(pipe_in[0]);
 	    close(pipe_in[1]);
         return false;
     }
-    //if (fcntl(pipe_out[0], F_SETFL, O_NONBLOCK) < 0)
-      //          std::cerr << "Prueba 2 fcntl fallida\n";
+    std::cerr << pipe_out[0]<< "GET/POST pipeOUT\n";
+
+  //  if (fcntl(pipe_out[0], F_SETFL, O_NONBLOCK) < 0)
+    //            std::cerr << "Prueba 2 fcntl fallida\n";
+
     return true;
 }
 std::string CGI::execute(std::string &content)
@@ -71,7 +78,8 @@ std::string CGI::execute(std::string &content)
         close(pipe_out[0]);
 		dup2(pipe_out[1], STDOUT_FILENO);
 		close(pipe_out[1]);
-
+     //   if (fcntl(pipe_out[0], F_SETFL, O_NONBLOCK) < 0)
+       //         std::cerr << "Prueba 2 fcntl fallida\n";
         if (!content.empty())
 		{
             //std::cerr << "DUP2 pipein" << std::endl;
@@ -88,40 +96,43 @@ std::string CGI::execute(std::string &content)
 	else if (_pid_CGI > 0)
     {
         close(pipe_out[1]);
+        std::cerr << pipe_out[0]<< "GET/POST pipeOUT2\n";
 
 		if (!content.empty())
+        
 		{
 
 			close(pipe_in[0]);
-			write(pipe_in[1], content.c_str(), content.size());
-			std::cerr << "PIPE INFO:\n" << content.c_str() << std::endl;
-            close(pipe_in[1]);
+			//write(pipe_in[1], content.c_str(), content.size());
+			//std::cerr << "PIPE INFO:\n" << content.c_str() << std::endl;
+           //close(pipe_in[1]);
+           
 		}
        
 
-        char buffer[1024];
-		int  readBytes;
-		int  readBytesTotal = 0;
-		while ((readBytes = read(pipe_out[0], buffer, 1024)) > 0)
-		{
-			res.append(buffer, readBytes);
-            readBytesTotal +=  readBytes;
-        if (readBytes == -1)
-		{
-			std::cerr << "Couldn't read from CGI " << ": " << strerror(errno) << std::endl;
-			close(pipe_out[0]);
-			return "";
-		}
-		}
-        close(pipe_out[0]);
-        if (waitpid(_pid_CGI, NULL, WNOHANG) < 0)
-        {
-            std::cerr << "CHILD ERROR: " << strerror(errno) << std::endl;
-        }
-        else{
-            std::cerr << "NOT CHILD ERROR: " << std::endl;
-
-        }
+        //char buffer[1024];
+		//int  readBytes;
+		//int  readBytesTotal = 0;
+		//while ((readBytes = read(pipe_out[0], buffer, 1024)) > 0)
+		//{
+		//	res.append(buffer, readBytes);
+        //    readBytesTotal +=  readBytes;
+        //if (readBytes == -1)
+		//{
+		//	std::cerr << "Couldn't read from CGI " << ": " << strerror(errno) << std::endl;
+		//	close(pipe_out[0]);
+		//	return "";
+		//}
+		//}
+        //close(pipe_out[0]);
+        //if (waitpid(_pid_CGI, NULL, WNOHANG) < 0)
+        //{
+        //    std::cerr << "CHILD ERROR: " << strerror(errno) << std::endl;
+        //}
+        //else{
+        //    std::cerr << "NOT CHILD ERROR: " << std::endl;
+//
+        //}
 
        // std::cerr << "Finished reading from CGI " << _argv[0] << std::endl;
         //std::cerr << "Finished RES: " << res << std::endl;
@@ -171,8 +182,8 @@ void CGI::createCGIEnvironment(const Request &ar_request, const Location& ar_loc
 	    std::string ConLenght = ar_request.getHeader("Content-Length:");
 	    std::string ConType = ar_request.getHeader("Content-Type:");
     
-	    //ConLenght = ConLenght.substr(1, ConLenght.size() - 2);
-	    //ConType = ConType.substr(1, ConType.size() - 2);
+	    ConLenght = ConLenght.substr(1, ConLenght.size() - 2);
+	    ConType = ConType.substr(1, ConType.size() - 2);
         _m_env["CONTENT_LENGTH"] = ConLenght;
         _m_env["CONTENT_TYPE"] = ConType;
         _m_env["UPLOAD_DIRECTORY"] =  "public/content/uploads"; 
@@ -220,3 +231,13 @@ void CGI::prepareArgForExecve()
     _argv[1] = strdup(_m_env["SCRIPT_NAME"].c_str());
 	_argv[2] = NULL;
 }
+CGI &CGI::operator=(const CGI &rhs){
+        pipe_out[0] = rhs.pipe_out[0];
+        pipe_out[1] = rhs.pipe_out[1];
+        pipe_in[1] = rhs.pipe_in[1];
+        pipe_in[0] = rhs.pipe_in[0];
+        _pid_CGI = rhs._pid_CGI;
+        //_argv = rhs._argv;
+        //_env_char = rhs._env_char;
+        return *this;
+    }

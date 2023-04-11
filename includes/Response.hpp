@@ -53,13 +53,18 @@ public:
 	void		setConnection();
 	void		server();
 	void		setDate();
+	void		setResponseBody(std::string& a_response_body);
+	void		setResponseContent(std::string& ar_ResponseContent);
 
 	//IS
-	bool		isCGIResponse() const;
+	int		isCGIResponse() const;
 
 	//Getters
 	std::string	getPath() const;
 	CGI			getCGIResponse() const;
+
+	// Setters
+	void		setIsCGIResponse(int a);
 
 	int 		handleCGI(const Location &location, const std::string& a_Method);
 	int			handleRequest();

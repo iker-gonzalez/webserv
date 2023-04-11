@@ -12,6 +12,8 @@ class CGI
         CGI();
         ~CGI();
         CGI(const CGI& other);
+    	CGI &operator=(const CGI & rhs);
+
 
 
         //Gettters
@@ -26,8 +28,7 @@ class CGI
                                     const Location &ar_location);
         void    prepareArgForExecve();
         bool    setupPipes(std::string &content);
-        std::string    execute(std::string &content); 
-   
+        std::string    execute(std::string &content);
     private:
         // Enviromnet variables 
         std::map<std::string, std::string> _m_env;

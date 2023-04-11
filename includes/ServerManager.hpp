@@ -23,7 +23,9 @@ public:
     // Server core. Infinitive loop
     bool acceptNewConnection(Server &a_m_server);
     bool readRequest(int fd, Client &a_client);
+    bool readCGIResponse(Client &a_client);
     bool sendResponse(int fdToSend, Client& ar_client);
+    bool sendCGIResponse(Client& ar_client);
 
 
     // FSET new fd in _read_fds/_write_fds and uppdate _max_socket
@@ -55,6 +57,7 @@ private:
     std::map<int, Server>   _m_fd_server;
     // Map contains each client with its file descriptor
     std::map<int, Client>   _m_fd_client;
+    std::map<int, Client>   _m_fd_cgi_client;
 };
 
 #endif

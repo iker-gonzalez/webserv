@@ -73,6 +73,7 @@ bool Request::readHeaderRequest(int client_fd)
 	int total_bytes_read;
 
 	total_bytes_read = 0;
+	std::cerr << "readHeaderRequest" << client_fd << std::endl;
 	while ((end = _request_header.find("\r\n\r\n")) == std::string::npos)
 	{
 		if ((bytes_read = recv(client_fd, &c, 1, 0)) == -1 )
@@ -353,6 +354,11 @@ std::string Request::getResquestHeaderStr(void) const
 {
     return _request_header;
 }
+void Request::setBody(std::string &a_body)
+{
+	_request_body = a_body;
+}
+
 std::ostream &operator<<(std::ostream &ors, const Request &a_request)
 {
    //std::cout << "CLIENT_FD: " << a_request.getClientFd() << std::endl;

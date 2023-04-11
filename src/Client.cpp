@@ -29,16 +29,19 @@ void    Client::buildResponse()
 	//std::cerr << "build Body" << std::endl;
     response.setRequest(this->request); //?? El que deberia de crear la respuesta es Response y pasarle el Request como parametro de constructro?
     response.buildResponse();
+    //CGI temp = response.getCGIResponse();
+    //std::cerr << temp.pipe_out[0]<< "GET/POST pipeOUT4\n";
+    
 
 }
-bool Client::getIsCGI() const
+int Client::getIsCGI() const
 {
-    return _is_CGI;
+    return response.isCGIResponse();
 }
 
-void Client::setIsCGI(bool a_is_CGI)
+void Client::setIsCGI(int a_is_CGI)
 {
-    _is_CGI = a_is_CGI;
+    response.setIsCGIResponse(a_is_CGI);
 }
 
 void    Client::setServer(Server &serv)

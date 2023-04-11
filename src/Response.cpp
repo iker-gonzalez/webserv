@@ -15,7 +15,7 @@ Response::Response()
 	_target_file = "";
 	_location = "";
 	_auto_index = false;
-	_isCGIResponse = false;
+	_isCGIResponse = 0;
 }
 
 Response::Response(Request &req) : request(req)
@@ -26,7 +26,7 @@ Response::Response(Request &req) : request(req)
 	_target_file = "";
 	_location = "";
 	_auto_index = false;
-	_isCGIResponse = false;
+	_isCGIResponse = 0;
 
 }
 
@@ -117,7 +117,16 @@ void	Response::setDate()
 	_m_headers["Date: "] = date;
 }
 
-bool Response::isCGIResponse() const
+void Response::setResponseBody(std::string &a_response_body)
+{
+	_response_body = a_response_body;
+}
+void Response::setResponseContent(std::string &ar_ResponseContent)
+{
+	_response_content = ar_ResponseContent;
+}
+
+int Response::isCGIResponse() const
 {
 	return _isCGIResponse;
 }
@@ -192,10 +201,16 @@ void	Response::buildResponse()
     std::cerr << "\x1B[36 Building Body"  << std::endl;
 	// Create the body of the response
 	int buildStatus = buildBody();
+	if (_isCGIResponse)
+	{
+    	std::cerr << _CGI_response.pipe_out[0]<< "GET/POST pipeOUT3\n";
+
+		std::cerr << "CGI RESPONSE" << std::endl;
+		return;
+	}
 	if (buildStatus)
 	{
 		
-		std::cerr << "SERVER RESPONSE" << std::endl;
 		std::cerr << _response_content << std::endl;
 		if (!_isCGIResponse && !_auto_index)
     		std::cerr << "\x1B[33mError Building Body"  << std::endl;
@@ -331,9 +346,13 @@ CGI Response::getCGIResponse() const
 	return _CGI_response;
 }
 
-int Response::handleCGI(const Location &location, const std::string& a_Method)
+void Response::setIsCGIResponse(int aiscgi)
 {
-	_isCGIResponse= true;
+	_isCGIResponse = aiscgi;
+}
+int Response::handleCGI(const Location &location, const std::string &a_Method)
+{
+	_isCGIResponse= 1;
 
 	std::cerr << "handleCGI2" << "-- MEthod:"<< a_Method << std::endl;
 	std::string content;
@@ -356,8 +375,12 @@ int Response::handleCGI(const Location &location, const std::string& a_Method)
 
 	_CGI_response.createCGIEnvironment(request, location);
 	
-	_CGI_response.setupPipes(content);
-	_response_body = _CGI_response.execute(content);
+	if (!_CGI_response.setupPipes(content))
+		return 0;
+
+	_CGI_response.execute(content);
+	std::cerr << "EXECUTE" << std::endl;
+	//_response_body = _CGI_response.execute(content);
 
 	return 1;
 }

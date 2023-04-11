@@ -62,6 +62,8 @@ class Request
 		std::string 						getRawBody() const;
 		bool								getIsChunked(void) const;
 		std::string							getResquestHeaderStr(void) const;
+
+		void								setBody(std::string &a_body);
 };
 
 std::ostream& operator<<(std::ostream& ors, const Request& a_request);

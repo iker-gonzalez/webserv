@@ -25,10 +25,10 @@ class Client
 		Server		server;
 
 		// Check
-		bool	getIsCGI() const;
+		int	getIsCGI() const;
 
 		// Setter
-		void	setIsCGI(bool a_is_CGI) ;
+		void	setIsCGI(int a_is_CGI) ;
 
 		// Poner private
 		//Request _request;
