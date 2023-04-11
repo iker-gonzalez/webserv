@@ -82,7 +82,7 @@ std::string CGI::execute(std::string &content)
        //         std::cerr << "Prueba 2 fcntl fallida\n";
         if (!content.empty())
 		{
-            //std::cerr << "DUP2 pipein" << std::endl;
+            std::cerr << "DUP2 pipein" << std::endl;
 			close(pipe_in[1]);
 			dup2(pipe_in[0], STDIN_FILENO);
             close(pipe_in[0]); //?? Lo cierr el no?
@@ -101,6 +101,7 @@ std::string CGI::execute(std::string &content)
 		if (!content.empty())
         
 		{
+        std::cerr << pipe_in[1]<< "GET/POST pipein\n";
 
 			close(pipe_in[0]);
 			//write(pipe_in[1], content.c_str(), content.size());
@@ -203,6 +204,8 @@ void CGI::createCGIEnvironment(const Request &ar_request, const Location& ar_loc
     }
    if (ar_request.getRequestFile()[0] == '/')
         script_name = script_name.substr(1,script_name.length() -1);
+
+
    // std::cerr << "-----SCRIPT_NAME----" << script_name << std::endl;
     this->_m_env["REQUEST_URI"] = ar_location.getCgiPass();
    this->_m_env["SCRIPT_NAME"] = script_name;

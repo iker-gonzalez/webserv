@@ -48,15 +48,14 @@ bool ServerManager::serverCore()
             else if (FD_ISSET(i, &read_fds) && _m_fd_client.find(i) != _m_fd_client.end()) 
             {
 				std::cerr << "readRequest I:"<< i << std::endl;
-				std::cerr << " readRequestISCGISEL:"<< _m_fd_client[i].getIsCGI()  << std::endl;
+				std::cerr << " readRequestISISEL:"<< _m_fd_client[i].getIsCGI()  << std::endl;
 
                if (!readRequest(i, _m_fd_client.at(i)))
 		       	return false;
             }
 
-			else if (FD_ISSET(i, &write_fds))
-            {
-				 if (_m_fd_client[i].getIsCGI() == true && _m_fd_client[i].request.getMethod() == "POST" &&
+
+			else if (_m_fd_client[i].getIsCGI() == true && _m_fd_client[i].request.getMethod() == "POST" &&
 				FD_ISSET(_m_fd_client[i].response.getCGIResponse().pipe_in[1], &write_fds)) 
             {
 				std::cerr << "sendCGIResponse I:"<< i << std::endl;
@@ -70,7 +69,7 @@ bool ServerManager::serverCore()
 				//std::cerr <<_m_fd_client[i].response.getCGIResponse().pipe_out[0] <<"there is a CGI READSELE\n "; 
 					readCGIResponse(_m_fd_client[i]);
 			}
-			else if (FD_ISSET(i, &write_fds) && !_m_fd_client[i].getIsCGI())
+			else if (FD_ISSET(i, &write_fds) && !_m_fd_client[i].getIsCGI()  && _m_fd_client.find(i) != _m_fd_client.end())
 			{
 		        	sendResponse(i, _m_fd_client[i]);
 
@@ -79,7 +78,6 @@ bool ServerManager::serverCore()
 			//	//std::cerr << "sendResponse:"<< i << std::endl;
 //
 			//	//else if (!_m_fd_client[i].getIsCGI())
-           	}
         }
 	}
 	closeServerSocket();
@@ -290,7 +288,7 @@ bool ServerManager::readRequest(int fd, Client &a_client)
 {
 	
     std::cerr << "\x1B[36mPARSE:"  <<fd <<std::endl;
-	bool status = a_client.request.parseRequest(a_client.getClientFd());
+	bool status = a_client.request.parseRequest(fd);
 	if (!status || a_client.request.getResquestHeaderStr().empty())
 	{
 		//if (a_client.request.getHeade())

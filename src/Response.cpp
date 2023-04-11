@@ -367,8 +367,8 @@ int Response::handleCGI(const Location &location, const std::string &a_Method)
 	std::string requestFile = request.getRequestFile();
 	if (a_Method == "DELETE")
 	{
-		content = request.getBody();
-
+		//content = request.getBody();
+		std::cerr << "DELETE CGI REQUEST FILE" << std::endl; 
 		requestFile = "cgi-bin/delete.py";
 	}
 	const std::string index_file = location.getIndex();
@@ -460,6 +460,13 @@ int		Response::buildBody()
 	else if (request.getMethod() == "DELETE")
 	{
 		if (!fileExists(_target_file))
+		{
+			_status_code = 404;
+			return (1);
+		}
+		std::string allow_directory = _target_file.substr(0, 23);
+		std::cerr << "allow_directory" << allow_directory << std::endl;  
+		if (allow_directory != "public/content/uploads/")
 		{
 			_status_code = 404;
 			return (1);

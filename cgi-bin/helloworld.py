@@ -29,7 +29,7 @@ else:
 		"<title>Hello - Second CGI Program</title>",
 		"</head>",
 		"<body>",
-		"<h2>Hello AA, your password is BB </h2>".format(username = username, password = password),
+		"<h2>Hello {username}, your password is {password} </h2>".format(username = username, password = password),
 		"</body>",
 		"</html>"
 	]

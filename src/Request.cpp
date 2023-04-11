@@ -85,9 +85,10 @@ bool Request::readHeaderRequest(int client_fd)
 			return true;
 		_request_header.push_back(c);
 		total_bytes_read += bytes_read;
+		//std::cerr << "_request_header" << _request_header << std::endl;
 	}
 	_request_header[total_bytes_read] = '\0';
-	std::cerr << "\033[32mNEW REQUEST\033[0m" << std::endl;
+	//std::cerr << "\033[32mNEW REQUEST\033[0m" << std::endl;
 	//std::cerr << _request_header << std::endl;
 
 
