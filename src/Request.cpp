@@ -77,10 +77,9 @@ bool Request::readHeaderRequest(int client_fd)
 		if ((bytes_read = recv(client_fd, &c, 1, 0)) == -1 )
 		{
 				std::cerr << bytes_read <<  "Error receivingdw\n";
-				perror("");
 				return false;
 		}
-		else if (!bytes_read )
+		else if (!bytes_read)
 			return true;
 		_request_header.push_back(c);
 		total_bytes_read += bytes_read;

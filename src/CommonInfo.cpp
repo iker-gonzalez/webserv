@@ -106,9 +106,8 @@ bool CommonInfo::Parse(std::string& aLine)
 	if (!fillInformation(v_strSplit) && !fillSpecificInfo(v_strSplit))
 		return false;
 	return true;
-
-
 }
+
 std::string CommonInfo::getListen() const
 {
 	return _listen;
@@ -194,6 +193,7 @@ bool CommonInfo::checkRoot(const std::string& aroot)
 	_is_root = true;
 	return true;
 }
+
 bool CommonInfo::checkIndex(const std::string& aindex)
 {
 	if (_is_index == true)
@@ -203,6 +203,7 @@ bool CommonInfo::checkIndex(const std::string& aindex)
 	_is_index = true;
 	return true;
 }
+
 bool CommonInfo::checkMethods(const std::vector<std::string>& a_v_methods)
 {
 
