@@ -14,7 +14,6 @@
 #include "Server.hpp"
 #include "CGI.hpp"
 
-#define DEFAULT_CLIENT_MAX_BODY_SIZE 20000
 
 class Response {
 
@@ -69,7 +68,7 @@ public:
 	bool		checkIfReturn(Location& location);
 	bool		isDirectory(std::string path);
 	bool		fileExists(const std::string& f);
-	int			isClientSizeAllowed(int client_size);
+	int			isClientSizeAllowed(int client_size, int location);
 	std::string	parseMultiPartRequest(const std::string& request_body, const std::string& boundary);
 	std::string	getResponseContent();
 	void		setServer(Server &server);

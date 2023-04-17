@@ -268,11 +268,16 @@ bool	Response::checkIfReturn(Location &location)
 	return false;
 }
 
-int Response::isClientSizeAllowed(int client_size_allowed)
+int Response::isClientSizeAllowed(int client_size_allowed, int location)
 {
+	if (location && !client_size_allowed)
+	{
+		if (_server.getClientSize())
+			client_size_allowed = _server.getClientSize();
+	}
 	std::cerr << "client_size_allowed: " << client_size_allowed << std::endl;
-	if (!client_size_allowed)
-		client_size_allowed = DEFAULT_CLIENT_MAX_BODY_SIZE;
+	std::cerr << "request content length: " << request.getContentLength() << std::endl;
+
 	if (request.getContentLength() > client_size_allowed)
 		return false;
 	return true;
@@ -589,7 +594,7 @@ int Response::handleNoMatch()
 		_status_code = 403; //? En handleMAtch el status_code es diferente
 		return (1);
 	}
-	if (!(isClientSizeAllowed(_server.getClientSize())))
+	if (!(isClientSizeAllowed(_server.getClientSize(), 0)))
 	{
 		_status_code = 413;
 		return (1);
@@ -664,7 +669,7 @@ int Response::handleMatch(std::string location)
 		_status_code = 405;
 		return 1;
 	}
-	if (!(isClientSizeAllowed(target_location.getClientSize())))
+	if (!(isClientSizeAllowed(target_location.getClientSize(), 1)))
 	{
 		_status_code = 413;
 		return 1;

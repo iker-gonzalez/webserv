@@ -12,7 +12,6 @@ Request::Request() : _client_fd(0),  _content_length(0), _port(0)
 
 	_is_chunked = false;
 
-	_content_length = 0;
 	_client_fd = 0;
 	_method = "";
 	_requestFile = "";
