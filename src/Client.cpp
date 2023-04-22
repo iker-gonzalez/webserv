@@ -5,10 +5,12 @@
 Client::Client(Server &serv, int a_fd) : _client_fd(a_fd), _is_CGI(false)
 {
     setServer(serv);
+    _time_out = time(NULL);
 }
 
 Client::Client()
 {
+    _time_out = time(NULL);
 }
 Client::~Client()
 {
@@ -47,4 +49,9 @@ void Client::setIsCGI(int a_is_CGI)
 void    Client::setServer(Server &serv)
 {
     response.setServer(serv);
+}
+
+time_t  Client::getTimeOut() const
+{
+    return _time_out;
 }

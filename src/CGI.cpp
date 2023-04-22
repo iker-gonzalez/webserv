@@ -174,7 +174,7 @@ void CGI::createCGIEnvironment(const Request &ar_request, const Location& ar_loc
 {
     const std::string cgi_executable = ar_location.getIndex();
 
-   if (ar_request.getMethod() == "GET")
+    if (ar_request.getMethod() == "GET")
         _m_env["QUERY_STRING"];
 
     if (ar_request.getMethod() == "POST")
@@ -191,7 +191,16 @@ void CGI::createCGIEnvironment(const Request &ar_request, const Location& ar_loc
          	//for (it = m_requestHeaders.begin(); it != m_requestHeaders.end(); ++it) 
               //  std::cout << it->first << it->second << std::endl;
     }
-
+    if (ar_request.getMethod() == "DELETE")
+    {
+        std::string ConLenght = ar_request.getHeader("Content-Length:");
+	    std::string ConType = ar_request.getHeader("Content-Type:");
+    
+	    ConLenght = ConLenght.substr(1, ConLenght.size() - 2);
+	    ConType = ConType.substr(1, ConType.size() - 2);
+        _m_env["CONTENT_LENGTH"] = ConLenght;
+        _m_env["CONTENT_TYPE"] = ConType;
+    }
     std::string script_name = ar_request.getRequestFile();
     // If the request file is a .py dont apend the index
     int pos = script_name.find(".py");

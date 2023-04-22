@@ -7,6 +7,8 @@
 #include "../includes/CGI.hpp"
 #include <sys/wait.h>
 
+#define MAX_TIMEOUT 10 // Time in seconds before client get kicked out if no data was sent.
+
 ServerManager::ServerManager( std::vector<Server> a_v_server) : _v_server(a_v_server),
 	_max_socket(0)
 {
@@ -50,8 +52,9 @@ bool ServerManager::serverCore()
 				std::cerr << "readRequest I:"<< i << std::endl;
 				std::cerr << " readRequestISISEL:"<< _m_fd_client[i].getIsCGI()  << std::endl;
 
-               if (!readRequest(i, _m_fd_client.at(i)))
-		       	return false;
+               readRequest(i, _m_fd_client.at(i));
+              //if (!readRequest(i, _m_fd_client.at(i)))
+		      //	return false;
             }
 
 
@@ -74,6 +77,8 @@ bool ServerManager::serverCore()
 		        	sendResponse(i, _m_fd_client[i]);
 
 			}
+
+			//checkTimeout();
 				
 			//	//std::cerr << "sendResponse:"<< i << std::endl;
 //
@@ -203,13 +208,14 @@ bool ServerManager::sendCGIResponse(Client &ar_client)
 
 void ServerManager::closeFd(const int fd_to_close)
 {
+	if (fd_to_close > 100)
+		exit(6);
     std:: cerr << "\033[32m " << fd_to_close << " Connection Closed.\033[0m" << std::endl;
 	if (FD_ISSET(fd_to_close, &_read_fds))
 		removeFdSet(fd_to_close, _read_fds);
 	else
-	{
 		removeFdSet(fd_to_close, _write_fds);
-	}
+
 	close(fd_to_close);   
 	if (_m_fd_server.count(fd_to_close))
 		_m_fd_server.erase(fd_to_close);
@@ -316,7 +322,8 @@ bool ServerManager::readRequest(int fd, Client &a_client)
 	if (a_client.getIsCGI())
     {
 		std::cerr <<a_client.getIsCGI()<< "there is a CGI Request and\n ";
-		if (a_client.request.getMethod() == "POST") 
+		//if (a_client.request.getMethod() == "POST" ||a_client.request.getMethod() == "DELETE") 
+		if (!a_client.request.getBody().empty()) 
 		{
         	addFdSet(a_client.response.getCGIResponse().pipe_in[1], _write_fds);
 			std::cerr << a_client.response.getCGIResponse().pipe_in[1]<< "there is a CGI WRITE\n "; 
@@ -369,6 +376,18 @@ bool ServerManager::readCGIResponse(Client &a_client)
     return true;
 }
 
+void ServerManager::checkTimeout()
+{
+	for(std::map<int, Client>::iterator it = _m_fd_client.begin() ; it != _m_fd_client.end(); ++it)
+    {
+        if (time(NULL) - it->second.getTimeOut() > MAX_TIMEOUT && it->second.getIsCGI())
+        {
+			std::cerr << "Close TIEMOUT" << std::endl;
+            closeFd(it->first);
+            return ;
+        }
+    }
+}
 void ServerManager::addFdSet(int new_fd, fd_set &a_fds_set)
 {
 	FD_SET(new_fd, &a_fds_set);
