@@ -356,21 +356,23 @@ int Response::handleCGI(const Location &location, const std::string &a_Method)
 
 	std::cerr << "handleCGI2" << "-- MEthod:"<< a_Method << std::endl;
 	std::string content;
-	if (a_Method == "POST")
-	{
+//	if (a_Method == "POST")
+//	{
 		content = request.getBody();
-	}
+//	}
 
 
 
 	std::cerr << "CGI:Request File" << request.getRequestFile() << std::endl;
+	std::cerr << "CGI:CONTETN" << content << std::endl;
+	std::cerr << "CGI:METHOD" << a_Method << std::endl;
 	std::string requestFile = request.getRequestFile();
-	if (a_Method == "DELETE")
-	{
-		//content = request.getBody();
-		std::cerr << "DELETE CGI REQUEST FILE" << std::endl; 
-		requestFile = "cgi-bin/delete.py";
-	}
+	//if (a_Method == "DELETE")
+	//{
+	//	//content = request.getBody();
+	//	std::cerr << "DELETE CGI REQUEST FILE" << std::endl; 
+	//	requestFile = "cgi-bin/delete.py";
+	//}
 	const std::string index_file = location.getIndex();
 
 	_CGI_response.createCGIEnvironment(request, location);
@@ -772,7 +774,8 @@ std::string		Response::get_content_type(std::string file_extension)
 	else if (file_extension == "gif")
 		return "image/gif";
 	else if (file_extension == "pdf")
-		return "application/pdf";
+		return "text/plain";
+		//return "application/pdf";
 	else if (file_extension == "txt")
 		return "text/plain";
 	else

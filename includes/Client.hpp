@@ -4,7 +4,7 @@
 #include "Request.hpp"
 #include "Response.hpp"
 #include "Server.hpp"
-
+#include <time.h>
 
 class Client 
 {
@@ -16,6 +16,7 @@ class Client
 		// Getters
 		int		getClientFd() const;
 		Server	getServer() const;
+		time_t	getTimeOut() const;
 		void	buildResponse();
 		void    setServer(Server &serv);
 
@@ -36,6 +37,7 @@ class Client
 	private:
 		int		_client_fd; 
 		bool	_is_CGI;
+		time_t  _time_out;
 };
 
 

@@ -1,15 +1,22 @@
 #!/usr/bin/env python
 import cgi
 import cgitb
-import os
+import cgitb
+import sys
+
 
 cgitb.enable()
 
 # Set the path to the directory where the file to be deleted is located
-file_path = "/public/content/uploads/"
+file_path = "./uploads/"
 
+for line in sys.stdin:
+    print(line)
 # Create the form object
 form = cgi.FieldStorage()
+
+# curl -X DELETE -d '{"delete": "descarga"}' localhost:8080/cgi-bin/delete.py
+print("HTTP/1.1 200 OK")
 
 # Check if the 'delete' parameter is present in the form
 if "delete" in form:
