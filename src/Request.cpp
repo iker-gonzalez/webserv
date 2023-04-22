@@ -12,7 +12,6 @@ Request::Request() : _client_fd(0),  _content_length(0), _port(0)
 
 	_is_chunked = false;
 
-	_content_length = 0;
 	_client_fd = 0;
 	_method = "";
 	_requestFile = "";
@@ -81,7 +80,7 @@ bool Request::readHeaderRequest(int client_fd)
 				std::cerr << bytes_read <<  "Error receivingdw\n";
 				return false;
 		}
-		else if (!bytes_read )
+		else if (!bytes_read)
 			return true;
 		_request_header.push_back(c);
 		total_bytes_read += bytes_read;
@@ -370,7 +369,8 @@ std::ostream &operator<<(std::ostream &ors, const Request &a_request)
    std::map<std::string, std::string> map = a_request.getHeaders();
 	std::map<std::string, std::string>::iterator it;
  	std::map<std::string, std::string>::iterator it_end = a_request.getHeaders().end();
-	for (it == map.begin(); it != it_end; ++it)
+	
+	//for (it == map.begin(); it != it_end; ++it)
 	//	//std::cout << "FIRST" << (*it).first <<  "SECOND" << (*it).second << std::endl;
 
    //std::cout << "CONTENT LENGHT: " << a_request.getContentLength() << std::endl;
