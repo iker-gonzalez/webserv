@@ -84,9 +84,9 @@ bool Request::readHeaderRequest(int client_fd)
 			return true;
 		_request_header.push_back(c);
 		total_bytes_read += bytes_read;
-		//std::cerr << "_request_header" << _request_header << std::endl;
 	}
 	_request_header[total_bytes_read] = '\0';
+		std::cerr << "_request_header" << _request_header << std::endl;
 	//std::cerr << "\033[32mNEW REQUEST\033[0m" << std::endl;
 	//std::cerr << _request_header << std::endl;
 
@@ -215,6 +215,10 @@ bool Request::parseNotChunkedBody(int client_fd)
 			std::cerr << "Error receiving dataAA" << std::endl;
 			return false;
 		}
+		else if(bytes_read == 0)
+		{
+			break;
+		}
 		else
 		{
 			//std::cout << "buffer:\n";
@@ -249,6 +253,10 @@ bool Request::parseChunkedBody(int client_fd)
 				break;
 			}
 			chunk_size_str += buffer[0];
+			if (bytes_read == 0)
+			{
+				break;
+			}
 		}
 		chunk_size = strtol(chunk_size_str.c_str(), NULL, 16);
 
@@ -267,6 +275,10 @@ bool Request::parseChunkedBody(int client_fd)
 				std::cerr << "Error receiving data Chunked_2" << std::endl;
 				return false;
 			}
+			else if (bytes_read == 0)
+			{
+				break;
+			}
 
 			_request_body.append(buffer, bytes_read);
 			bytes_left -= bytes_read;
@@ -283,6 +295,10 @@ bool Request::parseChunkedBody(int client_fd)
 				return false;
 			}
 			if (buffer[0] == '\n') {
+				break;
+			}
+			if (bytes_read == 0)
+			{
 				break;
 			}
 		}

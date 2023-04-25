@@ -10,31 +10,27 @@ SRC = src/main.cpp\
 		src/ServerManager.cpp\
 		src/Client.cpp\
 		src/Response.cpp\
-		src/CGI.cpp
-		#tests/non_blocking_server.cpp
+		src/CGI.cpp\
 
 OBJ	= $(SRC:.cpp=.o)
 
-
-CC = c++ -std=c++11 -g3 -fsanitize=address
+CC = c++ -std=c++98 -g3 -fsanitize=address
 CFLAGS = -Wall -Wextra -Werror 
 
-all : $(NAME)
+all: $(NAME)
 
-$(NAME) : $(OBJ)
-	$(CC) $(CFLAG) $(OBJ) -o $(NAME)
-
-%.o	: %.c 
+%.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+$(NAME): $(OBJ)
+	$(CC) $(CFLAGS) $(OBJ) -o $(NAME)
 
 clean:
 	rm -f $(OBJ)
-	#no descomentar porque borra los .cpp
 
 fclean: clean
 	rm -f $(NAME)
 
 re: fclean all 
 
-.PHONY : all clean fclean re bonus
+.PHONY : all clean fclean re

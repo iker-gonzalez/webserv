@@ -2,7 +2,6 @@
 
 # Import modules for CGI handling 
 import cgi 
-
 # Create instance of FieldStorage 
 form = cgi.FieldStorage()
 

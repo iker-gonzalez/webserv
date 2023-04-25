@@ -7,7 +7,7 @@
 #include "../includes/CGI.hpp"
 #include <sys/wait.h>
 
-#define MAX_TIMEOUT 10 // Time in seconds before client get kicked out if no data was sent.
+#define MAX_TIMEOUT 5 // Time in seconds before client get kicked out if no data was sent.
 
 ServerManager::ServerManager( std::vector<Server> a_v_server) : _v_server(a_v_server),
 	_max_socket(0)
@@ -39,7 +39,7 @@ bool ServerManager::serverCore()
 			return false;
 		}
         //loop over the read_fds"
-        for (int i = 0; i < _max_socket ; ++i)
+        for (int i = 0; i < _max_socket  ; ++i)
         {
             // New connection
             if (FD_ISSET(i, &read_fds) && _m_fd_server.find(i) != _m_fd_server.end())
@@ -58,7 +58,7 @@ bool ServerManager::serverCore()
             }
 
 
-			else if (_m_fd_client[i].getIsCGI() == true && _m_fd_client[i].request.getMethod() == "POST" &&
+			else if (_m_fd_client[i].getIsCGI() == true && _m_fd_client[i].request.getMethod() != "GET" &&
 				FD_ISSET(_m_fd_client[i].response.getCGIResponse().pipe_in[1], &write_fds)) 
             {
 				std::cerr << "sendCGIResponse I:"<< i << std::endl;
@@ -70,7 +70,7 @@ bool ServerManager::serverCore()
 				std::cerr << "readCGIResponse:"<< i << "PEP_OIT" <<  std::endl;
 				std::cerr << "ISCGISEL:"<< _m_fd_client[i].getIsCGI() <<_m_fd_client[i].response.getCGIResponse().pipe_out[0] << std::endl;
 				//std::cerr <<_m_fd_client[i].response.getCGIResponse().pipe_out[0] <<"there is a CGI READSELE\n "; 
-					readCGIResponse(_m_fd_client[i]);
+				readCGIResponse(_m_fd_client[i]);
 			}
 			else if (FD_ISSET(i, &write_fds) && !_m_fd_client[i].getIsCGI()  && _m_fd_client.find(i) != _m_fd_client.end())
 			{
@@ -78,9 +78,10 @@ bool ServerManager::serverCore()
 
 			}
 
-			//checkTimeout();
+			checkTimeout();
 				
-			//	//std::cerr << "sendResponse:"<< i << std::endl;
+		
+		//std::cerr << "sendResponse:"<< i << std::endl;
 //
 			//	//else if (!_m_fd_client[i].getIsCGI())
         }
@@ -136,31 +137,35 @@ bool ServerManager::sendResponse(int fdToSend, Client &ar_client)
 	int bytes_sent;
 
 	std::string response_content = ar_client.response.getResponseContent();
-	std::cout << "response content:\n" << response_content << std::endl;
+	//std::cout << "response content:\n" << response_content << std::endl;
 	std::cerr << "SEND RESPONSE: " << ar_client.response.getStatusCode() << std::endl;
 	//std::cerr << "\033[38;2;255;165;0m_status code\033[0m: " << ar_client.response.getStatusCode() << std::endl;
 	//std::cerr << "\033[38;2;255;165;0mFD\033[0m: " << fdToSend << std::endl;
 
-	bytes_sent = write(fdToSend, ar_client.response.getResponseContent().c_str(), ar_client.response.getResponseContent().length());
+	bytes_sent = send(fdToSend, ar_client.response.getResponseContent().c_str(), ar_client.response.getResponseContent().length(), 0);
 	closeFd(fdToSend);
-	//if (bytes_sent < 0 )
-	//	return false;
-	//else if (bytes_sent == 0 || bytes_sent == ar_client.request.getContentLength())
-    //{
-	//	if (ar_client.getIsCGI())
-	//	{
-    //        std:: cerr << "Client " << ar_client.getClientFd() << " Connection Closed." << std::endl;
-    //        closeFd(fdToSend);
-	//	}
-	//	else
-	//	{
-	//		removeFdSet(fdToSend, _write_fds);
-    //        addFdSet(fdToSend, _read_fds);
-	//	}
-    //}
+	if (bytes_sent < 0 )
+		return false;
+	else if (bytes_sent == 0 || bytes_sent == ar_client.request.getContentLength())
+    {
+        closeFd(fdToSend);
+		return true;
+		if (ar_client.getIsCGI())
+		{
+            std:: cerr << "Client " << ar_client.getClientFd() << " Connection Closed." << std::endl;
+            closeFd(fdToSend);
+		}
+		else
+		{
+			removeFdSet(fdToSend, _write_fds);
+            addFdSet(fdToSend, _read_fds);
+		}
+    }
 	//! meter condicion KEEP-ALIVE
 	//int bytes_sent = send(fdToSend, _s_buffer.c_str(),atoi(request.getHeaders()["Content-length"].c_str()), 0);
 	////std::cout << "bytes sent:" << bytes_sent << std::endl;
+        closeFd(fdToSend);
+
 	return true;
 }
 
@@ -169,7 +174,7 @@ bool ServerManager::sendCGIResponse(Client &ar_client)
 
 	int pipeToSent = ar_client.response.getCGIResponse().pipe_in[1];
 	std::string bodyToSent = ar_client.request.getBody();
-
+	bodyToSent[bodyToSent.length()] = '\0';
 	//close(ar_client.response.getCGIResponse().pipe_in[0]);
 	int bytes_sent = 0;
 	std::cerr << "\033[1;31msendCGIResponse FD:" << pipeToSent << "Body:" <<bodyToSent << "\033[0m\n" << std::endl;
@@ -185,11 +190,11 @@ bool ServerManager::sendCGIResponse(Client &ar_client)
 		return false;
 
 	}
-	//else if (bytes_sent == 0 || bytes_sent == bodyToSent.length())
-	else
+	else if (bytes_sent == 0 || bytes_sent == bodyToSent.length())
+//	else //??He write=0
 	{
 	   	closeFd(pipeToSent);
-		std::cerr << "FISICH SENDING PIPE INFO:\n" << bodyToSent.c_str() << std::endl;
+		std::cerr << "FISICH SENDING PIPE INFO:" << bodyToSent.c_str() << std::endl;
 		//ar_client.setIsCGI(1);
 		
 		return true;
@@ -351,8 +356,7 @@ bool ServerManager::readCGIResponse(Client &a_client)
 	int  readBytesTotal = 0;
 	while ((readBytes = read(pipeToRead, buffer, 1024)) > 0)
 	{
-		bodyToSent.append(buffer, readBytes);
-        readBytesTotal +=  readBytes;
+
     	if (readBytes == -1)
 		{
 			std::cerr << "Couldn't read from CGI " << ": " << strerror(errno) << std::endl;
@@ -360,7 +364,14 @@ bool ServerManager::readCGIResponse(Client &a_client)
 			a_client.setIsCGI(0);
 			return false;
 		}
+		else if (readBytes == 0)
+		{
+			break;
+		}
+		bodyToSent.append(buffer, readBytes);
+        readBytesTotal +=  readBytes;
 	}
+	bodyToSent[bodyToSent.length()] = '\0';
 	a_client.response.setResponseContent(bodyToSent); 
 	std::cerr << "CGI Response: " << bodyToSent << std::endl;
    	closeFd(pipeToRead);
@@ -383,7 +394,7 @@ void ServerManager::checkTimeout()
         if (time(NULL) - it->second.getTimeOut() > MAX_TIMEOUT && it->second.getIsCGI())
         {
 			std::cerr << "Close TIEMOUT" << std::endl;
-            closeFd(it->first);
+            //closeFd(it->first);
             return ;
         }
     }

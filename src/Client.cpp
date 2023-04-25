@@ -32,7 +32,6 @@ void    Client::buildResponse()
     response.setRequest(this->request); //?? El que deberia de crear la respuesta es Response y pasarle el Request como parametro de constructro?
     response.buildResponse();
     //CGI temp = response.getCGIResponse();
-    //std::cerr << temp.pipe_out[0]<< "GET/POST pipeOUT4\n";
     
 
 }

@@ -3,12 +3,12 @@ import cgi
 import cgitb
 import cgitb
 import sys
+import datetime
 
 
 cgitb.enable()
 
 # Set the path to the directory where the file to be deleted is located
-file_path = "./uploads/"
 
 for line in sys.stdin:
     print(line)
@@ -17,14 +17,20 @@ form = cgi.FieldStorage()
 
 # curl -X DELETE -d '{"delete": "descarga"}' localhost:8080/cgi-bin/delete.py
 print("HTTP/1.1 200 OK")
-
+filename = form.getvalue('username')
 # Check if the 'delete' parameter is present in the form
-if "delete" in form:
+if "username"  in form:
     # Get the name of the file to be deleted from the form
-    filename = form["delete"].value
-   
+    #filename = form["delete"].value
+   	# Retrive env from UPLOAD_DIRECTORY
+	uploadDir = os.environ['UPLOAD_DIRECTORY']
+	if (uploadDir == ""):
+		uploadDir = './uploads'
+	# Add / at the end if none is present
+	if (uploadDir[-1] != '/'):
+		uploadDir += '/'
     # Combine the file path and filename to get the full path to the file
-    file_to_delete = os.path.join(file_path, filename)
+    file_to_delete = os.path.join(uploadDir, filename)
    
     try:
         # Attempt to delete the file

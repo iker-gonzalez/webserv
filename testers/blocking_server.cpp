@@ -77,6 +77,7 @@ int block_server(ConfigFile &conf)
 
 		std::string request = "GET / HTTP/1.1\r\nHost: example.com\r\n\r\n";
 		send(sock, request.c_str(), request.length(), 0);
+		if 
 
 
 	//! Receive the response

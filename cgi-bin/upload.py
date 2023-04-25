@@ -29,10 +29,12 @@ if 'filename' in form:
 		#else:
 		open(uploadDir + fn, 'wb').write(fileitem.file.read())
 		message = 'The file \'' + fn + '\' was uploaded successfully to ' + uploadDir
+		print("HTTP/1.1 200 OK")
 else:
 	message = 'No file was uploaded'
+	print("HTTP/1.1 404 ")
 
-print("HTTP/1.1 200 OK")
+
 print ("Content-type:text/html\r\n")
 print ("<html>")
 print ("<head>")

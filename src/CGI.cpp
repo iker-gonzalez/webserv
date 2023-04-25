@@ -46,14 +46,10 @@ bool CGI::setupPipes(std::string &content)
 {
      if (!content.empty())
     {
-        std::cerr << "Post pipe_in\n";
+        std::cerr << "Post pipe_in" << content << std::endl; 
         if (pipe(pipe_in) < 0)
             return false;
-      // if (fcntl(pipe_in[0], F_SETFL, O_NONBLOCK) < 0)
-        //      std::cerr << "Prueba 2 fcntl fallida\n";
-      // if (fcntl(pipe_in[1], F_SETFL, O_NONBLOCK) < 0)
-        //       std::cerr << "Prueba 3 fcntl fallida\n";
-    std::cerr << pipe_in[1]<< "GET/POST pipeoit\n";
+       // std::cerr << pipe_in[1]<< "GET/POST pipeoit\n";
     }
     if (pipe(pipe_out) < 0)
     {
@@ -61,7 +57,7 @@ bool CGI::setupPipes(std::string &content)
 	    close(pipe_in[1]);
         return false;
     }
-    std::cerr << pipe_out[0]<< "GET/POST pipeOUT\n";
+    //std::cerr << pipe_out[0]<< "GET/POST pipeOUT\n";
 
   //  if (fcntl(pipe_out[0], F_SETFL, O_NONBLOCK) < 0)
     //            std::cerr << "Prueba 2 fcntl fallida\n";
@@ -200,6 +196,8 @@ void CGI::createCGIEnvironment(const Request &ar_request, const Location& ar_loc
 	    ConType = ConType.substr(1, ConType.size() - 2);
         _m_env["CONTENT_LENGTH"] = ConLenght;
         _m_env["CONTENT_TYPE"] = ConType;
+        _m_env["UPLOAD_DIRECTORY"] =  "public/content/uploads"; 
+
     }
     std::string script_name = ar_request.getRequestFile();
     // If the request file is a .py dont apend the index
@@ -215,7 +213,7 @@ void CGI::createCGIEnvironment(const Request &ar_request, const Location& ar_loc
         script_name = script_name.substr(1,script_name.length() -1);
 
 
-   // std::cerr << "-----SCRIPT_NAME----" << script_name << std::endl;
+    std::cerr << "-----SCRIPT_NAME----" << script_name << std::endl;
     this->_m_env["REQUEST_URI"] = ar_location.getCgiPass();
    this->_m_env["SCRIPT_NAME"] = script_name;
    this->_m_env["REQUEST_METHOD"] = ar_request.getMethod();
@@ -232,7 +230,7 @@ void CGI::prepareArgForExecve()
     {
         std::string env_varible = (*it).first + "=" + (*it).second;
         _env_char[i] = strdup(env_varible.c_str());
-        //std::cerr << "ENV_var: " << _env_char[i] << std::endl;
+        std::cerr << "ENV_var: " << _env_char[i] << std::endl;
         i++;
     }
     _env_char[i] = 0; 

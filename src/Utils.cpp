@@ -61,7 +61,7 @@ bool onlySpaces(const std::string& aLine)
 	return true;
 }
 /**/
-std::string getStatusMessage(int statusCode)
+std::string getStatusMessage(int statusCode)  //?? Esta funcion no se uitliza se puede borrar
 {
 	if (statusCode == 100) 
 		return "Continue";

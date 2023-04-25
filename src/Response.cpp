@@ -361,10 +361,7 @@ int Response::handleCGI(const Location &location, const std::string &a_Method)
 
 	std::cerr << "handleCGI2" << "-- MEthod:"<< a_Method << std::endl;
 	std::string content;
-//	if (a_Method == "POST")
-//	{
-		content = request.getBody();
-//	}
+	content = request.getBody();
 
 
 
@@ -458,6 +455,7 @@ int		Response::buildBody()
 				//std::cout << "file body:\n";
 				//std::cout << file_body << std::endl;
 				file.write(file_body.c_str(), file_body.length());
+	
 		}
 		 	//code assumes that the request is a regular request, and it simply
 			//writes the body of the request to the file
