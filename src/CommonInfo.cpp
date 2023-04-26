@@ -94,6 +94,7 @@ bool CommonInfo::fillInformation(std::vector<std::string>& a_v_strSplit)
 
 bool CommonInfo::Parse(std::string& aLine)
 {
+	(void)aLine;
 	std::string line_spaces;
 	if (aLine.empty() || onlySpaces(aLine))
 		return true;
@@ -187,6 +188,7 @@ void CommonInfo::setcloseBracket(bool a_close)
 
 bool CommonInfo::checkRoot(const std::string& aroot)
 {
+	(void)aroot;
 	if (_is_root == true)
 		return false;
 	//Mirar que exista el directorio
@@ -209,10 +211,8 @@ bool CommonInfo::checkMethods(const std::vector<std::string>& a_v_methods)
 
 	if (_is_v_methods == true)
 		return false;
-	//std::cout << _is_v_methods << std::endl;
 	for (unsigned int i = 0; i < a_v_methods.size(); i++)
 	{
-		//std::cout << "m:" << a_v_methods[i] << std::endl;
 		if (a_v_methods[i] != "GET" &&
 			a_v_methods[i] != "DELETE" &&
 			a_v_methods[i] != "POST")
@@ -241,6 +241,7 @@ bool CommonInfo::checkClientSize(const std::string& a_client_size)
 }
 bool CommonInfo::checkAutoindex(std::string& a_auto_index)
 {
+	
 	if (_is_autoindex == true)
 		return false;
 	if (a_auto_index.compare("on") && a_auto_index.compare("off"))
@@ -250,6 +251,8 @@ bool CommonInfo::checkAutoindex(std::string& a_auto_index)
 }
 bool CommonInfo::checkcloseBracket(bool a_auto_index)
 {
+	(void)a_auto_index;
+
 	if (_is_root == true)
 		return false;
 	_is_root = true;

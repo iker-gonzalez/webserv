@@ -79,7 +79,6 @@ bool ConfigFile::ReadFile(void)
 			{
 				int nbr_location = _v_server.at(_v_server.size() - 1).getLocations().size();
 				Location& tmp_location = _v_server.at(_v_server.size() - 1).getLocationsByReference(nbr_location - 1);
-//				std::cout << "tem_loca: " << tmp_location << std::endl; 
 				if (!tmp_location.Parse(line))
 					return false;
 				if (tmp_location.isCloseBracket())
@@ -88,19 +87,15 @@ bool ConfigFile::ReadFile(void)
 			else if (!_v_server.at(_v_server.size() - 1).Parse(line))
 				return false;
 		}
-
 		
-		//std::cout << line << std::endl;
 	}
-	for (unsigned int i = 0; i < _v_server.size(); i++)
-	{
-		//std::cout << _v_server[i] << std::endl;
-	}
+
 	return true;
 }
 
 bool ConfigFile::ParseFile(std::string &aline) const
 {
+	(void)aline;
 	return false;
 }
 
@@ -121,7 +116,8 @@ void ConfigFile::CheckNecessaryInfo() const
 		if ( !(*it_server).isAddress())
 			throw "Lack of necessary server info: (Port or Address)";
 		if (!(*it_server).isServerName())
-			throw "Lack of necessary server info: (Port or Address)"; std::vector<Location> v_location  = (*it_server).getLocations();
+			throw "Lack of necessary server info: (Port or Address)";
+		std::vector<Location> v_location  = (*it_server).getLocations();
 		std::vector<Location>::const_iterator it_location;
 		std::vector<Location>::const_iterator it_location_end = v_location.end();
 		for (it_location = v_location.begin(); it_location != it_location_end; it_location ++ )

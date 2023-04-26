@@ -44,8 +44,9 @@ class CGI
         // argv[0] -> Executable
         // argv[1] -> Path
         // argv[2] -> NULL
-        // env_char -> Enviroment
         char**  	_argv;
+        
+        // env_char -> Enviroment
         char **     _env_char;
 
 

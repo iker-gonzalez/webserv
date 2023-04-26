@@ -12,8 +12,7 @@ public:
 	ServerManager(std::vector<Server> a_v_server);
 	~ServerManager();
 
-    //Check maximun wait time
-    void    setupTimeout(); //?? Implementarlo
+ 
 
     // Main loop
 	bool    serverCore();

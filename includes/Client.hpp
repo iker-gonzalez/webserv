@@ -31,9 +31,6 @@ class Client
 		// Setter
 		void	setIsCGI(int a_is_CGI) ;
 
-		// Poner private
-		//Request _request;
-
 	private:
 		int		_client_fd; 
 		bool	_is_CGI;

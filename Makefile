@@ -2,15 +2,15 @@ NAME = web_server
 
 SRC = src/main.cpp\
 		src/CommonInfo.cpp\
-		src/ConfigFile.cpp\
 		src/Location.cpp\
 		src/Server.cpp\
 		src/Utils.cpp\
 		src/Request.cpp\
 		src/ServerManager.cpp\
 		src/Client.cpp\
-		src/Response.cpp\
 		src/CGI.cpp\
+		src/ConfigFile.cpp\
+		src/Response.cpp\
 
 OBJ	= $(SRC:.cpp=.o)
 

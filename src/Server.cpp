@@ -111,20 +111,14 @@ bool Server::setupServer(void)
 	}
 
 	int max_payload = getMaxPayloadSize(_listen_fd);
+	(void)max_payload;
 	// Set the socket to non-blocking mode
 	/*
 		The program sets the socket to non-blocking mode using the fcntl function,
 		it retrieves the current flags using F_GETFL and then sets the O_NONBLOCK flag using F_SETFL
 	*/
-	//! Opcion 1
 	 int option_value = 1;
 	setsockopt(_listen_fd, SOL_SOCKET, SO_REUSEADDR, &option_value, sizeof(int));
-	
-	//! Opcion 2
-//	int flags = fcntl(_listen_fd, F_GETFL, 0);
-//	fcntl(_listen_fd, F_SETFL, flags | O_NONBLOCK);
-//	fcntl(_listen_fd, F_SETFL, O_NONBLOCK) ;
-//	
 
 	// Bind the socket to an address and port
 	/*
@@ -138,18 +132,6 @@ bool Server::setupServer(void)
 	addr.sin_port = htons(_port);
 	inet_pton(AF_INET, _address.c_str(), &(addr.sin_addr)); //? 0)
 
-	//? 1)addr.sin_addr.s_addr = inet_addr(_address.data());
-
-	//? 2) if (inet_aton(_address.c_str(), &addr.sin_addr) == 0) 
-	//?{
-	//?	std::cerr << "Invalid address: " << _address << std::endl;
-	//?	return false;
-	//?}
-	
-	//char buf[INET_ADDRSTRLEN];
-	//std::string host_string = "127.0.0.1";
-	//inet_ntop(AF_INET, &host, buf, INET_ADDRSTRLEN);
-	//std::cout << "listen" << _listen_fd << std::endl;
 	int status_bind = bind(_listen_fd, (struct sockaddr *)&addr, sizeof(addr));;
 	if (status_bind < 0) 
 	{
@@ -157,7 +139,6 @@ bool Server::setupServer(void)
 
 		return false;
 	}
-	//std::cerr << "Bind status: "<<  status_bind <<  std::endl;
 	
 	return true;
 }
@@ -169,11 +150,8 @@ int Server::getMaxPayloadSize(int sock)
 	socklen_t len = sizeof(max_payload_size);
 	int ret = getsockopt(sock, IPPROTO_TCP, tcp_maxseg, &max_payload_size, &len);
 	if (ret < 0) {
-		std::cerr << "ERRROR GARRRAFAL\n";
-		// error handling
 		return -1;
 	}
-	//std::cout << "MAX_PAYLOAD_SIZE: " << max_payload_size << std::endl;
 	return max_payload_size;
 }
 
@@ -266,6 +244,7 @@ bool Server::checkListen(const std::string & alisten)
 }
 bool Server::checkServerName(const std::string& aserver_name)
 {
+	(void)aserver_name;
 	if (_is_server_name == true)
 		return false;
 	_is_server_name = true;

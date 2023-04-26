@@ -23,7 +23,7 @@ bool splitString(std::string aline, std::string character, std::vector<std::stri
 
 	while (it != aline.end() && (*it) == ' ')
 		it++;
-	for (it; it != aline.end(); ++it)
+	for ((void)it; it != aline.end(); ++it)
 	{
 		if (*it != character[0] )
 			create_line += *it;
@@ -60,7 +60,7 @@ bool onlySpaces(const std::string& aLine)
 	}
 	return true;
 }
-/**/
+
 std::string getStatusMessage(int statusCode)  //?? Esta funcion no se uitliza se puede borrar
 {
 	if (statusCode == 100) 
@@ -195,38 +195,24 @@ bool errorMessage(const std::string message)
 	std::cerr << message << std::endl;
 	return false;
 }
-/*
-std::string buildErrorPage(int status_code)
-{
-	std::string message;
-	std::string error_page;
-	std::string str_status_code;
 
-	message = getStatusMessage(status_code);
-	errorMessage(message);
-	str_status_code = std::to_string(status_code);
-	error_page = errorHtml(str_status_code, message);
-	std::string filePath = "public/html/error.html";
-	// open the file stream
-	std::ofstream fileStream(filePath);
-	// write the HTML content to the file
-	fileStream << error_page;
-	// close the file stream
-	fileStream.close();
-	return (error_page);
-}
-
-*/
 void getLastLineofString( const std::string & string, std::string& last_line)
 {
 	int count = string.length() - 1;
-	char c = string[count];
 	while (string[count] != '\n')
 	{
 		count--;
 	}
 
 	last_line = string.substr(count, string.length());
+}
+
+std::string intToString(int num)
+{
+	std::ostringstream oss;
+
+	oss << num;
+	return oss.str();
 }
 
 

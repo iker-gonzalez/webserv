@@ -34,7 +34,8 @@ Response::~Response() {}
 
 void	Response::setStatusLine()
 {
-	_response_content.append("HTTP/1.1 " + std::to_string(_status_code) + " ");
+//	_response_content.append("HTTP/1.1 " + std::to_string(_status_code) + " ");
+	_response_content.append("HTTP/1.1 " + intToString(_status_code) + " ");
 	_response_content.append("\r\n");
 }
 
@@ -151,8 +152,6 @@ int		Response::createAutoIndexBody()
     	_target_file += "/";
 		_status_code = 301;
 	}
-	//std::cerr << "--------AUTOINDEX2-----------" << _target_file <<  std::endl;
-
     directoryPath = opendir(_target_file.c_str());
 	if (directoryPath == NULL)
 	{
@@ -187,10 +186,9 @@ int		Response::createAutoIndexBody()
 				_response_body +=  "<tr>\n<td>\n<a href=\"" + file_name + "\">" + file_name + "/</a>\n</td>\n</tr>\n";
 		}
     }
-	_response_body += "<p>Total files found : " + std::to_string(filesFound) + "</p>\n";
+	_response_body += "<p>Total files found : " + intToString(filesFound) + "</p>\n";
     _response_body.append("</body>\n");
     _response_body.append("</html>\n");
-	////std::cerr << "--------AUTOINDEX2-----------" << _response_body <<  std::endl;
 	if (closedir(directoryPath) == -1)
 		return 1;
 	return 0;
@@ -198,14 +196,10 @@ int		Response::createAutoIndexBody()
 
 void	Response::buildResponse()
 {
-    std::cerr << "\x1B[36 Building Body"  << std::endl;
 	// Create the body of the response
 	int buildStatus = buildBody();
 	if (_isCGIResponse)
 	{
-    	std::cerr << _CGI_response.pipe_out[0]<< "GET/POST pipeOUT3\n";
-
-		std::cerr << "CGI RESPONSE" << std::endl;
 		return;
 	}
 	if (buildStatus)
@@ -220,13 +214,11 @@ void	Response::buildResponse()
 	setStatusLine();
 
 	// Set Headers except for CGI case, in this case the script already set headers
-	//?? Mirar si como norma siempre el CGI debe hacer eso o es algo que hemos puesto nosotros porquesi
 	if (!_isCGIResponse)
 		setHeaders();
 
 	if (!(_response_body.empty()))
 	{
-
 		_response_content.append(_response_body);
 	}
 
@@ -274,10 +266,7 @@ bool	Response::checkIfReturn(Location &location)
 {
 	if (!location.getReturn().empty())
 	{
-		std::cerr << "RETUUUU\n";
 		_location = location.getReturn();
-		//if (_location[0] != '/')
-		//	_location.insert(0, 1, '/');
 		return true;
 	}
 	return false;
@@ -290,9 +279,6 @@ int Response::isClientSizeAllowed(int client_size_allowed, int location)
 		if (_server.getClientSize())
 			client_size_allowed = _server.getClientSize();
 	}
-	std::cerr << "client_size_allowed: " << client_size_allowed << std::endl;
-	std::cerr << "request content length: " << request.getContentLength() << std::endl;
-
 	if (request.getContentLength() > client_size_allowed)
 		return false;
 	return true;
@@ -357,38 +343,25 @@ void Response::setIsCGIResponse(int aiscgi)
 }
 int Response::handleCGI(const Location &location, const std::string &a_Method)
 {
+	(void)a_Method;
 	_isCGIResponse = 1;
 
-	std::cerr << "handleCGI2" << "-- MEthod:"<< a_Method << std::endl;
 	std::string content;
 	content = request.getBody();
 
-
-
-	std::cerr << "CGI:Request File" << request.getRequestFile() << std::endl;
-	std::cerr << "CGI:CONTETN" << content << std::endl;
-	std::cerr << "CGI:METHOD" << a_Method << std::endl;
-
 	std::string requestFile = request.getRequestFile();
-	//if (a_Method == "DELETE")
-	//{
-	//	//content = request.getBody();
-	//	std::cerr << "DELETE CGI REQUEST FILE" << std::endl; 
-	//	requestFile = "cgi-bin/delete.py";
-	//}
+
 	const std::string index_file = location.getIndex();
 
 	_CGI_response.createCGIEnvironment(request, location);
 	
 	if (request.getMethod() == "DELETE")
 	{
-		int n_find = request.getBody().find("delete");
-		std::cerr << "1. DELETE CGI:" <<  std::endl;
+		size_t n_find = request.getBody().find("delete");
 		if (n_find != std::string::npos)
 		{
 			std::string file_to_remove = "public/content/uploads/";
 			file_to_remove += request.getBody().substr(7, file_to_remove.length() - 7);
-			
 			if ( !fileExists(file_to_remove))
 			{
 				_status_code = 404;
@@ -417,27 +390,20 @@ int		Response::buildBody()
 	// Before
 	if (handleRequest())
 	{
-		std::cerr << "-------------file body00:--------------\n";
-
 		std::string error_page = getErrorPage();
 		if (!(error_page.empty()))
 		{
-			std::cerr << "ARE YOU HERE?" << std::endl;
 			_target_file = combinePaths(_server.getRoot(), error_page, "");
 			if (readFile())
 				return (1);
 			return (0);
 		}
-		std::cerr << "targeteoooo: " << _target_file << std::endl;
 		return(1);
 	}
-	std::cerr << "-------------file body0:--------------\n";
-
 	if (_status_code)
 		return (0);
 	if (_auto_index)
 		return 0;
-	std::cerr << "_status code" << _status_code << std::endl;
 	if (request.getMethod() == "GET")
 	{
 		if (readFile())
@@ -445,20 +411,14 @@ int		Response::buildBody()
 	}
 	else if (request.getMethod() == "POST")
 	{
-		std::cerr << "-------------file body1:--------------TagetFile" << _target_file << std::endl ;
 		if (fileExists(_target_file))
 		{
-		std::cerr << "-------------file body2:--------------\n";
-
 			_status_code = 204;
 			return (0);
 		}
-		std::cerr << "\033[1;34mtarget file: " << _target_file << "\033[0m" << std::endl;
 		std::ofstream file(_target_file.c_str(), std::ios::binary);
 		if (file.fail())
 		{
-			std::cerr << "-------------file body2:--------------\n";
-
 			_status_code = 403;
 			return (1);
 		}
@@ -468,16 +428,12 @@ int		Response::buildBody()
 				size_t begin = content_type.find("boundary=") + 9;
 				std::string boundary = content_type.substr(begin);
 				// Use the boundary string to parse the request body
-				//std::cout << "request body:\n";
-				//std::cout << request.getBody() << std::endl;
 				std::string file_body = parseMultiPartRequest(request.getBody(), boundary);
-				//std::cout << "file body:\n";
-				//std::cout << file_body << std::endl;
 				file.write(file_body.c_str(), file_body.length());
 	
 		}
-		 	//code assumes that the request is a regular request, and it simply
-			//writes the body of the request to the file
+		//code assumes that the request is a regular request, and it simply
+		//writes the body of the request to the file
 		else
 			file.write(request.getBody().c_str(), request.getBody().length());
 	}
@@ -489,7 +445,6 @@ int		Response::buildBody()
 			return (1);
 		}
 		std::string allow_directory = _target_file.substr(0, 23);
-		std::cerr << "allow_directory" << allow_directory << std::endl;  
 		if (allow_directory != "public/content/uploads/")
 		{
 			_status_code = 404;
@@ -503,7 +458,6 @@ int		Response::buildBody()
 	}
 	_status_code = 200;
 
-	// CGI Case
 	return (0);
 }
 
@@ -512,9 +466,6 @@ std::string Response::parseMultiPartRequest(const std::string& request_body, con
 {
 	std::vector<std::string> parts;
 	size_t pos = 0;
-
-	std::cerr << "REQUEST BODY\n";
-	std::cerr << request_body << std::endl;
 
 	// split the request body into parts based on the boundary
 	while ((pos = request_body.find(boundary, pos)) != std::string::npos)
@@ -590,13 +541,11 @@ int Response::handleDirectory(Location& target_location)
 	else if (target_location.getAutoindex())
 	{
 		// allows to generate a directory listing for a given location
-		//std::cerr << "--------HOLAAA-3----" <<_target_file << std::endl;
 			_auto_index = true;
 		if (_target_file[_target_file.length() - 1] != '/')
 		{
     		_target_file += "/";
 			_status_code = 301;
-			//std::cerr << "--------HOLAAA-4----" <<_target_file << std::endl;
 
 		}
 		int error = createAutoIndexBody();
@@ -610,8 +559,6 @@ int Response::handleDirectory(Location& target_location)
 		else
 		_target_file += _server.getIndex();	
 
-		//std::cerr << "--------HOLAAA--5---" <<_target_file << std::endl;
-	// ?? Cuando llega aqui
 	// If the created _target_file does not exist
 	if (!fileExists(_target_file))
 	{
@@ -634,13 +581,11 @@ int Response::handleDirectory(Location& target_location)
 // It sets the target file to the path combined with the server root and calls handleDirectory.
 int Response::handleNoMatch() 
 {
-	std::cerr << "\033[38;5;205mNO-MatchLOCATION\033[0m" << std::endl;
 	_target_file = combinePaths(_server.getRoot(), request.getRequestFile(), "");
 	
-	//?? Mirar si se puede agrupar esto y el de handle MAtch
 	if(!(isMethodAllowed(request.getMethod(),_server.getMethods())))
 	{
-		_status_code = 403; //? En handleMAtch el status_code es diferente
+		_status_code = 403; 
 		return (1);
 	}
 	if (!(isClientSizeAllowed(_server.getClientSize(), 0)))
@@ -651,14 +596,10 @@ int Response::handleNoMatch()
 
 	if (isDirectory(_target_file))
 	{
-		////std::cout << "is directoryyy\n";
-		////std::cout << "target file:" << _target_file << std::endl;
 		if (_target_file[_target_file.length() - 1] != '/')
 		{
-			//std::cout << "redirect\n";
 			_status_code = 301;
 			_location = request.getRequestFile() + "/";
-			//std::cout << "location:" << _location << std::endl;
 			return 1;
 		}
 		_target_file += _server.getIndex();
@@ -672,13 +613,10 @@ int Response::handleNoMatch()
 		// if the index specified for this directory is another directory...
 		if (isDirectory(_target_file))
 		{
-			//std::cout << "\033[31mRedirection: Directory requested and index is another directory: \033[0m" << _target_file << std::endl;
 			_status_code = 301;
 			_location = combinePaths(request.getRequestFile(), _server.getIndex(), "");
 			if(_location[_location.length() - 1] != '/')
 				_location.insert(_location.end(), '/');
-			//std::cout << "\033[31mRedirected to: \033[0m" << _location << std::endl;
-			
 			return 1;
 		}
 	}
@@ -700,7 +638,6 @@ Location	Response::findLocationByName(std::string target_location, std::vector<L
 // It then calls handleDirectory.
 int Response::handleMatch(std::string location)
 {
-	std::cerr << "\033[38;5;205mMatchLOCATION\033[0m" << std::endl;
 	Location target_location = findLocationByName(location, _server.getLocations());
 
 	// Get target file with the relative path
@@ -713,7 +650,6 @@ int Response::handleMatch(std::string location)
 		else
 			_target_file = combinePaths(_server.getRoot(), request.getRequestFile(), "");
 	}
-	std::cerr << "****target file:******" << _target_file << std::endl;
 	if (!(isMethodAllowed(request.getMethod(), target_location.getMethods()))) {
 		_status_code = 405;
 		return 1;
@@ -727,24 +663,17 @@ int Response::handleMatch(std::string location)
 	if (checkIfReturn(target_location))
 	{
 		// If there is a return 
-		//std::cout << "RETURN\n";
 		_status_code = 301;
 		return 1;
 	}
-
-	// 
 	if (target_location.getPath().find("cgi-bin") != std::string::npos)
 	{
 		return handleCGI(target_location, request.getMethod());
 	}
 	if (isDirectory(_target_file) && request.getMethod() != "POST")
 	{
-		std::cerr << "****handleDirectory:******" << _target_file << std::endl;
 		return (handleDirectory(target_location));
 	}
-	//! HANDLE CGI
-
-
 	return (0);
 }
 
@@ -770,7 +699,6 @@ int Response::getStatusCode()
 
 void 	Response::location()
 {
-	//std::cout << "location: " << _location << std::endl;
 	if (_location.length())
 	{
 		_response_content.append("Location: "+ _location +"\r\n");

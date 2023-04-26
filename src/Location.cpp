@@ -12,7 +12,7 @@ Location::~Location()
 {
 }
 
-Location::Location(const Location &other)
+Location::Location(const Location &other) : CommonInfo(other)
 {
 	if (this != &other)
 		*this = other;
@@ -22,7 +22,7 @@ Location &Location::operator=(const Location &rhs)
 {
         if (this != &rhs)
 	{
-				//Copy commun info
+		//Copy commun info
 		CommonInfo::operator=(rhs);
 
 	

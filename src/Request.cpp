@@ -15,7 +15,6 @@ Request::Request() : _client_fd(0),  _content_length(0), _port(0)
 	_client_fd = 0;
 	_method = "";
 	_requestFile = "";
-	_content_length = 0;
 }
 Request &Request::operator=(const Request &rhs)
 {
@@ -44,11 +43,9 @@ Request::~Request()
 //****************PARSEO*********************
 bool Request::parseRequest(int client_fd)
 {
-	std::cerr << "READ_HRADERS\n";
 	if (!readHeaderRequest(client_fd))
 		return false;
 	
-	std::cerr << "PARSE_HEADERS\n";
 	//Si los bytes son 0 cerrar fd
 	if (_request_header.empty())
 		return true; //?? No me gusta como gestionamos cuando entra una petición vacia. Mirar
@@ -56,10 +53,8 @@ bool Request::parseRequest(int client_fd)
 	if (!parseHeaderRequest())
 		return false;
 	
-	std::cerr << "PARSE_BODY\n";
 	if (!parseBodyRequest(client_fd))
 		return false;
-	std::cerr << "FINISH_PARSE_BODY\n";
 	_request_raw = _request_header + _request_body;
 	return true;
 }
@@ -72,7 +67,6 @@ bool Request::readHeaderRequest(int client_fd)
 	int total_bytes_read;
 
 	total_bytes_read = 0;
-	std::cerr << "readHeaderRequest" << client_fd << std::endl;
 	while ((end = _request_header.find("\r\n\r\n")) == std::string::npos)
 	{
 		if ((bytes_read = recv(client_fd, &c, 1, 0)) == -1 )
@@ -86,24 +80,14 @@ bool Request::readHeaderRequest(int client_fd)
 		total_bytes_read += bytes_read;
 	}
 	_request_header[total_bytes_read] = '\0';
-		std::cerr << "_request_header" << _request_header << std::endl;
-	//std::cerr << "\033[32mNEW REQUEST\033[0m" << std::endl;
-	//std::cerr << _request_header << std::endl;
-
-
     return true;
 }
 
 bool Request::parseHeaderRequest(void)
 {
-	int i;
-	int k;
-	int j;
-
-	//std::cerr << "-------------------------" << std::endl; 
-	//std::cerr << "Start Parsing this request" << std::endl; 
-	//std::cerr << _request_header << std::endl; 
-	//std::cerr << "-------------------------" << std::endl; 
+	size_t i;
+	size_t k;
+	size_t j;
 
 	// Get Request Method
 	i = _request_header.find_first_of(" ", 0);
@@ -131,31 +115,17 @@ bool Request::parseHeaderRequest(void)
 		if (j == std::string::npos)
 			break;
 		std::string key = _request_header.substr(i, k - i + 1);
-		//std::cerr << "KEY: " << key << "VALUE:" <<  _request_header.substr(k + 1, j - k) << std::endl;
 		_m_headers[_request_header.substr(i, k - i + 1)] = _request_header.substr(k + 1, j - k);
 		i = j + 2;
 	}
 
 	parseHeaderHelper();
 
-	std::cerr << "*******REQUEST PARSED (MAP)********" << std::endl;
-	//std::cout << "-----------------------------------" << std::endl;
-	std::map<std::string, std::string>::iterator it;
-   	for (it = _m_headers.begin(); it != _m_headers.end(); ++it) {
-	//   	std::cerr << it->first << it->second << std::endl;
-	}
-	//print map content
-
     return true;
 }
 void Request::parseHeaderHelper()
 {
 	std::string host;
-	//??Quitar estp
-	if (_m_headers.count("Host:"))
-	{
-		std::cerr << "HHHHOO\n";
-	}
 	if (_m_headers.count("Host:"))
 	{
 		host = _m_headers.at("Host:");
@@ -166,7 +136,6 @@ void Request::parseHeaderHelper()
 		//Get ServerName 
  
 		_serverName = v_host[0];
-		std::cerr << "SERVER NAMMMME"  <<_serverName << "\n\n";
 
 		// Get Port
 		_port = std::atoi(v_host[1].c_str());
@@ -186,8 +155,6 @@ void Request::parseHeaderHelper()
 
 bool Request::parseBodyRequest(int client_fd)
 {
-
-	// read the request body into a buffer
 	if (_is_chunked)
 	{
 		parseChunkedBody(client_fd);
@@ -196,10 +163,6 @@ bool Request::parseBodyRequest(int client_fd)
 	{
 		parseNotChunkedBody(client_fd);
 	}
-	
-	//std::cout << "REQUEST BODY" << std::endl;
-	//std::cout << "------------" << std::endl;
-	//std::cout << _request_body << std::endl;
     return true;
 }
 bool Request::parseNotChunkedBody(int client_fd)
@@ -221,8 +184,6 @@ bool Request::parseNotChunkedBody(int client_fd)
 		}
 		else
 		{
-			//std::cout << "buffer:\n";
-			//std::cout << buffer << std::endl;
 			_request_body.append(buffer, bytes_read);
 			bytes_left -= bytes_read;
 		}
@@ -304,7 +265,6 @@ bool Request::parseChunkedBody(int client_fd)
 		}
 	}
 	return true;
-
 }
 
 
@@ -332,7 +292,9 @@ std::map<std::string, std::string> Request::getHeaders(void) const
 
 size_t Request::getContentLength(void) const
 {
-	return _content_length;
+	if (_content_length)
+		return _content_length;
+	return 0;
 }
 
 std::string Request::getBody(void) const
@@ -375,24 +337,3 @@ void Request::setBody(std::string &a_body)
 	_request_body = a_body;
 }
 
-std::ostream &operator<<(std::ostream &ors, const Request &a_request)
-{
-   //std::cout << "CLIENT_FD: " << a_request.getClientFd() << std::endl;
-   //std::cout << "METHOD: " << a_request.getMethod() << std::endl;
-   //std::cout << "RequestFile: " << a_request.getRequestFile() << std::endl;
-   ////std::cout << "BODY: " << a_request.getBody() << std::endl;
-   ////std::cout << "HEADERS: " << a_request.getHeaders() << std::endl;
-   std::map<std::string, std::string> map = a_request.getHeaders();
-	std::map<std::string, std::string>::iterator it;
- 	std::map<std::string, std::string>::iterator it_end = a_request.getHeaders().end();
-	
-	//for (it == map.begin(); it != it_end; ++it)
-	//	//std::cout << "FIRST" << (*it).first <<  "SECOND" << (*it).second << std::endl;
-
-   //std::cout << "CONTENT LENGHT: " << a_request.getContentLength() << std::endl;
-  // //std::cout << "PARSE Chunked Body: " << a_request.parseChunkedBody() << std::endl;
-  // //std::cout << "SeverName: " << a_request.getServerName() << std::endl;
-   //std::cout << "Port: " << a_request.getPort() << std::endl;
-
-	return ors;
-}

@@ -8,7 +8,6 @@
 class Request
 {
 	private:
-		// _client_fd: Esto no es nesario si el cliente va a tener la Request guardada no??
 		int									_client_fd;
 
 		std::string							_request_header;
@@ -19,7 +18,7 @@ class Request
 		std::string							_method; 		// GET, POST or DELETe
 		std::string							_requestFile; 	// Request HTML file (ej. /cgi-bin)
 		std::map<std::string, std::string>	_m_headers;		// All information
-		size_t								_content_length; // Donde se recoge??
+		size_t								_content_length; 
 		std::string							_serverName;
 		int									_port;
 		bool								_is_chunked;
@@ -44,10 +43,7 @@ class Request
 		bool								parseNotChunkedBody(int client_fd);
 		bool								parseChunkedBody(int client_fd) ;
 
-		//Parseo
-		bool								parseHeaders(std::string& request);
 		
-		// Useful for clean code
 
 		//Getters
 		int									getClientFd(void) const;
@@ -66,6 +62,5 @@ class Request
 		void								setBody(std::string &a_body);
 };
 
-std::ostream& operator<<(std::ostream& ors, const Request& a_request);
 
 #endif
