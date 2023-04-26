@@ -7,7 +7,7 @@
 #include "../includes/CGI.hpp"
 #include <sys/wait.h>
 
-#define MAX_TIMEOUT 5 // Time in seconds before client get kicked out if no data was sent.
+#define MAX_TIMEOUT 30 // Time in seconds before client get kicked out if no data was sent.
 
 ServerManager::ServerManager( std::vector<Server> a_v_server) : _v_server(a_v_server),
 	_max_socket(0)
@@ -124,12 +124,10 @@ bool ServerManager::sendCGIResponse(Client &ar_client)
 	std::string bodyToSent = ar_client.request.getBody();
 	bodyToSent[bodyToSent.length()] = '\0';
 	int bytes_sent = 0;
-	std::cerr << "\033[1;31msendCGIResponse FD:" << pipeToSent << "Body:" <<bodyToSent << "\033[0m\n" << std::endl;
 	bytes_sent = write(pipeToSent, bodyToSent.c_str(), bodyToSent.size());
 	if (bytes_sent < 0)
 	{
 	   	closeFd(pipeToSent);
-		std::cerr << "PIPE INFO:\n" << bodyToSent.c_str() << std::endl;
 		return false;
 
 	}
@@ -229,10 +227,7 @@ bool ServerManager::readRequest(int fd, Client &a_client)
 		if (!a_client.request.getBody().empty()) 
 		{
         	addFdSet(a_client.response.getCGIResponse().pipe_in[1], _write_fds);
-			std::cerr << a_client.response.getCGIResponse().pipe_in[1]<< "there is a CGI WRITE\n "; 
 		}
-
-		std::cerr <<a_client.response.getCGIResponse().pipe_out[0] <<"there is a CGI READ\n "; 
         addFdSet(a_client.response.getCGIResponse().pipe_out[0], _read_fds);
     }
 
@@ -286,7 +281,6 @@ void ServerManager::checkTimeout()
     {
         if (time(NULL) - it->second.getTimeOut() > MAX_TIMEOUT && it->second.getIsCGI())
         {
-			std::cerr << "Close TIEMOUT" << std::endl;
             closeFd(it->first);
             return ;
         }

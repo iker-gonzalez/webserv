@@ -42,7 +42,6 @@ void	Response::setStatusLine()
 int		Response::readFile()
 {
 	std::ifstream file(_target_file.c_str());
-	std::cerr << "\033[1;34mtarget file: " << _target_file << "\033[0m" << std::endl;
 	std::ostringstream ss;
 	if (file.fail())
 	{
@@ -205,7 +204,6 @@ void	Response::buildResponse()
 	if (buildStatus)
 	{
 		
-		std::cerr << _response_content << std::endl;
 		if (!_isCGIResponse && !_auto_index)
     		std::cerr << "\x1B[33mError Building Body"  << std::endl;
 	}
@@ -708,7 +706,6 @@ void 	Response::location()
 
 std::string		Response::get_content_type(std::string file_extension)
 {
-	std::cerr << "file extension:" << file_extension << std::endl;
 	if (file_extension == "html" || file_extension == "htm")
 		return "text/html";
 	else if (file_extension == "json")

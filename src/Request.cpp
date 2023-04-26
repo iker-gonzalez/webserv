@@ -195,7 +195,6 @@ bool Request::parseChunkedBody(int client_fd)
 {
 	char buffer[1024];
 	int bytes_left = 0;
-	 std::cerr << "EparseChunked_1" << std::endl;
 
 	while (true)
 	{
