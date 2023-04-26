@@ -154,7 +154,7 @@ bool Server::setupServer(void)
 	if (status_bind < 0) 
 	{
 		std::cerr << "Error binding socket:" << status_bind <<  std::endl;
-		perror("bind");
+
 		return false;
 	}
 	//std::cerr << "Bind status: "<<  status_bind <<  std::endl;
