@@ -18,7 +18,7 @@ class Request
 		std::string							_method; 		// GET, POST or DELETe
 		std::string							_requestFile; 	// Request HTML file (ej. /cgi-bin)
 		std::map<std::string, std::string>	_m_headers;		// All information
-		size_t								_content_length; 
+		int								_content_length; 
 		std::string							_serverName;
 		int									_port;
 		bool								_is_chunked;
@@ -51,7 +51,7 @@ class Request
 		std::string							getRequestFile(void) const;
 		std::string							getBody(void) const;
 		std::map<std::string, std::string>	getHeaders(void) const;
-		size_t								getContentLength(void) const;
+		int								getContentLength(void) const;
 		std::string							getServerName() const;
 		int									getPort() const;
 		std::string 						getHeader(std::string const &name) const;

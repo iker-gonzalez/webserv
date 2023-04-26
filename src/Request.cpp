@@ -290,7 +290,7 @@ std::map<std::string, std::string> Request::getHeaders(void) const
 	return _m_headers;
 }
 
-size_t Request::getContentLength(void) const
+int Request::getContentLength(void) const
 {
 	if (_content_length)
 		return _content_length;

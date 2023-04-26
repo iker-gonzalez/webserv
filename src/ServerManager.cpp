@@ -107,11 +107,13 @@ bool ServerManager::sendResponse(int fdToSend, Client &ar_client)
 	closeFd(fdToSend);
 	if (bytes_sent < 0 )
 		return false;
-	else if (bytes_sent == 0 || bytes_sent == ar_client.request.getContentLength())
+//	else if (bytes_sent == 0 || bytes_sent == ar_client.request.getContentLength())
+	else if (bytes_sent == 0)
     {
         closeFd(fdToSend);
 		return true;
 	}
+    closeFd(fdToSend);
 	return true;
 }
 
@@ -192,7 +194,6 @@ bool ServerManager::acceptNewConnection(Server &a_m_server)
 		addFdSet(client_sock, _read_fds);
 		if (_m_fd_client.count(client_sock) != 0)
 		{
-			std::cerr << "ERASEEEE" << std::endl;
 			_m_fd_client.erase(client_sock);
 
 		}
