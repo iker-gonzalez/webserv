@@ -46,10 +46,8 @@ bool CGI::setupPipes(std::string &content)
 {
      if (!content.empty())
     {
-        std::cerr << "Post pipe_in" << content << std::endl; 
         if (pipe(pipe_in) < 0)
             return false;
-       // std::cerr << pipe_in[1]<< "GET/POST pipeoit\n";
     }
     if (pipe(pipe_out) < 0)
     {
@@ -57,25 +55,18 @@ bool CGI::setupPipes(std::string &content)
 	    close(pipe_in[1]);
         return false;
     }
-    //std::cerr << pipe_out[0]<< "GET/POST pipeOUT\n";
-
-  //  if (fcntl(pipe_out[0], F_SETFL, O_NONBLOCK) < 0)
-    //            std::cerr << "Prueba 2 fcntl fallida\n";
-
     return true;
 }
 std::string CGI::execute(std::string &content)
 {
-
-    	std::string res = "";
+    std::string res = "";
     _pid_CGI = fork();
 	if (_pid_CGI == 0)
 	{
         close(pipe_out[0]);
 		dup2(pipe_out[1], STDOUT_FILENO);
 		close(pipe_out[1]);
-     //   if (fcntl(pipe_out[0], F_SETFL, O_NONBLOCK) < 0)
-       //         std::cerr << "Prueba 2 fcntl fallida\n";
+
         if (!content.empty())
 		{
             std::cerr << "DUP2 pipein" << std::endl;
@@ -86,24 +77,15 @@ std::string CGI::execute(std::string &content)
         prepareArgForExecve();
         int status;
 		status = execve(_argv[0], _argv, _env_char);
-        //std::cerr << "CGI status: " << status << std::endl;
         exit(status);
 	}
 	else if (_pid_CGI > 0)
     {
         close(pipe_out[1]);
-        std::cerr << pipe_out[0]<< "GET/POST pipeOUT2\n";
-
 		if (!content.empty())
         
 		{
-        std::cerr << pipe_in[1]<< "GET/POST pipein\n";
-
 			close(pipe_in[0]);
-			//write(pipe_in[1], content.c_str(), content.size());
-			//std::cerr << "PIPE INFO:\n" << content.c_str() << std::endl;
-           //close(pipe_in[1]);
-           
 		}
        
 
@@ -197,6 +179,8 @@ void CGI::createCGIEnvironment(const Request &ar_request, const Location& ar_loc
         _m_env["CONTENT_LENGTH"] = ConLenght;
         _m_env["CONTENT_TYPE"] = ConType;
         _m_env["UPLOAD_DIRECTORY"] =  "public/content/uploads"; 
+
+
 
     }
     std::string script_name = ar_request.getRequestFile();

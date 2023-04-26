@@ -357,7 +357,7 @@ void Response::setIsCGIResponse(int aiscgi)
 }
 int Response::handleCGI(const Location &location, const std::string &a_Method)
 {
-	_isCGIResponse= 1;
+	_isCGIResponse = 1;
 
 	std::cerr << "handleCGI2" << "-- MEthod:"<< a_Method << std::endl;
 	std::string content;
@@ -368,6 +368,7 @@ int Response::handleCGI(const Location &location, const std::string &a_Method)
 	std::cerr << "CGI:Request File" << request.getRequestFile() << std::endl;
 	std::cerr << "CGI:CONTETN" << content << std::endl;
 	std::cerr << "CGI:METHOD" << a_Method << std::endl;
+
 	std::string requestFile = request.getRequestFile();
 	//if (a_Method == "DELETE")
 	//{
@@ -379,12 +380,34 @@ int Response::handleCGI(const Location &location, const std::string &a_Method)
 
 	_CGI_response.createCGIEnvironment(request, location);
 	
+	if (request.getMethod() == "DELETE")
+	{
+		int n_find = request.getBody().find("delete");
+		std::cerr << "1. DELETE CGI:" <<  std::endl;
+		if (n_find != std::string::npos)
+		{
+			std::string file_to_remove = "public/content/uploads/";
+			file_to_remove += request.getBody().substr(7, file_to_remove.length() - 7);
+			
+			if ( !fileExists(file_to_remove))
+			{
+				_status_code = 404;
+			}
+			else
+			{
+				if (remove(file_to_remove.c_str()))
+				{
+					_status_code = 500;
+				}
+			}
+		}
+	}
+		
+
 	if (!_CGI_response.setupPipes(content))
 		return 0;
 
 	_CGI_response.execute(content);
-	std::cerr << "EXECUTE" << std::endl;
-	//_response_body = _CGI_response.execute(content);
 
 	return 1;
 }
@@ -401,7 +424,6 @@ int		Response::buildBody()
 		{
 			std::cerr << "ARE YOU HERE?" << std::endl;
 			_target_file = combinePaths(_server.getRoot(), error_page, "");
-			//std::cout << "ARE YOU HERE?" << std::endl;
 			if (readFile())
 				return (1);
 			return (0);
@@ -424,9 +446,6 @@ int		Response::buildBody()
 	else if (request.getMethod() == "POST")
 	{
 		std::cerr << "-------------file body1:--------------TagetFile" << _target_file << std::endl ;
-
-
-
 		if (fileExists(_target_file))
 		{
 		std::cerr << "-------------file body2:--------------\n";

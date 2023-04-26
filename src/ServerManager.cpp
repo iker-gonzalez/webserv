@@ -150,16 +150,16 @@ bool ServerManager::sendResponse(int fdToSend, Client &ar_client)
     {
         closeFd(fdToSend);
 		return true;
-		if (ar_client.getIsCGI())
-		{
-            std:: cerr << "Client " << ar_client.getClientFd() << " Connection Closed." << std::endl;
-            closeFd(fdToSend);
-		}
-		else
-		{
-			removeFdSet(fdToSend, _write_fds);
-            addFdSet(fdToSend, _read_fds);
-		}
+		//if (ar_client.getIsCGI())
+		//{
+        //    std:: cerr << "Client " << ar_client.getClientFd() << " Connection Closed." << std::endl;
+        //    closeFd(fdToSend);
+		//}
+		//else
+		//{
+		//	removeFdSet(fdToSend, _write_fds);
+        //    addFdSet(fdToSend, _read_fds);
+		//}
     }
 	//! meter condicion KEEP-ALIVE
 	//int bytes_sent = send(fdToSend, _s_buffer.c_str(),atoi(request.getHeaders()["Content-length"].c_str()), 0);
@@ -359,7 +359,7 @@ bool ServerManager::readCGIResponse(Client &a_client)
 
     	if (readBytes == -1)
 		{
-			std::cerr << "Couldn't read from CGI " << ": " << strerror(errno) << std::endl;
+			std::cerr << "Couldn't read from CGI " << std::endl;
 			closeFd(pipeToRead);
 			a_client.setIsCGI(0);
 			return false;
@@ -394,7 +394,7 @@ void ServerManager::checkTimeout()
         if (time(NULL) - it->second.getTimeOut() > MAX_TIMEOUT && it->second.getIsCGI())
         {
 			std::cerr << "Close TIEMOUT" << std::endl;
-            //closeFd(it->first);
+            closeFd(it->first);
             return ;
         }
     }
