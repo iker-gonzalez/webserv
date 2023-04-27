@@ -2,7 +2,7 @@
 
 
 
-Client::Client(Server &serv, int a_fd) : _client_fd(a_fd), _is_CGI(false)
+Client::Client(Server &serv, int a_fd) : _client_fd(a_fd)
 {
     setServer(serv);
     _time_out = time(NULL);

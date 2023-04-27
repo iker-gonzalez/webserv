@@ -157,7 +157,7 @@ int		Response::createAutoIndexBody()
 		std::cerr << "Could not open directory for autoindex creation" << std::endl;
 		return 0;
 	}
-	_response_body == "<html>\n<head>\n<title>Index of" + _target_file + "</title>\n</head>\n<body>\n";
+	_response_body = "<html>\n<head>\n<title>Index of" + _target_file + "</title>\n</head>\n<body>\n";
    _response_body += "<table style=\"width:80%; font-size: 15px\">\n";
    _response_body += "<hr>\n";
    _response_body += "<th style=\"text-align:left\"> File Name </th>\n";

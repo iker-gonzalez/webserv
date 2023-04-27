@@ -33,7 +33,6 @@ class Client
 
 	private:
 		int		_client_fd; 
-		bool	_is_CGI;
 		time_t  _time_out;
 };
 

@@ -25,7 +25,7 @@ int main(int ac, char **av)
 	if (!conf.CheckConfig())
 	{
 		std::cerr << "Bad ConfigFile" << std::endl;
-		return false;
+		return 1;
 	}
 
 	try {
@@ -39,13 +39,13 @@ int main(int ac, char **av)
 	//! TODO Create Select Core
 	ServerManager manager(conf.getServers());
 	if (!manager.setupServers()) 
-		return false;
+		return 1;
 	std::cout <<  "Start listening for incoming connections" << std::endl;
 
 	if (!manager.serverCore())
 	{
 		manager.closeServerSocket();
-		return false;
+		return 1;
 	}
 	return 0;
 }
