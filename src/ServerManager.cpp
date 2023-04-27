@@ -266,7 +266,7 @@ bool ServerManager::readCGIResponse(Client &a_client)
    	closeFd(pipeToRead);
     if (waitpid(0, NULL, WNOHANG) < 0)
     {
-        std::cerr << "CHILD ERROR: " << strerror(errno) << std::endl;
+        std::cerr << "CHILD ERROR" << std::endl;
     }
     else{
         std::cerr << "NOT CHILD ERROR: " << std::endl;
