@@ -157,11 +157,11 @@ bool Request::parseBodyRequest(int client_fd)
 {
 	if (_is_chunked)
 	{
-		parseChunkedBody(client_fd);
+		return (parseChunkedBody(client_fd));
 	}
 	else
 	{
-		parseNotChunkedBody(client_fd);
+		return (parseNotChunkedBody(client_fd));
 	}
     return true;
 }

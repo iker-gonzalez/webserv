@@ -104,9 +104,11 @@ bool ServerManager::sendResponse(int fdToSend, Client &ar_client)
 
 	std::string response_content = ar_client.response.getResponseContent();
 	bytes_sent = send(fdToSend, ar_client.response.getResponseContent().c_str(), ar_client.response.getResponseContent().length(), 0);
-	closeFd(fdToSend);
-	if (bytes_sent < 0 )
+	if (bytes_sent < 0)
+	{
+		closeFd(fdToSend);
 		return false;
+	}
 //	else if (bytes_sent == 0 || bytes_sent == ar_client.request.getContentLength())
 	else if (bytes_sent == 0)
     {
