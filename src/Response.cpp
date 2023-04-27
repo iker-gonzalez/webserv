@@ -15,6 +15,7 @@ Response::Response()
 	_target_file = "";
 	_location = "";
 	_auto_index = false;
+	_is_redirect = false;
 	_isCGIResponse = 0;
 }
 
@@ -26,6 +27,7 @@ Response::Response(Request &req) : request(req)
 	_target_file = "";
 	_location = "";
 	_auto_index = false;
+	_is_redirect = false;
 	_isCGIResponse = 0;
 
 }
@@ -34,8 +36,8 @@ Response::~Response() {}
 
 void	Response::setStatusLine()
 {
-//	_response_content.append("HTTP/1.1 " + std::to_string(_status_code) + " ");
 	_response_content.append("HTTP/1.1 " + intToString(_status_code) + " ");
+	std::cout << _status_code << std::endl;
 	_response_content.append("\r\n");
 }
 
@@ -204,7 +206,7 @@ void	Response::buildResponse()
 	if (buildStatus)
 	{
 		
-		if (!_isCGIResponse && !_auto_index)
+		if (!_isCGIResponse && !_auto_index && !_is_redirect) 
     		std::cerr << "\x1B[33mError Building Body"  << std::endl;
 	}
 
@@ -264,6 +266,7 @@ bool	Response::checkIfReturn(Location &location)
 {
 	if (!location.getReturn().empty())
 	{
+		_is_redirect = true;
 		_location = location.getReturn();
 		return true;
 	}

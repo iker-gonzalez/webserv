@@ -30,6 +30,7 @@ private:
 	std::string								_target_file;
 	bool									_auto_index;
 	bool									_isCGIResponse;
+	bool									_is_redirect;
 
 public:
 

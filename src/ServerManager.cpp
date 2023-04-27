@@ -210,11 +210,7 @@ bool ServerManager::readRequest(int fd, Client &a_client)
 	if (!status || a_client.request.getResquestHeaderStr().empty())
 	{
 		if (status)
-		{
 			closeFd(a_client.getClientFd());
-		}
-		else
-			std::cerr << "Error parsing request\n";
 		return status;
 	}
 

@@ -4,7 +4,6 @@
 #include <cstdlib>
 
 Request::Request() : _client_fd(0),  _content_length(0), _port(0)
-		 	
 {
 	_request_header = "";
 	_request_body = "";
@@ -18,7 +17,7 @@ Request::Request() : _client_fd(0),  _content_length(0), _port(0)
 }
 Request &Request::operator=(const Request &rhs)
 {
-    _client_fd = rhs._client_fd;
+	_client_fd = rhs._client_fd;
 
 	_request_header = rhs._request_header;
 	_request_body = rhs._request_body;
@@ -45,7 +44,7 @@ bool Request::parseRequest(int client_fd)
 {
 	if (!readHeaderRequest(client_fd))
 		return false;
-	
+	 
 	//Si los bytes son 0 cerrar fd
 	if (_request_header.empty())
 		return true; //?? No me gusta como gestionamos cuando entra una petición vacia. Mirar
@@ -69,9 +68,9 @@ bool Request::readHeaderRequest(int client_fd)
 	total_bytes_read = 0;
 	while ((end = _request_header.find("\r\n\r\n")) == std::string::npos)
 	{
-		if ((bytes_read = recv(client_fd, &c, 1, 0)) == -1 )
+		if ((bytes_read = recv(client_fd, &c, 1, 0)) == -1)
 		{
-				std::cerr << bytes_read <<  "Error receivingdw\n";
+				//std::cerr << bytes_read <<  "Error receivingdw\n";
 				return false;
 		}
 		else if (!bytes_read)
@@ -80,7 +79,7 @@ bool Request::readHeaderRequest(int client_fd)
 		total_bytes_read += bytes_read;
 	}
 	_request_header[total_bytes_read] = '\0';
-    return true;
+	return true;
 }
 
 bool Request::parseHeaderRequest(void)
@@ -93,11 +92,11 @@ bool Request::parseHeaderRequest(void)
 	i = _request_header.find_first_of(" ", 0);
 	_method = _request_header.substr(0, i);
 	_m_headers["METHOD: "] = _request_header.substr(0, i);
-	if (_method != "GET" && _method != "POST" && _method != "DELETE")
+	/*if (_method != "GET" && _method != "POST" && _method != "DELETE")
 	{
 		std::cerr << "Invalid Request Method" << std::endl;
 		return false;
-	}
+	}*/
 	// Get HHTP
 	k = _request_header.find_first_of(" ", i + 1);
 	_requestFile = _request_header.substr(i + 1, k - i - 1);
@@ -121,8 +120,9 @@ bool Request::parseHeaderRequest(void)
 
 	parseHeaderHelper();
 
-    return true;
+	return true;
 }
+
 void Request::parseHeaderHelper()
 {
 	std::string host;
@@ -163,8 +163,9 @@ bool Request::parseBodyRequest(int client_fd)
 	{
 		return (parseNotChunkedBody(client_fd));
 	}
-    return true;
+	return true;
 }
+
 bool Request::parseNotChunkedBody(int client_fd)
 {
 	char buffer[20000];
@@ -189,8 +190,9 @@ bool Request::parseNotChunkedBody(int client_fd)
 		}
 	}
 	_request_body[_content_length] = '\0';
-    return true;
+	return true;
 }
+
 bool Request::parseChunkedBody(int client_fd) 
 {
 	char buffer[1024];
@@ -265,9 +267,6 @@ bool Request::parseChunkedBody(int client_fd)
 	}
 	return true;
 }
-
-
-
 
 int Request::getClientFd(void) const
 {
