@@ -4,10 +4,12 @@ import datetime
 import cgi
 
 # curl -X GET localhost:8080/cgi-bin/time.py
+"""
 while (1):
     {
         
     }
+"""
 print("HTTP/1.1 200 OK")
 print("Content-type: text/html\r\n\r\n")
 print("<html>")
